@@ -2,9 +2,9 @@ import multiprocessing
 import matplotlib.pyplot as plt
 import time
 
-from CNS_Fun import function
+from CNS_Fun import PMF_function
 from CNS_UDP import *
-from CNS_GFun import gfunction
+from CNS_GFun import *
 
 
 class Top(multiprocessing.Process):
@@ -13,17 +13,17 @@ class Top(multiprocessing.Process):
 
     def run(self):
         UDP = UDPSocket(IP='', Port=7001)
+        fun1 = PMF_function(UDP)
         UDP.start()
-        time.sleep(1)
-        #fun1 = function(UDP, delay = 1)
-        #fun2 = function(UDP, delay = 2)
-        gfun1 = gfunction(UDP)
-        #gfun2 = gfunction(UDP)
+        fun1.start()
 
-        #fun1.start()
-        #fun2.start()
+        time.sleep(1)
+
+        gfun1 = gfunction(UDP)
+        gfun2 = PMF_gfunction(fun1)
+
         gfun1.start()
-        #gfun2.start()
+        gfun2.start()
 
         plt.show()
 

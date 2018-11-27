@@ -8,6 +8,7 @@ class UDPSocket(threading.Thread):
         self.address = (IP, Port)
         self.list_initial = True
         self.list_mem, self.mem, self.cns_time = {}, {}, 0
+        self.list_mem_length = 0
 
     def run(self):
         udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -15,6 +16,8 @@ class UDPSocket(threading.Thread):
         while True:
             data, client = udpSocket.recvfrom(4008)
             self.update_mem(data)
+            self.list_mem_length = len(self.list_mem['CNS_time']['Val'])
+            print(self.list_mem_length)
             #print(self.name, client, self.mem['QPROLD'], self.list_mem['QPROLD'], self.list_mem['CNS_time'])
 
     def update_mem(self, data):
@@ -54,6 +57,7 @@ class UDPSocket(threading.Thread):
         self.list_mem['CNS_time'] = {'Val': []}
         for __ in range(0, len(self.list_mem['KCNTOMS']['Val'])):
             self.list_mem['CNS_time']['Val'].append(__)
+
 
 
 
