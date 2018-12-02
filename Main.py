@@ -1,10 +1,9 @@
-import time
 from collections import deque
 from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_Fun import *
 from CNS_GFun import *
-
+from CNS_CFun import *
 
 class body:
     def __init__(self):
