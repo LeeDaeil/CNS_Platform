@@ -54,7 +54,6 @@ class UDPSocket(multiprocessing.Process):
                     print(self, 'stop CNS')
                     pass
 
-
     def update_mem(self, data):
         pid_list = []
         for i in range(0, 4000, 20):
