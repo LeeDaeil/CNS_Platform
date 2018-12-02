@@ -3,6 +3,7 @@ from collections import deque
 from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_Fun import *
+from CNS_GFun import *
 
 
 class body:
@@ -14,6 +15,7 @@ class body:
             function1(self.shared_mem),
             function2(self.shared_mem),
             function3(self.shared_mem),
+            gfunction(self.shared_mem),
         ]
 
     def start(self):
@@ -21,14 +23,12 @@ class body:
         for __ in self.UDP_net:
             __.start()
             job_list.append(__)
-
         time.sleep(1)
         for __ in self.process_list:
             __.start()
             job_list.append(__)
         for job in job_list:
             job.join()
-
 
 class generate_mem:
     def make_test_mem(self):

@@ -2,6 +2,7 @@ import multiprocessing
 import time
 from copy import deepcopy
 
+
 class function1(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
@@ -25,6 +26,7 @@ class function2(multiprocessing.Process):
             self.mem[1]['Test'] = 1
             self.mem[2].append(1)
             time.sleep(1)
+
 
 class function3(multiprocessing.Process):
     def __init__(self, mem):
