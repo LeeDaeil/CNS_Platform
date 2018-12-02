@@ -5,6 +5,7 @@ from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
 
+
 class body:
     def __init__(self):
         self.shared_mem = generate_mem().make_mem_structure()
@@ -14,6 +15,7 @@ class body:
             function1(self.shared_mem),
             function2(self.shared_mem),
             function3(self.shared_mem),
+            gfunction(self.shared_mem),
             gfunction(self.shared_mem),
         ]
 
