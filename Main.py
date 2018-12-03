@@ -16,7 +16,7 @@ class body:
             function2(self.shared_mem),
             function3(self.shared_mem),
             gfunction(self.shared_mem),
-            gfunction(self.shared_mem),
+            gfunction2(self.shared_mem),
         ]
 
     def start(self):
