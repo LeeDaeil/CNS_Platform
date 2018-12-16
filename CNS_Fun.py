@@ -39,3 +39,17 @@ class function3(multiprocessing.Process):
             self.mem[1]['Test'] = 2
             self.mem[2].append(2)
             time.sleep(3)
+
+#========================================================================
+
+
+class t_function1(multiprocessing.Process):
+    def __init__(self, mem):
+        multiprocessing.Process.__init__(self)
+        self.mem = mem[0] # main mem connection
+
+    def run(self):
+        para = ['KMSISO']
+        while True:
+            print(self, self.mem['KCNTOMS']['V'])
+            time.sleep(1)

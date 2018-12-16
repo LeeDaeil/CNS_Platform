@@ -12,11 +12,8 @@ class body:
         self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001)]
         self.process_list = [
             clean_mem(self.shared_mem),
-            function1(self.shared_mem),
-            function2(self.shared_mem),
-            function3(self.shared_mem),
-            gfunction(self.shared_mem),
-            gfunction2(self.shared_mem),
+            t_function1(self.shared_mem),
+            # gfunction(self.shared_mem),
         ]
 
     def start(self):
@@ -57,7 +54,7 @@ class generate_mem:
                     break
                 sig = 0 if temp_[1] == 'INTEGER' else 1
                 memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig,
-                                         'N_V': 0, 'N_L': [], 'N_D': deque(maxlen=max_len_deque)}  # Noise parameter
+                                         'N_V':0, 'N_L':[], 'N_D': deque(maxlen=max_len_deque)}     # Noise parameter
         if show_main_mem:
             print(memory_dict)
         return memory_dict
