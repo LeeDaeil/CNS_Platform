@@ -27,9 +27,9 @@ class UDPSocket(multiprocessing.Process):
                     self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
                     self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
 
-                    self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
-                    self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
-                    self.old_CNS_data[_]['N_D'].append(self.read_CNS_data[_]['N_V'])
+                    # self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
+                    # self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
+                    # self.old_CNS_data[_]['N_D'].append(self.read_CNS_data[_]['N_V'])
 
             if self.read_CNS_data['KCNTOMS']['V'] == 0:
                 if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
@@ -53,9 +53,9 @@ class UDPSocket(multiprocessing.Process):
                         self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
                         self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
 
-                        self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
-                        self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
-                        self.old_CNS_data[_]['N_D'].append(self.read_CNS_data[_]['N_V'])
+                        # self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
+                        # self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
+                        # self.old_CNS_data[_]['N_D'].append(self.read_CNS_data[_]['N_V'])
 
                     for __ in self.old_CNS_data.keys():
                         self.mem[0][__] = self.old_CNS_data[__]
@@ -71,7 +71,8 @@ class UDPSocket(multiprocessing.Process):
             pid, val, sig, idx = unpack(para, data[8 + i:28 + i])
             pid = pid.decode().rstrip('\x00')  # remove '\x00'
             if pid != '':
-                self.read_CNS_data[pid] = {'V': val, 'type': sig, 'N_V': val}
+                self.read_CNS_data[pid] = {'V': val, 'type': sig}
+                # self.read_CNS_data[pid] = {'V': val, 'type': sig, 'N_V': val}
                 pid_list.append(pid)
         return pid_list
 

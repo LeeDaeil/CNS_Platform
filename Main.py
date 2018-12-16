@@ -56,8 +56,9 @@ class generate_mem:
                 if temp_[0] == '':  # if empty space -> break
                     break
                 sig = 0 if temp_[1] == 'INTEGER' else 1
-                memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig,
-                                         'N_V': 0, 'N_L': [], 'N_D': deque(maxlen=max_len_deque)}  # Noise parameter
+                memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig}
+                # memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig,
+                #                          'N_V': 0, 'N_L': [], 'N_D': deque(maxlen=max_len_deque)}  # Noise parameter
         if show_main_mem:
             print(memory_dict)
         return memory_dict
