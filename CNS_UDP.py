@@ -5,7 +5,7 @@ from copy import deepcopy
 from time import sleep
 
 class UDPSocket(multiprocessing.Process):
-    def __init__(self, mem, IP, Port):
+    def __init__(self, mem, IP, Port, shut_up = False):
         multiprocessing.Process.__init__(self)
         self.address = (IP, Port)
 
@@ -14,6 +14,8 @@ class UDPSocket(multiprocessing.Process):
         self.old_CNS_data = deepcopy(self.mem[0])   # main mem copy
         self.read_CNS_data = deepcopy(self.mem[0])
 
+        self.shut_up = shut_up
+
     def run(self):
         udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udpSocket.bind(self.address)
@@ -21,7 +23,8 @@ class UDPSocket(multiprocessing.Process):
             data, client = udpSocket.recvfrom(4008)
             pid_list = self.update_mem(data)
             if self.old_CNS_data['KCNTOMS']['L'] == []:
-                print('List mem empty')
+                if not self.shut_up:
+                    print('List mem empty')
                 for _ in self.read_CNS_data.keys():
                     self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
                     self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
@@ -34,20 +37,23 @@ class UDPSocket(multiprocessing.Process):
             if self.read_CNS_data['KCNTOMS']['V'] == 0:
                 if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
                     self.mem[-1]['Clean'] = True
-                    print(self, 'Memory clear')
+                    if not self.shut_up:
+                        print(self, 'Memory clear')
                     sleep(0.2) # 조정이 필요함.
                     self.old_CNS_data = deepcopy(self.mem[0])  # main mem copy
                     self.read_CNS_data = deepcopy(self.mem[0])
                     for __ in self.old_CNS_data.keys():
                         self.mem[0][__] = self.old_CNS_data[__]
                 else:
-                    print(self, 'initial stedy')
+                    if not self.shut_up:
+                        print(self, 'initial stedy')
                     for __ in self.old_CNS_data.keys():
                         self.mem[0][__] = self.old_CNS_data[__]
                     pass
             else:   # not 0
                 if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
-                    print(self, 'run CNS')
+                    if not self.shut_up:
+                        print(self, 'run CNS')
                     for _ in self.read_CNS_data.keys():
                         self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
                         self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
@@ -60,7 +66,8 @@ class UDPSocket(multiprocessing.Process):
                     for __ in self.old_CNS_data.keys():
                         self.mem[0][__] = self.old_CNS_data[__]
                 else:
-                    print(self, 'stop CNS')
+                    if not self.shut_up:
+                        print(self, 'stop CNS')
                     pass
 
     def update_mem(self, data):

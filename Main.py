@@ -8,18 +8,30 @@ from CNS_CFun import *
 
 class body:
     def __init__(self):
+        #==== Initial part for testing===========================================================#
+        self.a3c_test_mode = False
+        self.shut_up = True
+        #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
-        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001)]
-        self.process_list = [
-            clean_mem(self.shared_mem),
-            function1(self.shared_mem),
-            function2(self.shared_mem),
-            function3(self.shared_mem),
-            gfunction(self.shared_mem),
-            gfunction2(self.shared_mem),
-        ]
+        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
+
+        if self.a3c_test_mode:
+            self.process_list = [
+                clean_mem(self.shared_mem, shut_up=self.shut_up),
+                function1(self.shared_mem),
+                function2(self.shared_mem),
+                function3(self.shared_mem),
+                gfunction(self.shared_mem),
+                gfunction2(self.shared_mem),
+            ]
+        else:
+            self.process_list = [
+                clean_mem(self.shared_mem, shut_up=self.shut_up),
+
+            ]
 
     def start(self):
+        print('A3C test mode : {}'.format(self.a3c_test_mode))
         job_list = []
         for __ in self.UDP_net:
             __.start()

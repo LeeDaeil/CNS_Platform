@@ -3,15 +3,18 @@ import time
 from copy import deepcopy
 
 class clean_mem(multiprocessing.Process):
-    def __init__(self, mem):
+    def __init__(self, mem, shut_up):
         multiprocessing.Process.__init__(self)
         self.all_mem = mem
         self.clean_signal_mem = mem[-1]
 
+        self.shut_up = shut_up
+
     def run(self):
         while True:
             if self.clean_signal_mem['Clean']:
-                print(self, 'Clean Mem')
+                if not self.shut_up:
+                    print(self, 'Clean Mem')
                 for __ in self.all_mem[:-1]:
                     # print(type(__).__name__) Show shared memory type
                     if type(__).__name__ == 'DictProxy':    # Dict clear

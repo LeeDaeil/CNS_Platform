@@ -1,6 +1,6 @@
 from Main import generate_mem, body
 from Net_Test import C_LSTM_Test
-from Value_test_Main import  body
+from Value_test_Main import body as tese_body
 from CNS_UDP import UDPSocket
 import unittest
 
@@ -9,8 +9,6 @@ class Test_UDP(unittest.TestCase):
     def test_run(self):
         mem = generate_mem().make_mem_structure()
         UDPSocket(mem, IP='', Port=7001)
-
-
 
 
 class Test_esay_function(unittest.TestCase):
@@ -45,5 +43,17 @@ class Test_module_for_generate_mem(unittest.TestCase):
 
 class Test_module_for_main(unittest.TestCase):
     def test_main_start(self):
+        '''
+        기본적인 메인 바디 시작
+        '''
         body().start()
+
+class Test_A3C_module_for_main(unittest.TestCase):
+    def test_main_start(self):
+        '''
+        A3C 테스터 동작 부분
+        '''
+        tester = body()
+        tester.a3c_test_mode = True
+        tester.start()
 
