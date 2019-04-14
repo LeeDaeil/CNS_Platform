@@ -9,7 +9,7 @@ class function1(multiprocessing.Process):
 
     def run(self):
         while True:
-            print(self, self.mem['KCNTOMS'])
+            print(self, self.mem['KFZRUN'])
             time.sleep(1)
 
 

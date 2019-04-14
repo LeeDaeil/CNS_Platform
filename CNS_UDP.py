@@ -19,10 +19,10 @@ class UDPSocket(multiprocessing.Process):
     def run(self):
         udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udpSocket.bind(self.address)
-        data, client = udpSocket.recvfrom(60000) # 최대 버퍼 수
+        # data, client = udpSocket.recvfrom(44388) # 최대 버퍼 수
         while True:
-            data, client = udpSocket.recvfrom(len(data))
-            print(len(data))
+            data, client = udpSocket.recvfrom(44388)
+            # print(len(data))
             pid_list = self.update_mem(data[8:]) # 주소값을 가지는 8바이트를 제외한 나머지 부분
             if self.old_CNS_data['KCNTOMS']['L'] == []:
                 if not self.shut_up:
