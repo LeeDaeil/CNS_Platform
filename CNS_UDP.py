@@ -19,9 +19,11 @@ class UDPSocket(multiprocessing.Process):
     def run(self):
         udpSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udpSocket.bind(self.address)
+        data, client = udpSocket.recvfrom(60000) # 최대 버퍼 수
         while True:
-            data, client = udpSocket.recvfrom(4008)
-            pid_list = self.update_mem(data)
+            data, client = udpSocket.recvfrom(len(data))
+            print(len(data))
+            pid_list = self.update_mem(data[8:]) # 주소값을 가지는 8바이트를 제외한 나머지 부분
             if self.old_CNS_data['KCNTOMS']['L'] == []:
                 if not self.shut_up:
                     print('List mem empty')
@@ -72,10 +74,12 @@ class UDPSocket(multiprocessing.Process):
 
     def update_mem(self, data):
         pid_list = []
-        for i in range(0, 4000, 20):
-            sig = unpack('h', data[24 + i: 26 + i])[0]
+        # print(len(data)) data의 8바이트를 제외한 나머지 버퍼의 크기
+        for i in range(0, len(data), 20):
+            sig = unpack('h', data[16 + i: 18 + i])[0]
             para = '12sihh' if sig == 0 else '12sfhh'
-            pid, val, sig, idx = unpack(para, data[8 + i:28 + i])
+            pid, val, sig, idx = unpack(para, data[i:20 + i])
+
             pid = pid.decode().rstrip('\x00')  # remove '\x00'
             if pid != '':
                 self.read_CNS_data[pid] = {'V': val, 'type': sig}

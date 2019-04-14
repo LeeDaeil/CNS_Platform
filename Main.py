@@ -9,7 +9,7 @@ from CNS_CFun import *
 class body:
     def __init__(self):
         #==== Initial part for testing===========================================================#
-        self.a3c_test_mode = False
+        self.a3c_test_mode = True
         self.shut_up = True
         #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
@@ -20,9 +20,9 @@ class body:
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 function1(self.shared_mem),
                 function2(self.shared_mem),
-                function3(self.shared_mem),
-                gfunction(self.shared_mem),
-                gfunction2(self.shared_mem),
+                # function3(self.shared_mem),
+                # gfunction(self.shared_mem),
+                # gfunction2(self.shared_mem),
             ]
         else:
             self.process_list = [
@@ -71,6 +71,24 @@ class generate_mem:
                 memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig}
                 # memory_dict[temp_[0]] = {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), "type": sig,
                 #                          'N_V': 0, 'N_L': [], 'N_D': deque(maxlen=max_len_deque)}  # Noise parameter
+
+        ## DCSCommPid.ini 만드는 기능
+        make_DCSCommPid = False
+        if make_DCSCommPid:
+            with open('./db.txt', 'r') as f:
+                nub_line = -1
+                while True:
+                    temp_ = f.readline().split('\t')
+                    if temp_[0] == '':
+                        break
+                    if nub_line != -1:  # 첫번째 헤더의 내용 제외하고 추가
+                        with open('./DCSCommPid.ini', 'a') as f_pid:
+                            if nub_line == 0:
+                                f_pid.write('{}\t{}\t{}'.format(nub_line, temp_[0], temp_[1]))
+                            else:
+                                f_pid.write('\n{}\t{}\t{}'.format(nub_line, temp_[0], temp_[1]))
+                    nub_line += 1
+
         if show_main_mem:
             print(memory_dict)
         return memory_dict
