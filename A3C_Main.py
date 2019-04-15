@@ -10,16 +10,18 @@ class body:
     def __init__(self):
         #==== Initial part for testing===========================================================#
         self.a3c_test_mode = True
-        self.shut_up = True
+        self.shut_up = [True for _ in range(0, 3)]
         #========================================================================================#
-        self.shared_mem = generate_mem().make_mem_structure()
+        self.shared_mem = [generate_mem().make_mem_structure() for _ in range(0, 3)]
         #========================================================================================#
-        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
+        self.UDP_net = [UDPSocket(self.shared_mem[_], IP='', Port=7001+_, shut_up=self.shut_up[_]) for _ in range(0, 3)]
 
         if self.a3c_test_mode:
             self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.shut_up),
-                function1(self.shared_mem),
+                clean_mem(self.shared_mem[0], shut_up=self.shut_up[0]),
+                clean_mem(self.shared_mem[1], shut_up=self.shut_up[1]),
+                function1(self.shared_mem[0]),
+                function1(self.shared_mem[1]),
                 # function2(self.shared_mem[1]),
                 # function3(self.shared_mem),
                 # gfunction(self.shared_mem),
@@ -116,7 +118,7 @@ class generate_mem:
             for __ in memory_list:
                 print('{}번째 리스트|{}'.format(i, __))
                 i += 1
-
+        print('done')
         return memory_list
 
 
