@@ -7,11 +7,11 @@ class function1(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
-        self.mem = mem[0] # main mem connection
+        self.mem = mem[0]   # main mem connection
 
     def run(self):
         while True:
-            print(self, self.mem['KFZRUN'])
+            print(self, self.mem['QPROREL'])
             time.sleep(1)
 
 

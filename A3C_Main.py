@@ -4,7 +4,7 @@ from CNS_UDP import *
 from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
-
+from copy import deepcopy
 
 class body:
     def __init__(self):
@@ -13,13 +13,14 @@ class body:
         self.shut_up = True
         #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
+        #========================================================================================#
         self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
 
         if self.a3c_test_mode:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 function1(self.shared_mem),
-                function2(self.shared_mem),
+                # function2(self.shared_mem[1]),
                 # function3(self.shared_mem),
                 # gfunction(self.shared_mem),
                 # gfunction2(self.shared_mem),
@@ -61,6 +62,7 @@ class generate_mem:
         return memory_dict
 
     def make_main_mem_structure(self, max_len_deque=10, show_main_mem=False):
+
         memory_dict = db_make().make_db_structure(max_len_deque)
 
         # with open('./db.txt', 'r') as f:
@@ -94,7 +96,7 @@ class generate_mem:
             print(memory_dict)
         return memory_dict
 
-    def make_mem_structure(self, show_mem_list=False):
+    def make_mem_structure(self, copy_mem_nub=1, show_mem_list=False):
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
                        Manager().dict(self.make_test_mem()),
                        Manager().list(self.make_test_list_mem()),
@@ -114,6 +116,7 @@ class generate_mem:
             for __ in memory_list:
                 print('{}번째 리스트|{}'.format(i, __))
                 i += 1
+
         return memory_list
 
 

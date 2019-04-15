@@ -5,7 +5,6 @@ from copy import deepcopy
 import time
 
 
-
 class clean_mem(multiprocessing.Process):
     def __init__(self, mem, shut_up):
         multiprocessing.Process.__init__(self)
@@ -23,13 +22,16 @@ class clean_mem(multiprocessing.Process):
                 # ------------------------------------------------------------#
                 # save data part
                 temp = pd.DataFrame()
-                for keys in self.db_mem.keys():
-                    temp[keys] = self.db_mem[keys]['L']
-
-                now = time.localtime()
-                s = "%02d-%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min)
-                temp.to_csv('{}.csv'.format(s))
-                print('Save_db')
+                if len(self.db_mem['KFIGIV']['L']) > 2:     # 아무의미없는 KFIGIV
+                    for keys in self.db_mem.keys():
+                        temp[keys] = self.db_mem[keys]['L']
+                    now = time.localtime()
+                    s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
+                                                           now.tm_sec)
+                    temp.to_csv('{}_{}.csv'.format(self.name, s))
+                    print('Save_db')
+                else:
+                    print('불충분한 저장 요건으로 파일저장 pass')
                 # ------------------------------------------------------------#
                 for __ in self.all_mem[:-1]:
                     # print(type(__).__name__) Show shared memory type
