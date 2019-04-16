@@ -1,62 +1,48 @@
 import multiprocessing
 import time
-import CNS_Send_UDP
 
 
-class function1(multiprocessing.Process):
+class A3C_Process_Module(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제
-    def __init__(self, mem):
+    def __init__(self, mem, net_type='DNN', Top_title = 'Untitle'):
         multiprocessing.Process.__init__(self)
-        self.mem = mem[0]   # main mem connection
+        self.top_title = Top_title
+        self.all_mem = mem
+        # self.all_mem[0] : 1번 에이전트의 메모리
+        # self.all_mem[0][0] : 1번 에이전트의 메모리 중 Main 메모리
+        # self.all_mem[0][0]['ZSGNOR1'] : 1번 에이전트의 메모리 중 Main 메모리에서 'ZSG..'의 정보
+
+        # 네트워크 정의 부분 ================================
+        if True:
+            self.net_type = net_type
+            if self.net_type == 'DNN':
+                self.action_dim = 3
+                self.state_dim = 5
+            elif self.net_type == 'LSTM':
+                self.action_dim = 3
+                self.state_dim = 5
+                self.time_dim = 10
+            else:
+                print('정의되지 않은 네트워크 입니다.')
+        # ===================================================
 
     def run(self):
-        while True:
-            print(self, self.mem['ZSGNOR1'])
-            time.sleep(1)
+        from A3C_Network import A3C
+        import tensorflow as tf
+        from keras.backend.tensorflow_backend import set_session
+        # 텐서보드에 데이터를 저장하기 위한 변수 선언
+        config = tf.ConfigProto()
+        config.gpu_options.allow_growth = True
+        set_session(tf.Session(config=config))
+        summary_writer = tf.summary.FileWriter('./tb_{}'.format(self.top_title))
 
-
-class function2(multiprocessing.Process):
-    ## 제어 신호 보내는 예제
-    def __init__(self, mem):
-        multiprocessing.Process.__init__(self)
-        self.mem = mem
-        self.mem2 = mem[2]
-
-        # UDP send part
-        self.UDP_sock = CNS_Send_UDP.CNS_Send_Signal('192.168.0.55', 7001)
-
-    def run(self):
-        while True:
-            # print(self, self.mem[1]['Test'], '->', 1, self.mem2)
-            self.mem[1]['Test'] = 1
-            self.mem[2].append(1)
-            self.UDP_sock._send_control_signal(['KSWO33', 'KSWO32'], [1, 0])
-            time.sleep(1)
-
-
-class function3(multiprocessing.Process):
-    def __init__(self, mem):
-        multiprocessing.Process.__init__(self)
-        self.mem = mem
-        self.mem2 = mem[2]
-
-    def run(self):
-        while True:
-            # print(self, self.mem[1]['Test'], '->', 2, self.mem2)
-            self.mem[1]['Test'] = 2
-            self.mem[2].append(2)
-            time.sleep(3)
-
-#========================================================================
-
-
-class t_function1(multiprocessing.Process):
-    def __init__(self, mem):
-        multiprocessing.Process.__init__(self)
-        self.mem = mem[0] # main mem connection
-
-    def run(self):
-        para = ['KMSISO']
-        while True:
-            print(self, self.mem['KCNTOMS']['V'])
-            time.sleep(1)
+        # # 네트워크 클래스 호출해옴
+        # if True:
+        #     if self.net_type == 'DNN':
+        #         Network_model = A3C(self.action_dim, self.state_dim, self.net_type)
+        #     elif self.net_type == 'LSTM':
+        #         Network_model = A3C(self.action_dim, self.state_dim, self.time_dim, self.net_type)
+        #     else:
+        #         pass
+        #
+        # Network_model.train(summary_writer)

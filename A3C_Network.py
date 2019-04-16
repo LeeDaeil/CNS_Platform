@@ -1,13 +1,15 @@
-class A3C_main_network:
+import tensorflow as tf
+from keras import backend as K
+from keras.layers import Dense, Input, Conv1D, MaxPooling1D, LSTM, Flatten
+from keras.models import Model
+from keras.optimizers import Adam, RMSprop
+
+
+class A3C:
     def __init__(self):
         pass
 
     def build_network_model(self, net_type='DNN', in_pa=1, ou_pa=1, time_leg=1):
-        import tensorflow as tf
-        from keras import backend as K
-        from keras.layers import Dense, Input, Conv1D, MaxPooling1D, LSTM, Flatten
-        from keras.models import Model
-        from keras.optimizers import Adam, RMSprop
 
         # 네트워크 모델 - 의존성 없음
         if True:

@@ -3,7 +3,8 @@ from db import db_make
 from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_CFun import *
-import A3C_Network as A3C_NET
+
+TOP_TITLE = 'Ver1'
 
 class body:
     def __init__(self):
@@ -16,16 +17,12 @@ class body:
         self.gen_mem = generate_mem()
         self.shared_mem = [self.gen_mem.make_mem_structure() for _ in self.a3c_mode['Range']]
         #========================================================================================#
-        self.A3C_NET_CALL = A3C_NET.A3C_main_network()
-        self.actor, self.critic = self.A3C_NET_CALL.build_network_model()
-        # ========================================================================================#
         self.UDP_net = [UDPSocket(self.shared_mem[_], IP='', Port=7001+_,
                                   shut_up=self.shut_up[_]) for _ in self.a3c_mode['Range']]
 
         if self.a3c_mode['mode']:
             clean_mem_list = [clean_mem(self.shared_mem[_], shut_up=self.shut_up[_]) for _ in self.a3c_mode['Range']]
-            a3c_function_list = [A3.function1(self.shared_mem[_]) for _ in self.a3c_mode['Range']]
-            self.process_list = clean_mem_list + a3c_function_list
+            self.process_list = clean_mem_list + [A3.A3C_Process_Module(self.shared_mem, 'DNN', TOP_TITLE)]
         else:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
