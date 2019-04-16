@@ -22,7 +22,7 @@ class body:
 
         if self.a3c_mode['mode']:
             clean_mem_list = [clean_mem(self.shared_mem[_], shut_up=self.shut_up[_]) for _ in self.a3c_mode['Range']]
-            self.process_list = clean_mem_list + [A3.A3C_Process_Module(self.shared_mem, 'DNN', TOP_TITLE)]
+            self.process_list = clean_mem_list + [A3.A3C_Process_Module(self.shared_mem, 'LSTM', TOP_TITLE)]
         else:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
