@@ -11,7 +11,7 @@ class function1(multiprocessing.Process):
 
     def run(self):
         while True:
-            # print(self, self.mem['QPROREL'])
+            print(self, self.mem['ZSGNOR1'])
             time.sleep(1)
 
 

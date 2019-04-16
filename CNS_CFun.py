@@ -21,17 +21,18 @@ class clean_mem(multiprocessing.Process):
                     print(self, 'Clean Mem')
                 # ------------------------------------------------------------#
                 # save data part
-                temp = pd.DataFrame()
-                if len(self.db_mem['KFIGIV']['L']) > 2:     # 아무의미없는 KFIGIV
-                    for keys in self.db_mem.keys():
-                        temp[keys] = self.db_mem[keys]['L']
-                    now = time.localtime()
-                    s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
-                                                           now.tm_sec)
-                    temp.to_csv('{}_{}.csv'.format(self.name, s))
-                    print('Save_db')
-                else:
-                    print('불충분한 저장 요건으로 파일저장 pass')
+                if True:
+                    temp = pd.DataFrame()
+                    if len(self.db_mem['KFIGIV']['L']) > 2:     # 아무의미없는 KFIGIV
+                        for keys in self.db_mem.keys():
+                            temp[keys] = self.db_mem[keys]['L']
+                        now = time.localtime()
+                        s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
+                                                               now.tm_sec)
+                        temp.to_csv('{}_{}.csv'.format(self.name, s))
+                        print('Save_db')
+                    else:
+                        print('불충분한 저장 요건으로 파일저장 pass')
                 # ------------------------------------------------------------#
                 for __ in self.all_mem[:-1]:
                     # print(type(__).__name__) Show shared memory type
