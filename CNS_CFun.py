@@ -13,6 +13,7 @@ class clean_mem(multiprocessing.Process):
         self.db_mem = mem[0]
 
         self.shut_up = shut_up
+        self.recover_initial_mem = deepcopy(self.all_mem)
 
     def run(self):
         while True:
@@ -34,6 +35,7 @@ class clean_mem(multiprocessing.Process):
                     else:
                         print('불충분한 저장 요건으로 파일저장 pass')
                 # ------------------------------------------------------------#
+                nub_mem = 0
                 for __ in self.all_mem[:-1]:
                     # print(type(__).__name__) Show shared memory type
                     if type(__).__name__ == 'DictProxy':    # Dict clear
@@ -47,8 +49,13 @@ class clean_mem(multiprocessing.Process):
                             for _ in dumy.keys():
                                 __[_] = dumy[_]
                         # -----------------------------------------------------#
+                        else:
+                            # 개인이 만든 메모리 초기화
+                            for dic_key_value in self.all_mem[nub_mem].keys():
+                                self.all_mem[nub_mem][dic_key_value] = self.recover_initial_mem[nub_mem][dic_key_value]
 
                     if type(__).__name__ == 'ListProxy':    # List clear
                         __[:] = [] # List mem clean
+                    nub_mem += 1
                 self.clean_signal_mem['Clean'] = False
             time.sleep(0.1)
