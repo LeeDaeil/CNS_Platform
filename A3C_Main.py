@@ -8,18 +8,23 @@ TOP_TITLE = 'Ver1'
 
 class body:
     def __init__(self):
-        #==== Initial part for testing===========================================================#
+        # ========================================================================================#
         # self.a3c_mode : a3c모드의 여부와 에이전트의 갯수를 조정하는 곳이다.
         self.a3c_num_agent = 2
         self.a3c_mode = {'mode': True, 'Nub_agent': self.a3c_num_agent, 'Range': range(0, self.a3c_num_agent)}
+        # Clean mem 기능 및 기타 기능에서 print로 출력되는 정보를 출력하지 않도록 하는 기능
         self.shut_up = [True for _ in self.a3c_mode['Range']]
         #========================================================================================#
+        # 공유 메모리
         self.gen_mem = generate_mem()
         self.shared_mem = [self.gen_mem.make_mem_structure() for _ in self.a3c_mode['Range']]
         #========================================================================================#
+        # 병렬적인 UDP 네트워크 소켓 생성하는 부분
+        # - 포트는 7001번 부터 에이전트 수가 증가하면 +1씩 증가
+        # - 1개의 에이전트 및 모듈을 사용하면 단일 소켓만 개방됨
         self.UDP_net = [UDPSocket(self.shared_mem[_], IP='', Port=7001+_,
                                   shut_up=self.shut_up[_]) for _ in self.a3c_mode['Range']]
-
+        # ========================================================================================#
         if self.a3c_mode['mode']:
             clean_mem_list = [clean_mem(self.shared_mem[_], shut_up=self.shut_up[_]) for _ in self.a3c_mode['Range']]
             self.process_list = clean_mem_list + [A3.A3C_Process_Module(self.shared_mem, 'LSTM', TOP_TITLE)]
@@ -27,9 +32,10 @@ class body:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
             ]
+        # ========================================================================================#
 
     def start(self):
-        print('A3C test mode : {}'.format(self.a3c_mode['mode']))
+        print('A3C mode : {}'.format(self.a3c_mode['mode']))
         job_list = []
         for __ in self.UDP_net:
             __.start()
@@ -43,6 +49,10 @@ class body:
 
 
 class generate_mem:
+    '''
+    공유 메모리를 선언하는 클레스
+    - 클래스 내의 함수를 작성하여 개별적인 메모리 선언가능
+    '''
     def __init__(self):
         self.db_maker_ = db_make()
 
