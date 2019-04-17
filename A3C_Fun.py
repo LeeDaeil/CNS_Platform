@@ -3,6 +3,26 @@ import time
 
 
 class A3C_Process_Module(multiprocessing.Process):
+    '''
+    A3C 네트워크
+        - 구조
+            [======
+            [*******Top*******]-[*******Mid********]-[*******Bot********]-[*******Bot********]-[*******Bot********]
+            [---A3C_Main.py---]-[----CNS_UDP.py----]
+                      │        [------UDP_net-----]----------┐
+                      │                             [-------mem--------]----------┐
+                      │                                                           │
+                      └--------[----A3C_Fun.py----]                               │
+                                [A3C_Process_Module]-[--A3C_Network.py--]          │
+                                                     [-------A3C--------]┬[-----Worker_1-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         ├[-----Worker_2-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         ├[-----Worker_3-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         └[-----Worker_4-----]-[----CNS_UDP.py----]
+                                                                                                [-CNS_Send_Signal--]
+    '''
     ## 단순한 값만 읽어 오는 예제
     def __init__(self, mem, net_type='DNN', Top_title = 'Untitle'):
         multiprocessing.Process.__init__(self)
@@ -23,7 +43,7 @@ class A3C_Process_Module(multiprocessing.Process):
             elif self.net_type == 'LSTM':
                 self.action_dim = 3
                 self.state_dim = 5
-                self.time_dim = 10
+                self.time_dim = 2
             else:
                 print('정의되지 않은 네트워크 입니다.')
         # ===================================================
