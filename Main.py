@@ -18,11 +18,15 @@ class body:
         if self.a3c_test_mode:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
-                function1(self.shared_mem),
-                function2(self.shared_mem),
+                # function1(self.shared_mem),
+                # function2(self.shared_mem),
                 # function3(self.shared_mem),
                 # gfunction(self.shared_mem),
                 # gfunction2(self.shared_mem),
+                function4_1(self.shared_mem),
+                function4_2(self.shared_mem),
+                function4_3(self.shared_mem),
+                function4_4(self.shared_mem),
             ]
         else:
             self.process_list = [
@@ -45,7 +49,7 @@ class body:
 
 class generate_mem:
     def make_test_mem(self):
-        memory_dict = {'Test': 0, 'List_Test': []}
+        memory_dict = {'4_1_state': True, '4_2_state': '', '4_4_state': False}
         return memory_dict
 
     def make_test_list_mem(self):
