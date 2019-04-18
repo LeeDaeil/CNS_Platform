@@ -53,16 +53,52 @@ class CNS_Send_Signal:
 
         self.send_sock.sendto(buffer, (self.CNS_ip, self.CNS_port))
 
+    def _send_malfunction_signal(self, Mal_nub, Mal_opt, Mal_time):
+        '''
+        CNS_04_18.tar 버전에서 동작함.
+        :param Mal_nub: Malfunction 번호
+        :param Mal_opt: Malfunction operation
+        :param Mal_time: Malfunction의 동작하는 시간
+        :return:
+        '''
+        if Mal_time == 0:
+            Mal_time = 5
+        else:
+            Mal_time = Mal_time * 5
+        return self._send_control_signal(['KFZRUN', 'KSWO280', 'KSWO279', 'KSWO278'],
+                                         [10, Mal_nub, Mal_opt, Mal_time])
+
 if __name__ == '__main__':
     import time
     test_udp_send = CNS_Send_Signal('192.168.0.55', 7001)
-    while True:
-        # print('CNS 동작 테스트')
-        # test_udp_send._send_control_signal(['KFZRUN'], [3])
-        # time.sleep(5)
-        # print('CNS 초기 조건 테스트')
-        # test_udp_send._send_control_signal(['KFZRUN'], [5])
-        # time.sleep(5)
-        # print('CNS Malfunction 테스트')
-        # test_udp_send._send_control_signal(['KFZRUN'], [10]) # 10은 멜펑션
-        pass
+    Test_1 = False  # 일반적인 UDP 테스트
+    if Test_1:
+        while True:
+            # print('CNS 동작 테스트')
+            # test_udp_send._send_control_signal(['KFZRUN'], [3])
+            # time.sleep(5)
+            # print('CNS 초기 조건 테스트')
+            # test_udp_send._send_control_signal(['KFZRUN'], [5])
+            # time.sleep(5)
+            # print('CNS Malfunction 테스트')
+            # test_udp_send._send_control_signal(['KFZRUN', 'KSWO280', 'KSWO279', 'KSWO278'], [10, 12, 100100, 5]) # 10은 멜펑션
+            # print('CNS 값 전송 테스트')
+            # test_udp_send._send_control_signal(['KSWO280'], [2])
+            time.sleep(1)
+            pass
+    Test_2 = False # CNS의 Malfunction 원격 조작을 위한 로직
+    if Test_2:
+        while True:
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [3])
+            time.sleep(2)
+            print('CNS Malfunction 입력')
+            test_udp_send._send_control_signal(['KFZRUN', 'KSWO280', 'KSWO279', 'KSWO278'],
+                                               [10, 12, 100100, 5])  # 10은 멜펑션
+            time.sleep(2)
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [3])
+            time.sleep(2)
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [3])
+            time.sleep(2)
