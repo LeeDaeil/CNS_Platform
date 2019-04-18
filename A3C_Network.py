@@ -215,12 +215,27 @@ class Actor(Agent):
 #====================================================================================================================#
 episode = 0
 lock = Lock()
-
+import A3C_Port as AP
 
 class worker:
     def training_thread(self, A3C_agent, max_episode, shared_mem, action_dim, learning_interval, summary_writer, nub_agent):
         '''
         A3C Network 단일 에이전트 부분
+        - Shared_mem
+            : self.shared_mem[nub_agent] - 해당 에이전트의 단독적인 메모리가 보내짐.
+
+            : self.all_mem[0] : 1번 에이전트의 메모리 <- 현재 수준에 전달된 메모리
+            : self.all_mem[0][0] : 1번 에이전트의 메모리 중 Main 메모리
+            : self.all_mem[0][0]['ZSGNOR1'] : 1번 에이전트의 메모리 중 Main 메모리에서 'ZSG..'의 정보
+
+            : 현재 클레스에서 값을 접근하려면
+            ex) shared_mem[0]['ZSGNOR1']
+
+            : CNS로 보내질 메모리 - shared_mem[0]
+                - CNS내에서는 shared_mem['ZSGNOR1']로 접근
+        - nub_agent
+            : 에이전트 1번의 경우 원격 컴퓨터의 포트는 7001번 CNS도 7001번
+            : AP.IP_PORT[nub_agent]['CNS_IP'] 또는 AP.IP_PORT[nub_agent]['CNS_Port']로 사용
         - 입력 데이터 예시
             1. DNN
                 input_data = np.array([[0.1, 0.2, 0.3, 0.4, 0.5]])
@@ -228,18 +243,22 @@ class worker:
             2. LSTM
                 input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
                 :> shape : (1,2,5) [2: time_leg][5: input_para]
+
         '''
 
         global episode
+        #=== CNS 선언 ===============================================================================================#
+        self.CNS = CNS(mem=shared_mem[0], ip=AP.IP_PORT[nub_agent]['CNS_IP'], port=AP.IP_PORT[nub_agent]['CNS_Port'])
+        # === CNS 선언 ===============================================================================================#
+        self.CNS.cns_initial()
         while episode < max_episode:
             print('{}_{}'.format(nub_agent, episode))
             input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
             print(np.shape(input_data))
             print(A3C_agent.policy_action(input_data))
+            self.CNS.cns_run()
             sleep(1)
 
-
-            A3C_agent
             a = False
 
             if a:
@@ -280,3 +299,59 @@ class worker:
         """ Scalar Value Tensorflow Summary
         """
         return tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=val)])
+
+#====================================================================================================================#
+from CNS_Send_UDP import CNS_Send_Signal as CNSUDP
+import time
+class CNS:
+    '''
+    - Shared_mem
+        : shared_mem[0] - 해당 에이전트의 Main 메모리가 보내짐.
+
+        : self.all_mem[0] : 1번 에이전트의 메모리
+        : self.all_mem[0][0] : 1번 에이전트의 메모리 중 Main 메모리 <- 현재 수준에 전달된 메모리
+        : self.all_mem[0][0]['ZSGNOR1'] : 1번 에이전트의 메모리 중 Main 메모리에서 'ZSG..'의 정보
+
+        : 현재 클레스에서 값을 접근하려면
+        ex) self.CNS_condition['ZSGNOR1']
+    '''
+    def __init__(self, mem, ip, port):
+        self.CNS_condition = mem
+        self.cns_udp = CNSUDP(ip=ip, port=port)
+
+    def cns_run(self):
+        '''
+        cns에 동작 신호를 보내고 1step 진행이 완료되면 0을 반환
+        :return: 0 : 1Step 진행 완료
+        '''
+        self.cns_udp._send_control_signal(['KFZRUN'], [3])
+        while True:
+            print(self.CNS_condition['KFZRUN'])
+            if self.CNS_condition['KFZRUN']['V'] == 4:  # Run하고 1초 대기후 Freeze한 상태
+                break
+            time.sleep(0.5)
+        return 0
+
+    def cns_initial(self):
+        '''
+        cns에 초기화 동작 신호를 보내고 완료되면 0을 반환
+        :return: 0 : CNS 초기화 완료
+        '''
+        self.cns_udp._send_control_signal(['KFZRUN'], [5])
+        while True:
+            print(self.CNS_condition['KFZRUN'])
+            if self.CNS_condition['KFZRUN']['V'] == 6:  # Initial이 완료된 상태
+                break
+            time.sleep(0.5)
+        return 0
+
+    def cns_mal_fun(self, mal_nub, mal_opt, mal_time):
+        '''
+        cns에 malfunction 신호를 보냄
+        :param mal_nub: malfunction nuber
+        :param mal_opt: malfunction option
+        :param mal_time: malfunction 발생 time
+        :return: -
+        '''
+        return self.cns_udp._send_malfunction_signal(mal_nub, mal_opt, mal_time)
+

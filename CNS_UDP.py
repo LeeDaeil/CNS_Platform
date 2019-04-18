@@ -50,6 +50,7 @@ class UDPSocket(multiprocessing.Process):
                     if not self.shut_up:
                         print(self, 'initial stedy')
                     for __ in self.old_CNS_data.keys():
+                        self.old_CNS_data[__]['V'] = self.read_CNS_data[__]['V'] # 초기 상태여도 V는 업데이트
                         self.mem[0][__] = self.old_CNS_data[__]
                     pass
             else:   # not 0
