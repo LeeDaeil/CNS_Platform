@@ -23,7 +23,7 @@ class A3C_Process_Module(multiprocessing.Process):
                                                                          └[-----Worker_4-----]-[----CNS_UDP.py----]
                                                                                                 [-CNS_Send_Signal--]
     '''
-    ## 단순한 값만 읽어 오는 예제
+
     def __init__(self, mem, net_type='DNN', Top_title = 'Untitle'):
         multiprocessing.Process.__init__(self)
         self.top_title = Top_title

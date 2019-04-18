@@ -52,3 +52,17 @@ class CNS_Send_Signal:
         buffer = UDP_header + pack('h', shape(para)[0]) + temp_data + buffer[len(temp_data):]
 
         self.send_sock.sendto(buffer, (self.CNS_ip, self.CNS_port))
+
+if __name__ == '__main__':
+    import time
+    test_udp_send = CNS_Send_Signal('192.168.0.55', 7001)
+    while True:
+        # print('CNS 동작 테스트')
+        # test_udp_send._send_control_signal(['KFZRUN'], [3])
+        # time.sleep(5)
+        # print('CNS 초기 조건 테스트')
+        # test_udp_send._send_control_signal(['KFZRUN'], [5])
+        # time.sleep(5)
+        # print('CNS Malfunction 테스트')
+        # test_udp_send._send_control_signal(['KFZRUN'], [10]) # 10은 멜펑션
+        pass

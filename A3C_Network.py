@@ -11,6 +11,27 @@ from time import sleep
 
 
 class A3C:
+    '''
+    A3C 네트워크
+        - 구조
+            [======
+            [*******Top*******]-[*******Mid********]-[*******Bot********]-[*******Bot********]-[*******Bot********]
+            [---A3C_Main.py---]-[----CNS_UDP.py----]
+                      │        [------UDP_net-----]----------┐
+                      │                             [-------mem--------]----------┐
+                      │                                                           │
+                      └--------[----A3C_Fun.py----]                               │
+                                [A3C_Process_Module]-[--A3C_Network.py--]          │
+                                                     [-------A3C--------]┬[-----Worker_1-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         ├[-----Worker_2-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         ├[-----Worker_3-----]-[----CNS_UDP.py----]
+                                                                         │                     [-CNS_Send_Signal--]
+                                                                         └[-----Worker_4-----]-[----CNS_UDP.py----]
+                                                                                                [-CNS_Send_Signal--]
+    '''
+
     def __init__(self, action_dim, state_dim, time_dim, net_type, nub_agent, shared_mem, gamma=0.99, lr=0.0001):
         ''' 네트워크에 대한 정보'''
         self.nub_agent = nub_agent
@@ -82,8 +103,8 @@ class A3C:
         worker_list = [threading.Thread(
                 target=Worker.training_thread,
                 # daemon=True,
-                args=(self, self.max_episode, self.shared_mem[i], self.action_dim, self.learning_interval,
-                      summary_writer, i)) for i in range(self.nub_agent)]
+                args=(self, self.max_episode, self.shared_mem[nub_agent], self.action_dim, self.learning_interval,
+                      summary_writer, nub_agent)) for nub_agent in range(self.nub_agent)]
 
         for __ in worker_list:
             __.start()
@@ -197,17 +218,28 @@ lock = Lock()
 
 
 class worker:
-    def training_thread(self, A3C_agent, Nmax, shared_mem, action_dim, f, summary_writer, nub_agent):
-        """ Build threads to run shared computation across """
+    def training_thread(self, A3C_agent, max_episode, shared_mem, action_dim, learning_interval, summary_writer, nub_agent):
+        '''
+        A3C Network 단일 에이전트 부분
+        - 입력 데이터 예시
+            1. DNN
+                input_data = np.array([[0.1, 0.2, 0.3, 0.4, 0.5]])
+                :> shape : (1,5) [5: input_para]
+            2. LSTM
+                input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
+                :> shape : (1,2,5) [2: time_leg][5: input_para]
+        '''
 
         global episode
-        while episode < Nmax:
+        while episode < max_episode:
             print('{}_{}'.format(nub_agent, episode))
-            input_data = np.array([[0.1, 0.2, 0.3, 0.4, 0.5]])
+            input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
             print(np.shape(input_data))
-            print(agent.policy_action(input_data))
-
+            print(A3C_agent.policy_action(input_data))
             sleep(1)
+
+
+            A3C_agent
             a = False
 
             if a:
@@ -215,9 +247,9 @@ class worker:
                 time, cumul_reward, done = 0, 0, False
                 old_state = env.reset()
                 actions, states, rewards = [], [], []
-                while not done and episode < Nmax:
+                while not done and episode < max_episode:
                     # Actor picks an action (following the policy)
-                    a = agent.policy_action(np.expand_dims(old_state, axis=0))
+                    a = A3C_agent.policy_action(np.expand_dims(old_state, axis=0))
                     # Retrieve new state, reward, and whether the state is terminal
                     new_state, r, done, _ = env.step(a)
                     # Memorize (s, a, r) for training
@@ -229,9 +261,9 @@ class worker:
                     cumul_reward += r
                     time += 1
                     # Asynchronous training
-                    if (time % f == 0 or done):
+                    if (time % learning_interval == 0 or done):
                         lock.acquire()
-                        agent.train_models(states, actions, rewards, done)
+                        A3C_agent.train_models(states, actions, rewards, done)
                         lock.release()
                         actions, states, rewards = [], [], []
 
@@ -241,7 +273,7 @@ class worker:
                 summary_writer.flush()
             # Update episode count
             with lock:
-                if (episode < Nmax):
+                if (episode < max_episode):
                     episode += 1
 
     def tfSummary(self, tag, val):
