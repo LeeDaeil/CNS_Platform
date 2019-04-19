@@ -243,6 +243,8 @@ class worker:
             2. LSTM
                 input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
                 :> shape : (1,2,5) [2: time_leg][5: input_para]
+            3. 입력
+                A3C_agent.policy_action(input_data)
 
         '''
 
@@ -250,21 +252,20 @@ class worker:
         #=== CNS 선언 ===============================================================================================#
         self.CNS = CNS(mem=shared_mem[0], ip=AP.IP_PORT[nub_agent]['CNS_IP'], port=AP.IP_PORT[nub_agent]['CNS_Port'])
         # === CNS 선언 ===============================================================================================#
-        self.CNS.cns_initial()
+        self.CNS.cns_initial()  # CNS 초기화를 요청
+
+        time, cumul_reward, done = 0, 0, False
         while episode < max_episode:
-            print('{}_{}'.format(nub_agent, episode))
-            input_data = np.array([[[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4, 0.5]]])
-            print(np.shape(input_data))
-            print(A3C_agent.policy_action(input_data))
-            self.CNS.cns_run()
-            sleep(1)
-
+            for _ in range(0, 5):
+                self.CNS.cns_run()
+                sleep(1)
+            print('done')
+            self.CNS.cns_initial()
+            # break
             a = False
-
             if a:
                 # Reset episode
-                time, cumul_reward, done = 0, 0, False
-                old_state = env.reset()
+
                 actions, states, rewards = [], [], []
                 while not done and episode < max_episode:
                     # Actor picks an action (following the policy)
@@ -303,7 +304,26 @@ class worker:
 #====================================================================================================================#
 from CNS_Send_UDP import CNS_Send_Signal as CNSUDP
 import time
-class CNS:
+
+
+class Control_data:
+    '''
+    훈련 데이터를 저장 및 관리하는 class
+    - Shared_mem
+        : shared_mem[0] - 해당 에이전트의 Main 메모리가 보내짐.
+
+        : self.all_mem[0] : 1번 에이전트의 메모리
+        : self.all_mem[0][0] : 1번 에이전트의 메모리 중 Main 메모리 <- 현재 수준에 전달된 메모리
+        : self.all_mem[0][0]['ZSGNOR1'] : 1번 에이전트의 메모리 중 Main 메모리에서 'ZSG..'의 정보
+
+        : 현재 클레스에서 값을 접근하려면
+        ex) self.CNS_condition['ZSGNOR1']
+    '''
+
+    def __init__(self, Shared_mem):
+        self.Shared_mem = Shared_mem
+
+class CNS(Control_data):
     '''
     - Shared_mem
         : shared_mem[0] - 해당 에이전트의 Main 메모리가 보내짐.
@@ -316,6 +336,7 @@ class CNS:
         ex) self.CNS_condition['ZSGNOR1']
     '''
     def __init__(self, mem, ip, port):
+        Control_data.__init__(self, mem)
         self.CNS_condition = mem
         self.cns_udp = CNSUDP(ip=ip, port=port)
 
@@ -324,12 +345,20 @@ class CNS:
         cns에 동작 신호를 보내고 1step 진행이 완료되면 0을 반환
         :return: 0 : 1Step 진행 완료
         '''
+        old_len = len(self.CNS_condition['KCNTOMS']['L'])
         self.cns_udp._send_control_signal(['KFZRUN'], [3])
         while True:
-            print(self.CNS_condition['KFZRUN'])
+            new_len = len(self.CNS_condition['KCNTOMS']['L'])
             if self.CNS_condition['KFZRUN']['V'] == 4:  # Run하고 1초 대기후 Freeze한 상태
-                break
+                if old_len != new_len:
+                    break
             time.sleep(0.5)
+        return 0
+
+    def cns_iter_run(self, iteration, para, val):
+        for i in range(iteration):
+            self.cns_control(para, val)
+            self.cns_run()
         return 0
 
     def cns_initial(self):
@@ -337,12 +366,14 @@ class CNS:
         cns에 초기화 동작 신호를 보내고 완료되면 0을 반환
         :return: 0 : CNS 초기화 완료
         '''
+        old_len = len(self.CNS_condition['KCNTOMS']['L'])
         self.cns_udp._send_control_signal(['KFZRUN'], [5])
         while True:
-            print(self.CNS_condition['KFZRUN'])
+            new_len = len(self.CNS_condition['KCNTOMS']['L'])
             if self.CNS_condition['KFZRUN']['V'] == 6:  # Initial이 완료된 상태
-                break
-            time.sleep(0.5)
+                if old_len != new_len:
+                    break
+            time.sleep(1)
         return 0
 
     def cns_mal_fun(self, mal_nub, mal_opt, mal_time):
@@ -354,4 +385,7 @@ class CNS:
         :return: -
         '''
         return self.cns_udp._send_malfunction_signal(mal_nub, mal_opt, mal_time)
+
+    def cns_control(self, para, val):
+        return self.cns_udp._send_control_signal(para=para, val=val)
 
