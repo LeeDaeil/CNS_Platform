@@ -95,8 +95,8 @@ class A3C:
         state_values = self.critic.predict(np.array(states))
         advantages = discounted_rewards - np.reshape(state_values, len(state_values))
         # Networks optimization
-        self.a_opt([states, actions, advantages])
-        self.c_opt([states, discounted_rewards])
+        self.act_op([states, actions, advantages])
+        self.cri_op([states, discounted_rewards])
 
     def train(self, summary_writer):
         Worker = worker()
@@ -249,37 +249,49 @@ class worker:
         '''
 
         global episode
+        self.shard_mem = shared_mem[0]
         #=== CNS 선언 ===============================================================================================#
-        self.CNS = CNS(mem=shared_mem[0], ip=AP.IP_PORT[nub_agent]['CNS_IP'], port=AP.IP_PORT[nub_agent]['CNS_Port'])
+        self.CNS = CNS(mem=shared_mem[0], ip=AP.IP_PORT[nub_agent]['CNS_IP'], port=AP.IP_PORT[nub_agent]['CNS_Port'],
+                       s_para=['KSWO33', 'KSWO32', 'KSWO31', 'KSWO30', 'KSOW29'],
+                       t_para=['Reward', 'Action', 'Done'])
         # === CNS 선언 ===============================================================================================#
         self.CNS.cns_initial()  # CNS 초기화를 요청
 
         time, cumul_reward, done = 0, 0, False
         while episode < max_episode:
+            # LSTM 대기 용
+            for _ in range(4):
+                self.pass_step()
+
+            old_state = self.CNS.state_mem.iloc[-2:].values
+
+            actions, states, rewards = [], [], []
             for _ in range(0, 5):
-                self.CNS.cns_run()
-                sleep(1)
+                a = A3C_agent.policy_action([[old_state]])
+                r, done = self.step(a)
+                # Memorize (s, a, r) for training
+                actions.append(a)
+                rewards.append(r)
+                states.append(old_state)
+                # New state
+                new_state = self.CNS.state_mem.iloc[-2:].values
+                # Update current state
+                old_state = new_state
+                cumul_reward += r
+                time += 1
+            self.CNS.save_db()
+            print('done and train')
+
+            lock.acquire()
+            A3C_agent.train_models(states, actions, rewards)
+            lock.release()
+            actions, states, rewards = [], [], []
+
             print('done')
-            self.CNS.cns_initial()
-            # break
+
             a = False
             if a:
-                # Reset episode
-
-                actions, states, rewards = [], [], []
                 while not done and episode < max_episode:
-                    # Actor picks an action (following the policy)
-                    a = A3C_agent.policy_action(np.expand_dims(old_state, axis=0))
-                    # Retrieve new state, reward, and whether the state is terminal
-                    new_state, r, done, _ = env.step(a)
-                    # Memorize (s, a, r) for training
-                    actions.append(to_categorical(a, action_dim))
-                    rewards.append(r)
-                    states.append(old_state)
-                    # Update current state
-                    old_state = new_state
-                    cumul_reward += r
-                    time += 1
                     # Asynchronous training
                     if (time % learning_interval == 0 or done):
                         lock.acquire()
@@ -301,27 +313,80 @@ class worker:
         """
         return tf.Summary(value=[tf.Summary.Value(tag=tag, simple_value=val)])
 
+    def step(self, action):
+        if action == 0:
+            self.CNS.cns_control(['KSWO33', 'KSWO32'], [1, 0])
+        elif action == 1:
+            self.CNS.cns_control(['KSWO33', 'KSWO32'], [0, 0])
+        elif action == 2:
+            self.CNS.cns_control(['KSWO33', 'KSWO32'], [0, 1])
+        else:
+            pass
+        self.CNS.cns_run()
+        # ================================================================================================
+        done = False
+        r = 1
+        self.CNS.update_train_db_structure(r=r, a=action, done=done)
+        self.CNS.update_state_db_structure([
+            self.shard_mem['KSWO33']['L'][-1],
+            self.shard_mem['KSWO33']['L'][-1]/5,
+            self.shard_mem['KSWO33']['L'][-1]/4,
+            self.shard_mem['KSWO33']['L'][-1]/3,
+            self.shard_mem['KSWO33']['L'][-1]/2,
+        ])
+        return r, done
+
+    def pass_step(self):
+        self.CNS.cns_run()
+        self.CNS.update_train_db_structure(r=0, a=0, done=False)
+        self.CNS.update_state_db_structure([
+            self.shard_mem['KSWO33']['L'][-1],
+            self.shard_mem['KSWO33']['L'][-1]/5,
+            self.shard_mem['KSWO33']['L'][-1]/4,
+            self.shard_mem['KSWO33']['L'][-1]/3,
+            self.shard_mem['KSWO33']['L'][-1]/2,
+        ])
+
 #====================================================================================================================#
 from CNS_Send_UDP import CNS_Send_Signal as CNSUDP
 import time
+import pandas as pd
 
 
 class Control_data:
     '''
     훈련 데이터를 저장 및 관리하는 class
-    - Shared_mem
-        : shared_mem[0] - 해당 에이전트의 Main 메모리가 보내짐.
-
-        : self.all_mem[0] : 1번 에이전트의 메모리
-        : self.all_mem[0][0] : 1번 에이전트의 메모리 중 Main 메모리 <- 현재 수준에 전달된 메모리
-        : self.all_mem[0][0]['ZSGNOR1'] : 1번 에이전트의 메모리 중 Main 메모리에서 'ZSG..'의 정보
-
-        : 현재 클레스에서 값을 접근하려면
-        ex) self.CNS_condition['ZSGNOR1']
     '''
 
-    def __init__(self, Shared_mem):
-        self.Shared_mem = Shared_mem
+    def __init__(self, s_para, t_para):
+        self.state_parameter = s_para
+        self.train_parameter = t_para
+        self.state_mem = self.initial_db_structure(self.state_parameter)
+        self.train_mem = self.initial_db_structure(self.train_parameter)
+
+    def update_state_db_structure(self, value):
+        self.state_mem.loc[len(self.state_mem)] = value
+        return 0
+
+    def update_train_db_structure(self, r, a, done):
+        self.train_mem.loc[len(self.train_mem)] = [r, a, done]
+        return 0
+    
+    def save_db(self):
+        for _ in self.train_mem.columns:
+            self.state_mem[_] = self.train_mem[_]
+        self.state_mem.to_csv('{}.csv'.format(episode))
+        # 메모리 초기화 및 재 설계
+        self.state_mem = []
+        self.train_mem = []
+        self.state_mem = self.initial_db_structure(self.state_parameter)
+        self.train_mem = self.initial_db_structure(self.train_parameter)
+
+    def initial_db_structure(self, para):
+        # 초기 상태 메모리 선언
+        state_structure = pd.DataFrame([], columns=para)
+        return state_structure
+
 
 class CNS(Control_data):
     '''
@@ -335,8 +400,8 @@ class CNS(Control_data):
         : 현재 클레스에서 값을 접근하려면
         ex) self.CNS_condition['ZSGNOR1']
     '''
-    def __init__(self, mem, ip, port):
-        Control_data.__init__(self, mem)
+    def __init__(self, mem, ip, port, s_para, t_para):
+        Control_data.__init__(self, s_para, t_para)
         self.CNS_condition = mem
         self.cns_udp = CNSUDP(ip=ip, port=port)
 
@@ -345,20 +410,14 @@ class CNS(Control_data):
         cns에 동작 신호를 보내고 1step 진행이 완료되면 0을 반환
         :return: 0 : 1Step 진행 완료
         '''
-        old_len = len(self.CNS_condition['KCNTOMS']['L'])
+        old_line = len(self.CNS_condition['KFZRUN']['L'])
         self.cns_udp._send_control_signal(['KFZRUN'], [3])
         while True:
-            new_len = len(self.CNS_condition['KCNTOMS']['L'])
+            new_line = len(self.CNS_condition['KFZRUN']['L'])
             if self.CNS_condition['KFZRUN']['V'] == 4:  # Run하고 1초 대기후 Freeze한 상태
-                if old_len != new_len:
+                if old_line != new_line:
                     break
-            time.sleep(0.5)
-        return 0
-
-    def cns_iter_run(self, iteration, para, val):
-        for i in range(iteration):
-            self.cns_control(para, val)
-            self.cns_run()
+            time.sleep(1)
         return 0
 
     def cns_initial(self):
@@ -366,13 +425,10 @@ class CNS(Control_data):
         cns에 초기화 동작 신호를 보내고 완료되면 0을 반환
         :return: 0 : CNS 초기화 완료
         '''
-        old_len = len(self.CNS_condition['KCNTOMS']['L'])
         self.cns_udp._send_control_signal(['KFZRUN'], [5])
         while True:
-            new_len = len(self.CNS_condition['KCNTOMS']['L'])
-            if self.CNS_condition['KFZRUN']['V'] == 6:  # Initial이 완료된 상태
-                if old_len != new_len:
-                    break
+            if self.CNS_condition['KCNTOMS']['V'] == 0 and self.CNS_condition['KFZRUN']['V'] == 6:  # Initial이 완료된 상태
+                break
             time.sleep(1)
         return 0
 
@@ -388,4 +444,3 @@ class CNS(Control_data):
 
     def cns_control(self, para, val):
         return self.cns_udp._send_control_signal(para=para, val=val)
-
