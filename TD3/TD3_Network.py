@@ -8,28 +8,23 @@ from keras.utils import to_categorical
 from keras.layers import Dense, Input, Conv1D, MaxPooling1D, Flatten, CuDNNLSTM
 from keras.optimizers import RMSprop
 from time import sleep
+
 # import os
 # os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
-class A3C:
+class TD3:
     '''
-    A3C 네트워크
+    TD3 네트워크
         - 구조
             [======
             [*******Top*******]-[*******Mid********]-[*******Bot********]-[*******Bot********]-[*******Bot********]
-            [---A3C_Main.py---]-[----CNS_UDP.py----]
+            [---TD3_Main.py---]-[----CNS_UDP.py----]
                       │        [------UDP_net-----]----------┐
                       │                             [-------mem--------]----------┐
                       │                                                           │
-                      └--------[----A3C_Fun.py----]                               │
-                                [A3C_Process_Module]-[--A3C_Network.py--]          │
-                                                     [-------A3C--------]┬[-----Worker_1-----]-[----CNS_UDP.py----]
-                                                                         │                     [-CNS_Send_Signal--]
-                                                                         ├[-----Worker_2-----]-[----CNS_UDP.py----]
-                                                                         │                     [-CNS_Send_Signal--]
-                                                                         ├[-----Worker_3-----]-[----CNS_UDP.py----]
-                                                                         │                     [-CNS_Send_Signal--]
-                                                                         └[-----Worker_4-----]-[----CNS_UDP.py----]
+                      └--------[----TD3_Fun.py----]                               │
+                                [TD3_Process_Module]-[--TD3_Network.py--]          │
+                                                     [-------TD3--------]┬[-----Worker_1-----]-[----CNS_UDP.py----]
                                                                                                 [-CNS_Send_Signal--]
     '''
 
