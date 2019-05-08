@@ -93,12 +93,12 @@ class function4_2(multiprocessing.Process):
             if len(self.mem['QPROREL']['L']) > 2:
             # ==========================================================================================#
                 if self.mem['QPROREL']['V'] < 0.80:
-                    print('{} 출력 90% 이하 감지 진단'.format(self))
+                    print('{} 출력 80% 이하 감지 진단'.format(self))
                     print(self.trigger_mem)
                     self.trigger_mem['4_2_state'] = '80%Min'
 
                 if self.mem['QPROREL']['V'] < 0.70:
-                    print('{} 출력 90% 이하 감지 진단'.format(self))
+                    print('{} 출력 70% 이하 감지 진단'.format(self))
                     print(self.trigger_mem)
                     self.trigger_mem['4_2_state'] = '70%Min'
 
@@ -118,13 +118,13 @@ class function4_3(multiprocessing.Process):
             if len(self.mem['QPROREL']['L']) > 2:
             # ==========================================================================================#
                 if self.trigger_mem['4_2_state'] == '80%Min':
-                    print('{} 출력 90% 이하 감지로 전략 조정'.format(self))
+                    print('{} 출력 80% 이하 감지로 전략 조정'.format(self))
                     print(self.trigger_mem)
                     self.trigger_mem['4_1_state'] = False
                     self.trigger_mem['4_4_state'] = True
 
                 if self.trigger_mem['4_2_state'] == '70%Min':
-                    print('{} 출력 90% 이하 감지로 전략 조정'.format(self))
+                    print('{} 출력 70% 이하 감지로 전략 조정'.format(self))
                     print(self.trigger_mem)
                     self.trigger_mem['4_1_state'] = False
                     self.trigger_mem['4_4_state'] = True
