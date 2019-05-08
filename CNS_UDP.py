@@ -10,6 +10,7 @@ class UDPSocket(multiprocessing.Process):
         self.address = (IP, Port)
 
         self.mem = mem
+        self.trigger_mem = mem[-1]   # Clean mem -> 'Normal':True
 
         self.old_CNS_data = deepcopy(self.mem[0])   # main mem copy
         self.read_CNS_data = deepcopy(self.mem[0])
@@ -28,9 +29,32 @@ class UDPSocket(multiprocessing.Process):
                 if not self.shut_up:
                     print('List mem empty')
                 for _ in self.read_CNS_data.keys():
-                    self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
-                    self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
-                    self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
+                    if self.trigger_mem['Normal']:
+                        if _ == 'Normal_0':
+                            self.old_CNS_data[_]['V'] = 1
+                            self.old_CNS_data[_]['L'].append(1)
+                            self.old_CNS_data[_]['D'].append(1)
+                        elif _ == 'Normal_1':
+                            self.old_CNS_data[_]['V'] = 0
+                            self.old_CNS_data[_]['L'].append(0)
+                            self.old_CNS_data[_]['D'].append(0)
+                        else:
+                            self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
+                            self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
+                            self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
+                    else:
+                        if _ == 'Normal_0':
+                            self.old_CNS_data[_]['V'] = 0
+                            self.old_CNS_data[_]['L'].append(0)
+                            self.old_CNS_data[_]['D'].append(0)
+                        elif _ == 'Normal_1':
+                            self.old_CNS_data[_]['V'] = 1
+                            self.old_CNS_data[_]['L'].append(1)
+                            self.old_CNS_data[_]['D'].append(1)
+                        else:
+                            self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
+                            self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
+                            self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
 
                     # self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
                     # self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
@@ -58,9 +82,32 @@ class UDPSocket(multiprocessing.Process):
                     if not self.shut_up:
                         print(self, 'run CNS')
                     for _ in self.read_CNS_data.keys():
-                        self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
-                        self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
-                        self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
+                        if self.trigger_mem['Normal']:
+                            if _ == 'Normal_0':
+                                self.old_CNS_data[_]['V'] = 1
+                                self.old_CNS_data[_]['L'].append(1)
+                                self.old_CNS_data[_]['D'].append(1)
+                            elif _ == 'Normal_1':
+                                self.old_CNS_data[_]['V'] = 0
+                                self.old_CNS_data[_]['L'].append(0)
+                                self.old_CNS_data[_]['D'].append(0)
+                            else:
+                                self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
+                                self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
+                                self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
+                        else:
+                            if _ == 'Normal_0':
+                                self.old_CNS_data[_]['V'] = 0
+                                self.old_CNS_data[_]['L'].append(0)
+                                self.old_CNS_data[_]['D'].append(0)
+                            elif _ == 'Normal_1':
+                                self.old_CNS_data[_]['V'] = 1
+                                self.old_CNS_data[_]['L'].append(1)
+                                self.old_CNS_data[_]['D'].append(1)
+                            else:
+                                self.old_CNS_data[_]['V'] = self.read_CNS_data[_]['V']
+                                self.old_CNS_data[_]['L'].append(self.read_CNS_data[_]['V'])
+                                self.old_CNS_data[_]['D'].append(self.read_CNS_data[_]['V'])
 
                         # self.old_CNS_data[_]['N_V'] = self.read_CNS_data[_]['N_V']
                         # self.old_CNS_data[_]['N_L'].append(self.read_CNS_data[_]['N_V'])
