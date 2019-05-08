@@ -58,4 +58,5 @@ class clean_mem(multiprocessing.Process):
                         __[:] = [] # List mem clean
                     nub_mem += 1
                 self.clean_signal_mem['Clean'] = False
+                self.clean_signal_mem['Normal'] = True
             time.sleep(0.1)

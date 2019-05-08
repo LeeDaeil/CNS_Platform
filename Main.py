@@ -23,10 +23,11 @@ class body:
                 # function3(self.shared_mem),
                 # gfunction(self.shared_mem),
                 # gfunction2(self.shared_mem),
-                function4_1(self.shared_mem),
-                function4_2(self.shared_mem),
-                function4_3(self.shared_mem),
-                function4_4(self.shared_mem),
+                # function4_1(self.shared_mem),
+                # function4_2(self.shared_mem),
+                # function4_3(self.shared_mem),
+                # function4_4(self.shared_mem),
+                funtion5(self.shared_mem),
             ]
         else:
             self.process_list = [
@@ -61,7 +62,7 @@ class generate_mem:
         return memory_list
 
     def make_clean_mem(self):
-        memory_dict = {'Clean': True}
+        memory_dict = {'Clean': True, 'Normal': True}
         return memory_dict
 
     def make_main_mem_structure(self, max_len_deque=10, show_main_mem=False):
