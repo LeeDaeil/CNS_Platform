@@ -62,7 +62,7 @@ class generate_mem:
         return memory_list
 
     def make_clean_mem(self):
-        memory_dict = {'Clean': True, 'Normal': True}
+        memory_dict = {'Clean': True, 'Normal': True, 'Accident_nb': 0}
         return memory_dict
 
     def make_main_mem_structure(self, max_len_deque=10, show_main_mem=False):
