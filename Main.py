@@ -4,18 +4,18 @@ from CNS_UDP import *
 from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
-
+from CNS_TSMS import *
 
 class body:
     def __init__(self):
         #==== Initial part for testing===========================================================#
-        self.a3c_test_mode = True
+        self.test_mode = 'TSMS' # 'Normal', 'TSMS', 'Test_clean'
         self.shut_up = True
         #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
         self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
 
-        if self.a3c_test_mode:
+        if self.test_mode == 'Normal':
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 # function1(self.shared_mem),
@@ -29,14 +29,18 @@ class body:
                 # function4_4(self.shared_mem),
                 funtion5(self.shared_mem),
             ]
+        elif self.test_mode == 'Test_TSMS':
+            self.process_list = [
+                clean_mem(self.shared_mem, shut_up=self.shut_up),
+                TSMS(self.shared_mem),
+            ]
         else:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
-
             ]
 
     def start(self):
-        print('A3C test mode : {}'.format(self.a3c_test_mode))
+        print('CNS Platfrom mode : {}'.format(self.test_mode))
         job_list = []
         for __ in self.UDP_net:
             __.start()
@@ -47,6 +51,7 @@ class body:
             job_list.append(__)
         for job in job_list:
             job.join()
+
 
 class generate_mem:
     def make_test_mem(self):

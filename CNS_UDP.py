@@ -89,7 +89,9 @@ class UDPSocket(multiprocessing.Process):
     def update_old_CNS_data(self):
 
         for _ in self.read_CNS_data.keys():
-            self.append_value_to_old_CNS_data(key=_, value=self.read_CNS_data[_]['V'])
+            if not _ in ['Normal_0', 'Normal_1', 'Accident_0', 'Accident_1', 'Accident_2', 'Accident_3',
+                                                 'Accident_4', 'Accident_5']:
+                self.append_value_to_old_CNS_data(key=_, value=self.read_CNS_data[_]['V'])
 
         temp_list = [1, 0] if self.trigger_mem['Normal'] else [0, 1]
         self.update_other_state_to_old_CNS_data(['Normal_0', 'Normal_1'], temp_list)
