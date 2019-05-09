@@ -11,6 +11,7 @@ class UDPSocket(multiprocessing.Process):
 
         self.mem = mem
         self.trigger_mem = mem[-1]   # Clean mem -> 'Normal':True
+        self.TSMS_mem = mem[-3]
 
         self.old_CNS_data = deepcopy(self.mem[0])   # main mem copy
         self.read_CNS_data = deepcopy(self.mem[0])
@@ -83,19 +84,27 @@ class UDPSocket(multiprocessing.Process):
         self.old_CNS_data[key]['D'].append(value)
 
     def update_other_state_to_old_CNS_data(self, para, value):
-        for length in range(len(para)):
+        for length in range(0, len(para)):
             self.append_value_to_old_CNS_data(key=para[length], value=value[length])
 
     def update_old_CNS_data(self):
 
         for _ in self.read_CNS_data.keys():
-            if not _ in ['Normal_0', 'Normal_1', 'Accident_0', 'Accident_1', 'Accident_2', 'Accident_3',
-                                                 'Accident_4', 'Accident_5']:
-                self.append_value_to_old_CNS_data(key=_, value=self.read_CNS_data[_]['V'])
+            self.append_value_to_old_CNS_data(key=_, value=self.read_CNS_data[_]['V'])
+            if _ == 'KFZRUN': break # CNS에서 제공하는 DB까지 읽고 나머지는 아래에서 수동으로 업데이트
 
+        # TSMS 데이터 업데이트
+        self.append_value_to_old_CNS_data(key='TSMS_Monitoring', value=self.TSMS_mem['Monitoring_result'])
+        self.append_value_to_old_CNS_data(key='TSMS_Raw_violation', value=self.TSMS_mem['Raw_violation'])
+        self.append_value_to_old_CNS_data(key='TSMS_Raw_text_result', value=self.TSMS_mem['Raw_text_result'])
+        self.append_value_to_old_CNS_data(key='TSMS_Raw_result', value=self.TSMS_mem['Raw_result'])
+        self.append_value_to_old_CNS_data(key='TSMS_Raw_action', value=self.TSMS_mem['Raw_action'])
+
+        # 정상 상태 라벨링 업데이트
         temp_list = [1, 0] if self.trigger_mem['Normal'] else [0, 1]
         self.update_other_state_to_old_CNS_data(['Normal_0', 'Normal_1'], temp_list)
 
+        # 비상 상태 라벨링 업데이트
         temp_list = [0, 0, 0, 0, 0, 0, 0]
         temp_list[self.trigger_mem['Accident_nb']] = 1
         self.update_other_state_to_old_CNS_data(['Accident_0', 'Accident_1', 'Accident_2', 'Accident_3',

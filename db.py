@@ -2220,6 +2220,15 @@ class db_make:
             'KSWO319': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'KSWO320': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'KFZRUN': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+
+            # TSMS 변수
+            'TSMS_Monitoring': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'TSMS_Raw_violation': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'TSMS_Raw_text_result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'TSMS_Raw_result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'TSMS_Raw_action': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+
+            # Accident 변수
             'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Normal_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},

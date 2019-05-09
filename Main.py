@@ -29,7 +29,7 @@ class body:
                 # function4_4(self.shared_mem),
                 funtion5(self.shared_mem),
             ]
-        elif self.test_mode == 'Test_TSMS':
+        elif self.test_mode == 'TSMS':
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 TSMS(self.shared_mem),
@@ -65,6 +65,11 @@ class generate_mem:
     def make_CNS_time_mem(self):
         memory_list = []
         return memory_list
+
+    def make_TSMS_mem(self):
+        memory_dict = {'Monitoring_result': 0,
+                       'Raw_violation': '', 'Raw_text_result': '', 'Raw_result': 0, 'Raw_action': ''}
+        return memory_dict
 
     def make_clean_mem(self):
         memory_dict = {'Clean': True, 'Normal': True, 'Accident_nb': 0}
@@ -106,8 +111,9 @@ class generate_mem:
 
     def make_mem_structure(self, show_mem_list=False):
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
-                       Manager().dict(self.make_test_mem()),
-                       Manager().list(self.make_test_list_mem()),
+                       # Manager().dict(self.make_test_mem()),
+                       # Manager().list(self.make_test_list_mem()),
+                       Manager().dict(self.make_TSMS_mem()),                            # [-3]
                        Manager().list(self.make_CNS_time_mem()),                        # [-2]
                        Manager().dict(self.make_clean_mem()),                           # [-1]
                        ]
