@@ -5,6 +5,7 @@ from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
 from CNS_TSMS import *
+from CNS_Interface import *
 
 class body:
     def __init__(self):
@@ -13,7 +14,7 @@ class body:
         self.shut_up = True
         #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
-        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
+        self.UDP_net = [UDPSocket(self.shared_mem, IP=' `', Port=7001, shut_up=self.shut_up)]
 
         if self.test_mode == 'Normal':
             self.process_list = [
@@ -32,6 +33,7 @@ class body:
         elif self.test_mode == 'TSMS':
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
+                interface_function(self.shared_mem),
                 TSMS(self.shared_mem),
             ]
         else:
@@ -54,6 +56,28 @@ class body:
 
 
 class generate_mem:
+    def make_autonomous_mem(self):
+        memory_dict = {'Man_state': False, 'Auto_state': True, 'Man_require': False,
+                       'Current_op': 'LSTM-based algorithm', #'['LSTM-based algorithm', 'Tech Spec action', 'Ruel-based algorithm'],
+                       'Strategy_out': ['[00:00:00] Start - Normal Operation - LSTM-base algorithm',
+                                        '[00:00:46] Emergency Operation - LSTM-base algorithm'],
+                       'Auto_operation_out': ['[00:00:00] Start',
+                                              '[00:00:46] Reactor Trip',
+                                              '[00:00:57] SI Valve Open',
+                                              '[00:00:58] Charging Pump 1 Start',
+                                              '[00:00:58] Aux Feed Water Pump 1 Start',
+                                              '[00:00:58] Aux Feed Water Pump 3 Start',
+                                              '[00:00:59] Aux Feed Water Control Valve (HV313) Open',
+                                              '[00:00:59] Aux Feed Water Control Valve (HV315) Open',
+                                              '[00:01:25] Aux Feed Water Pump 2 Start',
+                                              '[00:01:27] Aux Feed Water Control Valve (HV314) Open',
+                                              '[00:02:06] MSIV Close (HV108, HV208, HV308',
+                                              '[00:04:36] RCP 1 Stop',
+                                              '[00:04:36] RCP 2 Stop',
+                                              '[00:04:36] RCP 3 Stop',
+                                              ]}
+        return memory_dict
+
     def make_test_mem(self):
         memory_dict = {'4_1_state': True, '4_2_state': '', '4_4_state': False}
         return memory_dict
@@ -116,6 +140,7 @@ class generate_mem:
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
                        # Manager().dict(self.make_test_mem()),
                        # Manager().list(self.make_test_list_mem()),
+                       Manager().dict(self.make_autonomous_mem()),  # [-4]
                        Manager().dict(self.make_TSMS_mem()),                            # [-3]
                        Manager().list(self.make_CNS_time_mem()),                        # [-2]
                        Manager().dict(self.make_clean_mem()),                           # [-1]
