@@ -50,6 +50,7 @@ class TSMS_Monitoring:
             self.TSMS_mem['Monitoring_result'] = 0
         else:
             self.TSMS_mem['Monitoring_result'] = 1
+            print('aa')
 
 
 class TSMS_Raw_data_monitoring:
