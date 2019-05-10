@@ -15,12 +15,14 @@ class TSMS(multiprocessing.Process):
 
         self.TSMS_mem = mem[-3]
         self.TSMS_PT_cal = TSMS_SVM_PTcurve(mem=mem)
+        self.current_len = len(self.mem['QPROREL']['L'])
 
     def run(self):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) >= 1:
+            if len(self.mem['QPROREL']['L']) > 0 and self.current_len != len(self.mem['QPROREL']['L']):
+                self.current_len = len(self.mem['QPROREL']['L'])
             # ==========================================================================================#
                 self.TSMS_monitoring.monitoring()
                 self.TSMS_Raw_data_monitoring.Detection()
@@ -50,7 +52,7 @@ class TSMS_Monitoring:
             self.TSMS_mem['Monitoring_result'] = 0
         else:
             self.TSMS_mem['Monitoring_result'] = 1
-            print('a2')
+            # print('a2')
 
 
 class TSMS_Raw_data_monitoring:
@@ -82,7 +84,7 @@ class TSMS_Raw_data_monitoring:
             else:
                 self.TSMS_mem['Raw_result'] = 0
                 self.Detection_signal = 1
-                print(self.ActionPlanning_signal)
+                # print(self.ActionPlanning_signal)
                 self.TSMS_mem['Raw_text_result'] = 'LCO Dissatisfaction'
                 self.TSMS_mem['Raw_violation'] = 'LCO 3.4.1'
                 # self.trigger.append(0)
@@ -93,27 +95,27 @@ class TSMS_Raw_data_monitoring:
 
             if 154.7 < self.mem['ZINST65']['V'] <  161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
                 if self.timer1 < 180 : #180 -> 7200으로 바꿀 것
-                    print('Action Success - 복구 성공, 제한시간 내 수행')
-                    print(self.timer1)
+                    # print('Action Success - 복구 성공, 제한시간 내 수행')
+                    # print(self.timer1)
                     self.TSMS_mem['Raw_result'] = 1
                     self.trigger = True
-                    print('Detection1번 신호 발생')
+                    # print('Detection1번 신호 발생')
                     self.TSMS_mem['Raw_action'] = 'Action Success - 복구 성공, 제한시간 내 수행'
                 else :
-                    print('Action Fail - 복구 성공, 제한시간 초과')
-                    print(self.timer1)
+                    # print('Action Fail - 복구 성공, 제한시간 초과')
+                    # print(self.timer1)
                     self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 2
                     self.TSMS_mem['Raw_action'] = 'Action Fail - 복구 성공, 제한시간 초과'
             else:
                 if self.timer1 < 180 :
-                    print('Action Ongoing')
+                    # print('Action Ongoing')
                     self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 0
-                    print(self.timer1)
+                    # print(self.timer1)
                     self.TSMS_mem['Raw_action'] = 'Action Ongoing'
                 else:
-                    print('조치 실패 - 복구 실패, 제한시간 초과')
+                    # print('조치 실패 - 복구 실패, 제한시간 초과')
                     self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 2
                     self.TSMS_mem['Raw_action'] = 'Action Fail - 복구 실패, 제한시간 초과'
@@ -136,13 +138,13 @@ class TSMS_Raw_data_monitoring:
     def ActionPlanning(self):
 
         if self.Detection_signal == 1:
-            print('신호 잘옴.')
+            # print('신호 잘옴.')
             self.trigger = False
             self.ActionPlanning_signal = 1
             self.timer1_signal = True
 
         elif self.Detection_signal == 2:
-            print('운전모드 신호 줘라')
+            # print('운전모드 신호 줘라')
             self.trigger = False
             self.ActionPlanning_signal = 2 # action signal을 2로 지정함. 'Detection'에서 운전모드 감시할 수 있도록.
             # self.timer2_signal = True
@@ -312,9 +314,6 @@ class TSMS_SVM_PTcurve:
         # 데이터 전처리
         self.scaler.fit(X)
         X = self.scaler.transform(X)
-        import numpy as np
-        print(np.shape(X))
-
         # SVM 훈련
         svc = svm.SVC(kernel='linear', gamma='auto', C=1000)
         svc.fit(X, y)

@@ -14,7 +14,7 @@ class body:
         self.shut_up = True
         #========================================================================================#
         self.shared_mem = generate_mem().make_mem_structure()
-        self.UDP_net = [UDPSocket(self.shared_mem, IP=' `', Port=7001, shut_up=self.shut_up)]
+        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
 
         if self.test_mode == 'Normal':
             self.process_list = [
@@ -140,7 +140,7 @@ class generate_mem:
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
                        # Manager().dict(self.make_test_mem()),
                        # Manager().list(self.make_test_list_mem()),
-                       Manager().dict(self.make_autonomous_mem()),  # [-4]
+                       Manager().dict(self.make_autonomous_mem()),                      # [-4]
                        Manager().dict(self.make_TSMS_mem()),                            # [-3]
                        Manager().list(self.make_CNS_time_mem()),                        # [-2]
                        Manager().dict(self.make_clean_mem()),                           # [-1]
