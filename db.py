@@ -2240,7 +2240,7 @@ class db_make:
             'TSMS_Shut_Result': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'TSMS_Shut_ab_comment': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
-            'TSMS_PT_Resulr': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'TSMS_PT_Result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
             # Accident 변수
             'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},

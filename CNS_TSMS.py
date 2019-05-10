@@ -2,7 +2,7 @@ import multiprocessing
 import time
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
+
 
 class TSMS(multiprocessing.Process):
     def __init__(self, mem):
@@ -12,6 +12,8 @@ class TSMS(multiprocessing.Process):
         self.TSMS_Raw_data_monitoring = TSMS_Raw_data_monitoring(mem=mem)
         self.TSMS_Shutdown_margin_calculation = TSMS_Shutdown_margin_calculation(mem=mem)
         self.TSMS_Shutdown_margin_calculation_ab = TSMS_Shutdown_margin_calculation_abnormal(mem=mem)
+
+        self.TSMS_mem = mem[-3]
         self.TSMS_PT_cal = TSMS_SVM_PTcurve(mem=mem)
 
     def run(self):
@@ -25,6 +27,8 @@ class TSMS(multiprocessing.Process):
                 self.TSMS_Raw_data_monitoring.ActionPlanning()
                 self.TSMS_Shutdown_margin_calculation.shutdown_margin_calculation()
                 self.TSMS_Shutdown_margin_calculation_ab.detect()
+                self.TSMS_PT_cal.predict_svm()
+                print(self.TSMS_mem)
                 time.sleep(1)
 
 
@@ -42,22 +46,10 @@ class TSMS_Monitoring:
 
         #KLAMPO124 KLAMPO125 KLAMPO126
 
-        if self.mem['KLAMPO124']['V'] == 1:
-            if self.mem['KLAMPO125']['V'] == 1:
-                self.TSMS_mem['Monitoring_result'] = 1
-            elif self.mem['KLAMPO126']['Val'] == 1:
-                self.TSMS_mem['Monitoring_result'] = 1
-            else:
-                self.TSMS_mem['Monitoring_result'] = 0
-
-        elif self.mem['KLAMPO125']['Val'] == 1:
-            if self.mem['KLAMPO126']['Val'] == 1:
-                self.TSMS_mem['Monitoring_result'] = 1
-            else:
-                self.TSMS_mem['Monitoring_result'] = 0
-
-        else:
+        if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
             self.TSMS_mem['Monitoring_result'] = 0
+        else:
+            self.TSMS_mem['Monitoring_result'] = 1
 
 
 class TSMS_Raw_data_monitoring:
@@ -77,7 +69,6 @@ class TSMS_Raw_data_monitoring:
         self.timer2 = 0
         self.timer1_signal = False
         self.timer2_signal = False
-        self.action = []
 
     def Detection(self):
 
@@ -214,7 +205,7 @@ class TSMS_Shutdown_margin_calculation:
 
     def shutdown_margin_calculation(self):
         # 1. BOL, 현출력% -> 0% 하기위한 출력 결손량 계산
-        ReactorPower = self.mem['QPROLD']['Val'] * 100
+        ReactorPower = self.mem['QPROLD']['V'] * 100
         self.TSMS_mem['Shut_BOL'] = self.init_para['TotalPowerDefect_BOL'] * ReactorPower / self.init_para['HFP']
 
         # 2. EOL, 현출력% -> 0% 하기위한 출력 결손량 계산
@@ -242,7 +233,7 @@ class TSMS_Shutdown_margin_calculation:
                                                              + self.TSMS_mem['Shut_Abnormal_rod_worth']
 
         # 8. 현 출력에서의 정지여유도 계산
-        self.TSMS_mem['Shut_ShutdownMargin'] = self.init_para['TotalRodWortho'] - \
+        self.TSMS_mem['Shut_ShutdownMargin'] = self.init_para['TotalRodWorth'] - \
                                                self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'] - \
                                                self.TSMS_mem['Shut_Fin']
 
@@ -301,6 +292,7 @@ class TSMS_Shutdown_margin_calculation_abnormal:
 
 
 class TSMS_SVM_PTcurve:
+
     def __init__(self, mem):
         self.mem = mem[0]
         self.TSMS_mem = mem[-3]
@@ -308,6 +300,7 @@ class TSMS_SVM_PTcurve:
         self.model_svm = self.train_model_svm()
 
     def train_model_svm(self):
+        from sklearn.svm import SVC
         print('SVM 모델 훈련 시작')
         data = pd.read_csv('SVM_PT_DATA.csv', header=None)
 
@@ -323,7 +316,6 @@ class TSMS_SVM_PTcurve:
         X_train_scaled = (X_train - self.min_on_training) / range_on_training
         X_test_scaled = (X_test - self.min_on_training) / range_on_training
 
-
         svc = SVC(kernel='linear', gamma='auto', C=1000)
         svc.fit(X_train_scaled, y_train)
         print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
@@ -331,4 +323,5 @@ class TSMS_SVM_PTcurve:
         return svc
 
     def predict_svm(self):
-        self.TSMS_mem['PT_Result'] = self.model_svm.predict([0, 0.5])[0] # svc.predict([[0, 0.5]]) 쌍괄호 사용
+        # [온도, 압력]
+        self.TSMS_mem['PT_Result'] = self.model_svm.predict([[0, 0.5]])[0] # svc.predict([[0, 0.5]]) 쌍괄호 사용
