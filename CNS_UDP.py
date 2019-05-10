@@ -99,6 +99,18 @@ class UDPSocket(multiprocessing.Process):
         self.append_value_to_old_CNS_data(key='TSMS_Raw_text_result', value=self.TSMS_mem['Raw_text_result'])
         self.append_value_to_old_CNS_data(key='TSMS_Raw_result', value=self.TSMS_mem['Raw_result'])
         self.append_value_to_old_CNS_data(key='TSMS_Raw_action', value=self.TSMS_mem['Raw_action'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_BOL', value=self.TSMS_mem['Shut_BOL'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_EOL', value=self.TSMS_mem['Shut_EOL'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Burn_up', value=self.TSMS_mem['Shut_Burn_up'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Fin', value=self.TSMS_mem['Shut_Fin'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_rod', value=self.TSMS_mem['Shut_Inoper_rod'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Abnormal_rod_worth', value=self.TSMS_mem['Shut_Abnormal_rod_worth'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_ableAbnormal_RodWorth',
+                                          value=self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_ShutdownMargin', value=self.TSMS_mem['Shut_ShutdownMargin'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_Result', value=self.TSMS_mem['Shut_Result'])
+        self.append_value_to_old_CNS_data(key='TSMS_Shut_ab_comment', value=self.TSMS_mem['Shut_ab_comment'])
+        self.append_value_to_old_CNS_data(key='TSMS_PT_Result', value=self.TSMS_mem['PT_Result'])
 
         # 정상 상태 라벨링 업데이트
         temp_list = [1, 0] if self.trigger_mem['Normal'] else [0, 1]

@@ -1,5 +1,8 @@
 import multiprocessing
 import time
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
 
 class TSMS(multiprocessing.Process):
     def __init__(self, mem):
@@ -7,6 +10,9 @@ class TSMS(multiprocessing.Process):
         self.mem = mem[0]
         self.TSMS_monitoring = TSMS_Monitoring(mem=mem)
         self.TSMS_Raw_data_monitoring = TSMS_Raw_data_monitoring(mem=mem)
+        self.TSMS_Shutdown_margin_calculation = TSMS_Shutdown_margin_calculation(mem=mem)
+        self.TSMS_Shutdown_margin_calculation_ab = TSMS_Shutdown_margin_calculation_abnormal(mem=mem)
+        self.TSMS_PT_cal = TSMS_SVM_PTcurve(mem=mem)
 
     def run(self):
         while True:
@@ -17,12 +23,15 @@ class TSMS(multiprocessing.Process):
                 self.TSMS_monitoring.monitoring()
                 self.TSMS_Raw_data_monitoring.Detection()
                 self.TSMS_Raw_data_monitoring.ActionPlanning()
-
+                self.TSMS_Shutdown_margin_calculation.shutdown_margin_calculation()
+                self.TSMS_Shutdown_margin_calculation_ab.detect()
                 time.sleep(1)
+
 
 class TSMS_Monitoring:
     '''
     Operability_2019-01-27 폴더의 test1.py 파일 구현
+    RCS Operability 폴더의 test.py 와 동일
     '''
 
     def __init__(self, mem):
@@ -169,3 +178,157 @@ class TSMS_Raw_data_monitoring:
                 return 5
         else:
             return 6
+
+
+class TSMS_Shutdown_margin_calculation:
+    '''
+    ShutdownMarginCalculation.py 파일 구현
+    '''
+
+    def __init__(self, mem):
+        self.mem = mem[0]
+        self.TSMS_mem = mem[-3]
+
+        # 계산을 위한 초기 파라메터
+        self.init_para = {
+            'HFP': 100,  # H
+            'ReatorPower': 90,              # T
+            'BoronConcentration': 1318,     # T
+            'Burnup': 4000,                 # T
+            'Burnup_BOL': 150,              # H
+            'Burnup_EOL': 18850,            # H
+            'TotalPowerDefect_BOL': 1780,   # H
+            'TotalPowerDefect_EOL': 3500,   # H
+            'VoidCondtent': 50,             # H
+            'TotalRodWorth': 5790,          # H
+            'WorstStuckRodWorth': 1080,     # H
+            'InoperableRodNumber': 1,       # T
+            'BankWorth_D': 480,             # H
+            'BankWorth_C': 1370,            # H
+            'BankWorth_B': 1810,            # H
+            'BankWorth_A': 760,             # H
+            'AbnormalRodName': 'C',         # T
+            'AbnormalRodNumber': 1,         # T
+            'ShutdownMarginValue': 1770,    # H
+        }
+
+    def shutdown_margin_calculation(self):
+        # 1. BOL, 현출력% -> 0% 하기위한 출력 결손량 계산
+        ReactorPower = self.mem['QPROLD']['Val'] * 100
+        self.TSMS_mem['Shut_BOL'] = self.init_para['TotalPowerDefect_BOL'] * ReactorPower / self.init_para['HFP']
+
+        # 2. EOL, 현출력% -> 0% 하기위한 출력 결손량 계산
+        self.TSMS_mem['Shut_EOL'] = self.init_para['TotalPowerDefect_EOL'] * ReactorPower / self.init_para['HFP']
+
+        # 3. 현재 연소도, 현출력% -> 0% 하기위한 출력 결손량 계산
+        A = self.init_para['Burnup_EOL'] - self.init_para['Burnup_BOL']
+        B = self.TSMS_mem['Shut_EOL'] - self.TSMS_mem['Shut_BOL']
+        C = self.init_para['Burnup'] - self.init_para['Burnup_EOL']
+
+        self.TSMS_mem['Shut_Burn_up'] = B * C / A + self.TSMS_mem['Shut_BOL']
+
+        # 4. 반응도 결손량을 계산
+        self.TSMS_mem['Shut_Fin'] = self.TSMS_mem['Shut_Burn_up'] + self.init_para['VoidCondtent']
+
+        # 5. 운전불가능 제어봉 제어능을 계산
+        self.TSMS_mem['Shut_Inoper_rod'] = self.init_para['InoperableRodNumber'] * self.init_para['WorstStuckRodWorth']
+
+        # 6. 비정상 제어봉 제어능을 계산
+        self.TSMS_mem['Shut_Abnormal_rod_worth'] = self.init_para['BankWorth_{}'.format(
+            self.init_para['AbnormalRodName'])] / 8 * self.init_para['AbnormalRodNumber']
+
+        # 7. 운전 불능, 비정상 제어봉 제어능의 합 계산
+        self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'] = self.TSMS_mem['Shut_Inoper_rod'] \
+                                                             + self.TSMS_mem['Shut_Abnormal_rod_worth']
+
+        # 8. 현 출력에서의 정지여유도 계산
+        self.TSMS_mem['Shut_ShutdownMargin'] = self.init_para['TotalRodWortho'] - \
+                                               self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'] - \
+                                               self.TSMS_mem['Shut_Fin']
+
+        # 9. 결과 출력
+        self.TSMS_mem['Shut_Result'] = '만족' if self.TSMS_mem['Shut_ShutdownMargin'] \
+                                               >= self.init_para['ShutdownMarginValue'] else '불만족'
+
+
+class TSMS_Shutdown_margin_calculation_abnormal:
+    '''
+    ShutdownMarginCalculation_abnormal.py 파일 구현
+    '''
+
+    def __init__(self, mem):
+        self.mem = mem[0]
+        self.TSMS_mem = mem[-3]
+
+    def detect(self):
+        if self.TSMS_mem['Shut_Result'] == '불만족':
+            # ex. self.TSMS_mem['Raw_violation'] = 'LCO 3.4.1'
+            detected_bin = self.diagnosis(self.TSMS_mem['Raw_violation'])
+            self.TSMS_mem['Shut_ab_comment'], t = self.suggest(diagnosis_bin=detected_bin,
+                                                               raw_violation=self.TSMS_mem['Raw_violation'],
+                                                               shutdown_margin=self.TSMS_mem['Shut_ShutdownMargin'])
+        else: pass # 만족 조건으로 pass
+
+    def diagnosis(self, Raw_violation):
+
+        if Raw_violation == 'LCO 3.1.1':
+            return 0 # detected_bin
+        else:
+            print('?')
+
+    def suggest(self, diagnosis_bin, raw_violation, shutdown_margin):
+
+        A = shutdown_margin
+        B = 1770
+        C = -5.9
+        time_limit, suggested_comment = 0, ''
+
+        if diagnosis_bin == 0:  # LCO 3.1.1
+
+            parameter = 'KBCDO16'
+            current_value = self.mem[parameter]['V']
+            boron = (A - B) / C
+            target_value = current_value + boron
+            time_limit = 900
+
+            suggested_comment = '위반사항: {}, 파라메터: {}, 현재 보론: {}, 목표 보론: {} 제한시간:{}'.format(
+                raw_violation, parameter, current_value, target_value, time_limit)
+
+        else:
+            print('?')
+
+        return suggested_comment, time_limit
+
+
+class TSMS_SVM_PTcurve:
+    def __init__(self, mem):
+        self.mem = mem[0]
+        self.TSMS_mem = mem[-3]
+        self.min_on_training = 0
+        self.model_svm = self.train_model_svm()
+
+    def train_model_svm(self):
+        print('SVM 모델 훈련 시작')
+        data = pd.read_csv('SVM_PT_DATA.csv', header=None)
+
+        X = data.loc[:, 0:1].values
+        y = data[2].values
+
+        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.3)
+
+        # 데이터 전처리
+        self.min_on_training = X_train.min(axis=0)
+        range_on_training = (X_train - self.min_on_training).max(axis=0)
+
+        X_train_scaled = (X_train - self.min_on_training) / range_on_training
+        X_test_scaled = (X_test - self.min_on_training) / range_on_training
+
+
+        svc = SVC(kernel='linear', gamma='auto', C=1000)
+        svc.fit(X_train_scaled, y_train)
+        print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
+        print("테스트 세트 정확도 : {: .3f}".format(svc.score(X_test_scaled, y_test)))
+        return svc
+
+    def predict_svm(self):
+        self.TSMS_mem['PT_Result'] = self.model_svm.predict([0, 0.5])[0] # svc.predict([[0, 0.5]]) 쌍괄호 사용
