@@ -1,8 +1,8 @@
 import multiprocessing
 import time
 import pandas as pd
-from sklearn.model_selection import train_test_split
-
+from sklearn import svm
+from sklearn.preprocessing import MinMaxScaler
 
 class TSMS(multiprocessing.Process):
     def __init__(self, mem):
@@ -296,32 +296,33 @@ class TSMS_SVM_PTcurve:
     def __init__(self, mem):
         self.mem = mem[0]
         self.TSMS_mem = mem[-3]
-        self.min_on_training = 0
+
+        self.scaler = MinMaxScaler()
+
         self.model_svm = self.train_model_svm()
 
     def train_model_svm(self):
-        from sklearn.svm import SVC
-        print('SVM 모델 훈련 시작')
+        # print('SVM 모델 훈련 시작')
         data = pd.read_csv('SVM_PT_DATA.csv', header=None)
 
         X = data.loc[:, 0:1].values
         y = data[2].values
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0, test_size=0.3)
-
         # 데이터 전처리
-        self.min_on_training = X_train.min(axis=0)
-        range_on_training = (X_train - self.min_on_training).max(axis=0)
+        self.scaler.fit(X)
+        X = self.scaler.transform(X)
+        import numpy as np
+        print(np.shape(X))
 
-        X_train_scaled = (X_train - self.min_on_training) / range_on_training
-        X_test_scaled = (X_test - self.min_on_training) / range_on_training
-
-        svc = SVC(kernel='linear', gamma='auto', C=1000)
-        svc.fit(X_train_scaled, y_train)
-        print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
-        print("테스트 세트 정확도 : {: .3f}".format(svc.score(X_test_scaled, y_test)))
+        # SVM 훈련
+        svc = svm.SVC(kernel='linear', gamma='auto', C=1000)
+        svc.fit(X, y)
+        # print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
+        # print("테스트 세트 정확도 : {: .3f}".format(svc.score(X_test_scaled, y_test)))
         return svc
 
     def predict_svm(self):
-        # [온도, 압력]
-        self.TSMS_mem['PT_Result'] = self.model_svm.predict([[0, 0.5]])[0] # svc.predict([[0, 0.5]]) 쌍괄호 사용
+        # [온도, 압력] # svc.predict([[0, 0.5]]) 쌍괄호 사용
+        import numpy as np
+        temp = self.scaler.transform([[self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']]])
+        self.TSMS_mem['PT_Result'] = self.model_svm.predict(temp)[0]
