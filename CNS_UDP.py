@@ -94,19 +94,25 @@ class UDPSocket(multiprocessing.Process):
             if _ == 'KFZRUN': break # CNS에서 제공하는 DB까지 읽고 나머지는 아래에서 수동으로 업데이트
 
         # TSMS 데이터 업데이트
+        self.append_value_to_old_CNS_data(key='TSMS_OperationMode', value=self.TSMS_mem['OperationMode'])
         self.append_value_to_old_CNS_data(key='TSMS_Monitoring', value=self.TSMS_mem['Monitoring_result'])
-        self.append_value_to_old_CNS_data(key='TSMS_Raw_violation', value=self.TSMS_mem['Raw_violation'])
-        self.append_value_to_old_CNS_data(key='TSMS_Raw_text_result', value=self.TSMS_mem['Raw_text_result'])
-        self.append_value_to_old_CNS_data(key='TSMS_Raw_result', value=self.TSMS_mem['Raw_result'])
-        self.append_value_to_old_CNS_data(key='TSMS_Raw_action', value=self.TSMS_mem['Raw_action'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_BOL', value=self.TSMS_mem['Shut_BOL'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_EOL', value=self.TSMS_mem['Shut_EOL'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_Burn_up', value=self.TSMS_mem['Shut_Burn_up'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_Fin', value=self.TSMS_mem['Shut_Fin'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_rod', value=self.TSMS_mem['Shut_Inoper_rod'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_Abnormal_rod_worth', value=self.TSMS_mem['Shut_Abnormal_rod_worth'])
-        self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_ableAbnormal_RodWorth',
-                                          value=self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'])
+        self.append_value_to_old_CNS_data(key='TSMS_F', value=self.TSMS_mem['F']) # F test
+        self.append_value_to_old_CNS_data(key='TSMS_FT', value=self.TSMS_mem['FT'])  # FT test
+        self.append_value_to_old_CNS_data(key='TSMS_E', value=self.TSMS_mem['E'])  # FT test
+        # self.append_value_to_old_CNS_data(key='TSMS_Raw_violation', value=self.TSMS_mem['Raw_violation'])
+        self.append_value_to_old_CNS_data(key='TSMS_RCSDNBR', value=self.TSMS_mem['RCSDNBR'])
+        self.append_value_to_old_CNS_data(key='TSMS_F2', value=self.TSMS_mem['F2'])  # F test
+        self.append_value_to_old_CNS_data(key='TSMS_FT2', value=self.TSMS_mem['FT2'])  # FT test
+        # self.append_value_to_old_CNS_data(key='TSMS_Raw_result', value=self.TSMS_mem['Raw_result'])
+        self.append_value_to_old_CNS_data(key='TSMS_E2', value=self.TSMS_mem['E2'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_BOL', value=self.TSMS_mem['Shut_BOL'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_EOL', value=self.TSMS_mem['Shut_EOL'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_Burn_up', value=self.TSMS_mem['Shut_Burn_up'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_Fin', value=self.TSMS_mem['Shut_Fin'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_rod', value=self.TSMS_mem['Shut_Inoper_rod'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_Abnormal_rod_worth', value=self.TSMS_mem['Shut_Abnormal_rod_worth'])
+        # self.append_value_to_old_CNS_data(key='TSMS_Shut_Inoper_ableAbnormal_RodWorth',
+        #                                   value=self.TSMS_mem['Shut_Inoper_ableAbnormal_RodWorth'])
         self.append_value_to_old_CNS_data(key='TSMS_Shut_ShutdownMargin', value=self.TSMS_mem['Shut_ShutdownMargin'])
         self.append_value_to_old_CNS_data(key='TSMS_Shut_Result', value=self.TSMS_mem['Shut_Result'])
         self.append_value_to_old_CNS_data(key='TSMS_Shut_ab_comment', value=self.TSMS_mem['Shut_ab_comment'])

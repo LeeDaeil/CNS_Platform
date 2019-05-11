@@ -8,6 +8,7 @@ class TSMS(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]
+        # self.TSMS_OperationMode = TSMS_OperationMode(mem=mem)
         self.TSMS_monitoring = TSMS_Monitoring(mem=mem)
         self.TSMS_Raw_data_monitoring = TSMS_Raw_data_monitoring(mem=mem)
         self.TSMS_Shutdown_margin_calculation = TSMS_Shutdown_margin_calculation(mem=mem)
@@ -22,6 +23,7 @@ class TSMS(multiprocessing.Process):
             # CNS 초기 조건 발생시 대기하는 부분
             if len(self.mem['QPROREL']['L']) >= 1:
             # ==========================================================================================#
+                #self.TSMS_OperationMode.OperationMode()
                 self.TSMS_monitoring.monitoring()
                 self.TSMS_Raw_data_monitoring.Detection()
                 self.TSMS_Raw_data_monitoring.ActionPlanning()
@@ -31,8 +33,32 @@ class TSMS(multiprocessing.Process):
                 print(self.TSMS_mem)
                 time.sleep(1)
 
+class TSMS_OperationMode: #업데이트 필요
 
-class TSMS_Monitoring:
+    def __init__(self, mem):
+        self.mem = mem[0]
+        self.TSMS_mem = mem[-3]
+
+    def OperationMode(self): #OperationMode 계산 안됨
+        # TermalPower = para.ThermalPower ZINST1
+        # Reactivity = para.Reactivity self.mem['CRETIV']['Val']
+        # AvgTemp = para.Reactivity UCOLEG1
+        if self.mem['CRETIV']['V'] >= 0:
+            if self.mem['ZINST1']['V'] > 5:
+                self.TSMS_mem['OperationMode'] = 'Mode 1'
+            elif self.mem['ZINST1']['V'] <= 5:
+                self.TSMS_mem['OperationMode'] = 'Mode 2'
+        elif self.mem['CRETIV']['V'] < 0:
+            if self.mem['UCOLEG1']['V'] >= 350:
+                self.TSMS_mem['OperationMode'] = 'Mode 3'
+            elif 200 < self.mem['UCOLEG1']['V'] < 350:
+                self.TSMS_mem['OperationMode'] = 'Mode 4'
+            elif self.mem['UCOLEG1']['V'] <= 200:
+                self.TSMS_mem['OperationMode'] = 'Mode 5'
+        else:
+            self.TSMS_mem['OperationMode'] = 'Mode 6'
+
+class TSMS_Monitoring: # 수정함 
     '''
     Operability_2019-01-27 폴더의 test1.py 파일 구현
     RCS Operability 폴더의 test.py 와 동일
@@ -41,17 +67,54 @@ class TSMS_Monitoring:
     def __init__(self, mem):
         self.mem = mem[0]
         self.TSMS_mem = mem[-3]
+        self.signal = 0
+        # self.LCO344_signal_two = 0
+        # self.LCO344_signal_time = False
+        self.timer = 0
 
     def monitoring(self):
 
         #KLAMPO124 KLAMPO125 KLAMPO126
 
         if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
-            self.TSMS_mem['Monitoring_result'] = 0
+            self.TSMS_mem['Monitoring_result'] = 'LCO 3.4.4 Dissatisfaction' # 출력값을 수정하였음
+            self.TSMS_mem['F'] = 'Enter Mode 3' # 후속 조치
+            self.TSMS_mem['FT'] = 'Limit Time = 6hr'  # 후속 조치의 제한 시간
+            self.signal = 1
         else:
-            self.TSMS_mem['Monitoring_result'] = 1
-            print('aa')
+            self.TSMS_mem['Monitoring_result'] = 'LCO 3.4.4 Satisfaction'
 
+    # def ActionPlanning(self):
+    # 
+    #         if self.TSMS_mem['Monitoring_result'] == 'LCO 3.4.4 Dissatisfaction':
+    # 
+    #             self.TSMS_mem['F'] = 'Enter Mode 3'  # 후속 조치
+    #             self.TSMS_mem['FT'] = 'Limit Time = 6hr'  # 후속 조치의 제한 시간
+    # 
+    #             self.signal = 1
+    #             # self.LCO344_signal_time == True
+    #         else:
+    #             pass
+
+    def Action_Evaluation(self): #검증 필요
+
+        if self.signal == 1:
+
+            # if self.LCO344_signal_time == True:
+            self.timer += 1
+
+            if self.TSMS_mem['OperationMode'] == 'Mode 3':
+
+                if self.timer <= 21600:
+                    self.TSMS_mem['E'] = 'action success'
+                else:
+                    self.TSMS_mem['E'] = 'action fail'
+            else:
+
+                if self.timer <= 21600:
+                    self.TSMS_mem['E'] = 'action ongoing'
+                else:
+                    self.TSMS_mem['E'] = 'action fail'
 
 class TSMS_Raw_data_monitoring:
     '''
@@ -73,50 +136,48 @@ class TSMS_Raw_data_monitoring:
 
     def Detection(self):
 
-        if self.trigger == True :
+        if self.trigger == True : # 검증 필요
 
             if 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
-                self.TSMS_mem['Raw_result'] = 1
-                self.TSMS_mem['Raw_violation'] = 'X'
-                self.TSMS_mem['Raw_text_result'] = 'LCO Satisfaction'
+                self.TSMS_mem['RCSDNBR'] = 'LCO 3.4.1 Satisfaction'
             else:
-                self.TSMS_mem['Raw_result'] = 0
                 self.Detection_signal = 1
                 print(self.ActionPlanning_signal)
-                self.TSMS_mem['Raw_text_result'] = 'LCO Dissatisfaction'
-                self.TSMS_mem['Raw_violation'] = 'LCO 3.4.1'
+                self.TSMS_mem['RCSDNBR'] = 'LCO 3.4.1 Dissatisfaction'
+                self.TSMS_mem['F2'] = '154.7 < RCS P < 161.6 and 286.7 < RCS cold-leg T< 293.3' # F2 추가
+                self.TSMS_mem['FT2'] ='Limit Time = 2hr' # FT2추가
                 # self.trigger.append(0)
 
-        elif self.ActionPlanning_signal == 1:
+        elif self.ActionPlanning_signal == 1: # 검증 필요
             if self.timer1_signal == True:
                 self.timer1 += 1
 
             if 154.7 < self.mem['ZINST65']['V'] <  161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
-                if self.timer1 < 180 : #180 -> 7200으로 바꿀 것
+                if self.timer1 < 7200 : #180 -> 7200으로 바꿀 것
                     print('Action Success - 복구 성공, 제한시간 내 수행')
                     print(self.timer1)
-                    self.TSMS_mem['Raw_result'] = 1
+                    # self.TSMS_mem['Raw_result'] = 1
                     self.trigger = True
                     print('Detection1번 신호 발생')
-                    self.TSMS_mem['Raw_action'] = 'Action Success - 복구 성공, 제한시간 내 수행'
+                    self.TSMS_mem['E2'] = 'Action Success' # 복구 성공, 제한시간 내 수행
                 else :
                     print('Action Fail - 복구 성공, 제한시간 초과')
                     print(self.timer1)
-                    self.TSMS_mem['Raw_result'] = 0
+                    # self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 2
-                    self.TSMS_mem['Raw_action'] = 'Action Fail - 복구 성공, 제한시간 초과'
+                    self.TSMS_mem['E2'] = 'Action Fail' # 복구 성공, 제한시간 초과
             else:
-                if self.timer1 < 180 :
+                if self.timer1 < 7200 :
                     print('Action Ongoing')
-                    self.TSMS_mem['Raw_result'] = 0
+                    # self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 0
                     print(self.timer1)
-                    self.TSMS_mem['Raw_action'] = 'Action Ongoing'
+                    self.TSMS_mem['E2'] = 'Action Ongoing'
                 else:
                     print('조치 실패 - 복구 실패, 제한시간 초과')
-                    self.TSMS_mem['Raw_result'] = 0
+                    # self.TSMS_mem['Raw_result'] = 0
                     self.Detection_signal = 2
-                    self.TSMS_mem['Raw_action'] = 'Action Fail - 복구 실패, 제한시간 초과'
+                    self.TSMS_mem['E2'] = 'Action Fail' # 복구 실패, 제한시간 초과
 
         elif self.ActionPlanning_signal == 2:
 
@@ -129,8 +190,10 @@ class TSMS_Raw_data_monitoring:
 
             if self.Monitoring() == 2:
                 self.TSMS_mem['Raw_result'] = 1
-            else:   # elif self.Monitoring() == 1 or 3 or 4 or 5 or 6
-                self.TSMS_mem['Raw_result'] = 0
+
+            else:
+                # elif self.Monitoring() == 1 or 3 or 4 or 5 or 6
+                # self.TSMS_mem['Raw_result'] = 0
                 print('여기임?')
 
     def ActionPlanning(self):
@@ -239,8 +302,8 @@ class TSMS_Shutdown_margin_calculation:
                                                self.TSMS_mem['Shut_Fin']
 
         # 9. 결과 출력
-        self.TSMS_mem['Shut_Result'] = '만족' if self.TSMS_mem['Shut_ShutdownMargin'] \
-                                               >= self.init_para['ShutdownMarginValue'] else '불만족'
+        self.TSMS_mem['Shut_Result'] = 'LCO 3.1.1 Satisfaction' if self.TSMS_mem['Shut_ShutdownMargin'] \
+                                               >= self.init_para['ShutdownMarginValue'] else 'LCO 3.1.1 Dissatisfaction'
 
 
 class TSMS_Shutdown_margin_calculation_abnormal:
@@ -253,7 +316,7 @@ class TSMS_Shutdown_margin_calculation_abnormal:
         self.TSMS_mem = mem[-3]
 
     def detect(self):
-        if self.TSMS_mem['Shut_Result'] == '불만족':
+        if self.TSMS_mem['Shut_Result'] == 'LCO 3.1.1 Dissatisfaction':
             # ex. self.TSMS_mem['Raw_violation'] = 'LCO 3.4.1'
             detected_bin = self.diagnosis(self.TSMS_mem['Raw_violation'])
             self.TSMS_mem['Shut_ab_comment'], t = self.suggest(diagnosis_bin=detected_bin,
@@ -326,4 +389,9 @@ class TSMS_SVM_PTcurve:
         # [온도, 압력] # svc.predict([[0, 0.5]]) 쌍괄호 사용
         import numpy as np
         temp = self.scaler.transform([[self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']]])
-        self.TSMS_mem['PT_Result'] = self.model_svm.predict(temp)[0]
+
+        if self.model_svm.predict(temp)[0] ==0:
+            self.TSMS_mem['PT_Result'] = 'LCO 3.4.3 Dissatisfaction'
+        else:
+            self.TSMS_mem['PT_Result'] = 'LCO 3.4.3 Satisfaction'
+
