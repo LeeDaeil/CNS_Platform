@@ -33,7 +33,7 @@ class body:
         elif self.test_mode == 'TSMS':
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
-                # interface_function(self.shared_mem),
+                interface_function(self.shared_mem),
                 TSMS(self.shared_mem),
             ]
         else:
