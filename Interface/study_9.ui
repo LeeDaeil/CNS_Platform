@@ -8449,6 +8449,22 @@ color: rgb(255, 255, 255);</string>
     </item>
    </layout>
   </widget>
+  <widget class="QPushButton" name="Open_GP_Window">
+   <property name="geometry">
+    <rect>
+     <x>1090</x>
+     <y>10</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <property name="text">
+    <string>TrendGP</string>
+   </property>
+  </widget>
   <zorder>Back_5</zorder>
   <zorder>Back_02</zorder>
   <zorder>Back_01</zorder>
@@ -8638,6 +8654,7 @@ color: rgb(255, 255, 255);</string>
   <zorder>D_53</zorder>
   <zorder>horizontalLayoutWidget</zorder>
   <zorder>verticalLayoutWidget</zorder>
+  <zorder>Open_GP_Window</zorder>
  </widget>
  <resources>
   <include location="resource/Study_9_re.qrc"/>

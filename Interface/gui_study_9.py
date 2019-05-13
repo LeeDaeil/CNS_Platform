@@ -3551,6 +3551,9 @@ class Ui_Dialog(object):
         self.Control_out_2.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.Control_out_2.setObjectName("Control_out_2")
         self.verticalLayout.addWidget(self.Control_out_2)
+        self.Open_GP_Window = QtWidgets.QPushButton(Dialog)
+        self.Open_GP_Window.setGeometry(QtCore.QRect(1090, 10, 75, 23))
+        self.Open_GP_Window.setObjectName("Open_GP_Window")
         self.Back_5.raise_()
         self.Back_02.raise_()
         self.Back_01.raise_()
@@ -3740,6 +3743,7 @@ class Ui_Dialog(object):
         self.D_53.raise_()
         self.horizontalLayoutWidget.raise_()
         self.verticalLayoutWidget.raise_()
+        self.Open_GP_Window.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -4060,5 +4064,6 @@ class Ui_Dialog(object):
         self.D_53.setText(_translate("Dialog", "RCP 3 ON"))
         self.CNS_Time.setText(_translate("Dialog", "CNS TIME :"))
         self.label_13.setText(_translate("Dialog", "[ Autonomous Operation Signal ]"))
+        self.Open_GP_Window.setText(_translate("Dialog", "TrendGP"))
 
-# import Study_9_re_rc
+#import Study_9_re_rc

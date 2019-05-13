@@ -1,9 +1,13 @@
 import sys
 import multiprocessing
-from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
 from PyQt5 import QtCore
-from Interface.gui_study_9 import Ui_Dialog
+# ------------------------------------------------------
+from Interface.gui_study_9 import Ui_Dialog as Main_ui
 from Interface.resource import Study_9_re_rc
+# ------------------------------------------------------
+from Interface.Trend_window import Ui_Dialog as Trend_ui
+
 
 class interface_function(multiprocessing.Process):
     def __init__(self, mem):
@@ -16,15 +20,16 @@ class interface_function(multiprocessing.Process):
         w.exec()
         sys.exit(app.exec_())
 
+
 class MyForm(QDialog):
     def __init__(self, mem):
         super().__init__()
 
-        self.ui = Ui_Dialog()
+        self.ui = Main_ui()
         self.ui.setupUi(self)
-
-        self.mem = mem[0]
-        self.Auto_mem = mem[-4]
+        if True: # 메인 메모리와 연결된 부분
+            self.mem = mem[0]
+            self.Auto_mem = mem[-4]
 
         self.color_setting()
 
@@ -50,8 +55,16 @@ class MyForm(QDialog):
         # timer.timeout.connect(self.update_label)
         # timer.timeout.connect(self.update_alarm)
         timer.start(500)
-
+        self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
         self.show()
+
+    # ======================= Trend Popup===============================
+
+    def call_trend_window(self):
+        self.trend_window = sub_tren_window(self.mem)
+
+
+    # ======================= Initial_coloe=============================
 
     def color_setting(self):
         self.back_color = {
@@ -1051,3 +1064,34 @@ class MyForm(QDialog):
         self.ui.Control_out.clear()
         for _ in self.Auto_mem['Auto_operation_out']:
             self.ui.Control_out.append(_)
+
+
+class sub_tren_window(QDialog):
+    def __init__(self, mem):
+        super().__init__()
+        self.mem = mem
+
+        self.Trend_ui = Trend_ui()
+        self.Trend_ui.setupUi(self)
+
+        self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
+
+        timer = QtCore.QTimer(self)
+        for _ in [self.update_window]:
+            timer.timeout.connect(_)
+        timer.start(500)
+
+        self.Trend_ui.listWidget.itemClicked.connect(self.print_out)
+        # self.Trend_ui.listWidget.itemClicked(self.print_out)
+
+        self.show()
+
+    def update_window(self):
+        self.Trend_ui.Test_label.setText('{:0.2f}'.format(self.mem['ZINST58']['V']))
+        # self.ui.D_21.setText()  # PZR pressure
+
+    def print_out(self, item):
+        LCO_name = item.text().split('\t')[1]
+        if LCO_name == 'LCO 1.1.1':
+            content = 'LCO 1.1.1\n불만족 조건: 가압기 압력이 150km/cm^2 이 되면 안됨.\n 현재 가압기 압력 상태:{}'.format(self.mem['ZINST58']['V'])
+            QMessageBox.information(self, "LCO 정보", content)
