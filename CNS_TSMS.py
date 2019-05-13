@@ -24,7 +24,7 @@ class TSMS(multiprocessing.Process):
             # CNS 초기 조건 발생시 대기하는 부분
             if len(self.mem['QPROREL']['L']) > 0 and self.current_len != len(self.mem['QPROREL']['L']):
                 self.current_len = len(self.mem['QPROREL']['L'])
-                # ==========================================================================================#
+            # ==========================================================================================#
                 self.TSMS_monitoring.run()
                 # self.TSMS_Raw_data_monitoring.Detection()
                 # self.TSMS_Raw_data_monitoring.ActionPlanning()
@@ -33,112 +33,6 @@ class TSMS(multiprocessing.Process):
                 # self.TSMS_PT_cal.predict_svm()
                 # print(self.TSMS_mem)
                 time.sleep(1)
-
-
-class TSMS_Monitoring:
-    '''
-    Operability_2019-01-27 폴더의 test1.py 파일 구현
-    RCS Operability 폴더의 test.py 와 동일
-    '''
-
-    def __init__(self, mem):
-        self.mem = mem[0]
-        self.TSMS_mem = mem[-3]
-
-        self.OperationMode = []  # 운전모드
-        self.result_ActionEvaluation = []  # Action Evaluation
-        self.activation = 0  # monitoring function에 의해 다음 function Action_Evaluaiton 활성화 위함
-
-        # self.RCP1_status = self.mem['KLAMPO124']['V']
-        # self.RCP2_status = self.mem['KLAMPO125']['V']
-        # self.RCP3_status = self.mem['KLAMPO126']['V']
-
-    def run(self):
-        self.monitoring()  # LCO 위반 탐지
-        self.Monitoring_Operation_Mode() # 운전모드 식별
-        self.Action_Evaluation() # Follow-up action 평가dd
-        # print(self.TSMS_mem['RCS_Status_FA'])
-        # print(self.TSMS_mem['RCS_Status_FA_LT'])
-        print(self.TSMS_mem)
-
-    # def calculate_time(self):
-    #     Time_val = self.mem['KCNTOMS']['V'] // 5
-    #     t_sec = Time_val % 60   # x sec
-    #     t_min = Time_val // 60  # x min
-    #     t_hour = t_min // 60
-    #     t_min = t_min % 60
-    #     return
-
-    def monitoring(self):
-
-        # Pump Status: KLAMPO124 KLAMPO125 KLAMPO126 ddddd
-
-        if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
-            self.TSMS_mem['RCS_Status'] = {
-                'content': 'LCO 3.4.4 Dissatisfaction',
-                'FA': 'Enter Mode3',
-                'FA_LT': '6hr',
-                'Start_time': self.mem['KCNTOMS']['V'] // 5,
-                'End_time': 0
-            }
-            self.activation = True
-            # self.TSMS_mem['RCS_Status'] = 'LCO 3.4.4 Dissatisfaction'  # 변수명 수정: Monitoring_result -> RCS_Status
-            # self.TSMS_mem['RCS_Status_FA'] = 'Enter Mode3' # 변수 추가: RCS_Status_FA = RCS_Status 가 LCO 위반했을 때, Follow-up Action
-            # self.TSMS_mem['RCS_Status_FA_LT'] = '6hr' # 변수 추가: RCS_Status_FA_LM =  RCS_Status 가 LCO 위반했을 때, FA의 Limit Time(제한시간)
-            # self.activation = 1 # Fun: Action_Evaluation 활성화
-        else:
-            self.TSMS_mem['RCS_Status'] = {
-                'content': 'LCO 3.4.4 Satisfaction',
-                'FA': '',
-                'FA_LT': '',
-                'Start_time': 0,
-                'End_time': 0
-            }
-            self.activation = False
-
-    def Monitoring_Operation_Mode(self):
-
-        if self.mem['CRETIV']['V'] >= 0:
-            if self.mem['ZINST1']['V'] > 5:
-                self.OperationMode.append('Mode1')
-
-            elif self.mem['ZINST1']['V'] <= 5:
-                self.OperationMode.append('Mode2')
-
-        elif self.mem['CRETIV']['V'] < 0:
-            if self.mem['UCOLEG1']['V'] >= 177:
-                self.OperationMode.append('Mode3')
-
-            elif 93 < self.mem['UCOLEG1']['V'] < 177:
-                self.OperationMode.append('Mode4')
-
-            elif self.mem['UCOLEG1']['V'] <= 93:
-                self.OperationMode.append('Mode5')
-        else:
-            self.OperationMode.append('Mode6')
-
-    def Action_Evaluation(self):
-        if self.activation:
-            if self.TSMS_mem['RCS_Status']['End_time'] == 0:
-                self.TSMS_mem['RCS_Status']['End_time'] += 21600
-
-            if self.OperationMode[-1] == 'Mode3':
-                if self.mem['KCNTOMS']['V'] // 5 > self.TSMS_mem['RCS_Status']['End_time']:
-                    self.result_ActionEvaluation.append('Action fail')
-                    self.activation = False
-                else:
-                    self.result_ActionEvaluation.append('Action success')
-                    self.activation = False
-            elif self.OperationMode[-1] == 'Mode1' or self.OperationMode[-1] == 'Mode2':
-                if self.mem['KCNTOMS']['V'] // 5 > self.TSMS_mem['RCS_Status']['End_time']:
-                    self.result_ActionEvaluation.append('Action fail')
-                    self.activation = False
-                else:
-                    self.result_ActionEvaluation.append('Action ongoing')
-            else:
-                pass
-        else:
-            pass
 
 class TSMS_Raw_data_monitoring:
     '''
@@ -400,7 +294,7 @@ class TSMS_SVM_PTcurve:
         self.scaler.fit(X)
         X = self.scaler.transform(X)
         # SVM 훈련
-        svc = svm.SVC(kernel='linear', gamma='auto', C=1000)
+        svc = svm.SVC(kernel='rbf', gamma='auto', C=1000)
         svc.fit(X, y)
         # print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
         # print("테스트 세트 정확도 : {: .3f}".format(svc.score(X_test_scaled, y_test)))

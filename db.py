@@ -2221,6 +2221,16 @@ class db_make:
             'KSWO320': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'KFZRUN': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
+            # Accident 변수
+            'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Normal_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_2': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_3': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_4': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_5': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+
             # TSMS 변수
             'TSMS_Monitoring': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
@@ -2243,15 +2253,5 @@ class db_make:
             'TSMS_PT_Result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
             'RCS_Status': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-
-            # Accident 변수
-            'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Normal_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_2': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_3': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_4': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'Accident_5': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
         }
         return mem_dict

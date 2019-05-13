@@ -1,5 +1,9 @@
 import sys
 import multiprocessing
+import pandas as pd
+from sklearn import svm
+from sklearn.preprocessing import MinMaxScaler
+
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
 from PyQt5 import QtCore
 # ------------------------------------------------------
@@ -25,6 +29,10 @@ class MyForm(QDialog):
     def __init__(self, mem):
         super().__init__()
 
+        self.scaler = MinMaxScaler()
+        self.model_svm = self.Make_P_T_SVM()
+        print('SVM 시작 완료')
+
         self.ui = Main_ui()
         self.ui.setupUi(self)
         if True: # 메인 메모리와 연결된 부분
@@ -47,7 +55,7 @@ class MyForm(QDialog):
 
         # x msec마다 업데이트
         update_module = [self.update_comp, self.update_CSF, self.update_display, self.update_alarm, self.update_timmer,
-                         self.Autonomous_operation_strategy]
+                         self.Autonomous_operation_strategy, self.run_TSMS]
         timer = QtCore.QTimer(self)
         for _ in update_module:
             timer.timeout.connect(_)
@@ -56,13 +64,13 @@ class MyForm(QDialog):
         # timer.timeout.connect(self.update_alarm)
         timer.start(500)
         self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
+        self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
         self.show()
 
     # ======================= Trend Popup===============================
 
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem)
-
 
     # ======================= Initial_coloe=============================
 
@@ -146,6 +154,29 @@ class MyForm(QDialog):
             t_hour = '0{}'.format(t_hour)
 
         self.ui.CNS_Time.setText('CNS TIME : {}:{}:{}'.format(t_hour, t_min, t_sec))
+        self.Call_CNS_time = ['[{}:{}:{}]'.format(t_hour, t_min, t_sec), Time_val]
+
+    def calculate_time(self, time_val):
+        t_sec = time_val % 60  # x sec
+        t_min = time_val // 60  # x min
+        t_hour = t_min // 60
+        t_min = t_min % 60
+
+        if t_min >= 10:
+            t_min = '{}'.format(t_min)
+        else:
+            t_min = '0{}'.format(t_min)
+
+        if t_sec >= 10:
+            t_sec = '{}'.format(t_sec)
+        else:
+            t_sec = '0{}'.format(t_sec)
+
+        if t_hour >= 10:
+            t_hour = '{}'.format(t_hour)
+        else:
+            t_hour = '0{}'.format(t_hour)
+        return '[{}:{}:{}]'.format(t_hour, t_min, t_sec)
 
     # ======================= Alarm ======================================
 
@@ -1065,8 +1096,161 @@ class MyForm(QDialog):
         for _ in self.Auto_mem['Auto_operation_out']:
             self.ui.Control_out.append(_)
 
+    # ======================= Monitorin DIS ==============================
+
+    def run_TSMS(self):
+        if self.mem['KCNTOMS']['V'] < 4:
+            self.ui.Performace_Mn.clear()
+            self.TSMS_State = {}
+        self.Monitoring()
+
+    def Monitoring(self):
+        # LCO 3.4.4
+        if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
+            if not 'LCO 3.4.4' in self.TSMS_State.keys():
+                self.TSMS_State['LCO 3.4.4'] = {'Start_time': self.Call_CNS_time[1],
+                                                'End_time': self.Call_CNS_time[1]+24000}
+                end_time = self.calculate_time(self.Call_CNS_time[1]+24000)
+                self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.4\tDissatisfaction'.format(self.Call_CNS_time[0],
+                                                                                         end_time))
+        # LCO 3.4.1
+        if not 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
+            if not'LCO 3.4.1' in self.TSMS_State.keys():
+                self.TSMS_State['LCO 3.4.1'] = {'Start_time': self.Call_CNS_time[1],
+                                                'End_time': self.Call_CNS_time[1]+7200}
+                end_time = self.calculate_time(self.Call_CNS_time[1]+7200)
+                self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.1\tDissatisfaction'.format(self.Call_CNS_time[0],
+                                                                                          end_time))
+        # LCO 3.4.3
+        if self.predict_SVM(self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']) != 1:
+            if not'LCO 3.4.3' in self.TSMS_State.keys():
+                self.TSMS_State['LCO 3.4.3'] = {'Start_time': self.Call_CNS_time[1],
+                                                'End_time': self.Call_CNS_time[1]+1800}
+                end_time = self.calculate_time(self.Call_CNS_time[1]+1800)
+                self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.3\tDissatisfaction'.format(self.Call_CNS_time[0],
+                                                                                          end_time))
+
+    def Monitoring_Operation_Mode(self):
+        if self.mem['CRETIV']['V'] >= 0:
+            if self.mem['ZINST1']['V'] > 5:
+                mode = 1
+            elif self.mem['ZINST1']['V'] <= 5:
+                mode = 2
+        elif self.mem['CRETIV']['V'] < 0:
+            if self.mem['UCOLEG1']['V'] >= 177:
+                mode = 3
+            elif 93 < self.mem['UCOLEG1']['V'] < 177:
+                mode = 4
+            elif self.mem['UCOLEG1']['V'] <= 93:
+                mode = 5
+        else:
+            mode = 6
+        return mode
+
+    def TSMS_LCO_info(self, item):
+        LCO_name = item.text().split('\t')[1]
+        if LCO_name == 'LCO 3.4.4':
+            currnet_mode = self.Monitoring_Operation_Mode()
+            cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
+            cont += '=' * 50 + '\n'
+            cont += 'Follow up action : Enter Mode 3\n'
+            cont += '=' * 50 + '\n'
+            cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
+            cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
+                                              self.calculate_time(self.Call_CNS_time[1]),
+                                              self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
+            cont += '=' * 50 + '\n'
+            if currnet_mode == 3:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Success\n'
+            elif currnet_mode == 1 or currnet_mode == 2:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Ongoing\n'
+            cont += '=' * 50 + '\n'
+            QMessageBox.information(self, "LCO 정보", cont)
+
+        elif LCO_name == 'LCO 3.4.1':
+            currnet_mode = self.Monitoring_Operation_Mode()
+            cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
+            cont += '=' * 50 + '\n'
+            cont += 'Follow up action :\n'
+            cont += '  - 154.7 < RCS Pressure < 161.6 [kg/cm²]\n'
+            cont += '  - 286.7 < RCS Cold-leg Temp < 293.3 [℃]\n'
+            cont += '=' * 50 + '\n'
+            cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
+            cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
+                                              self.calculate_time(self.Call_CNS_time[1]),
+                                              self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
+            cont += '=' * 50 + '\n'
+            if 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Success\n'
+            else:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Ongoing\n'
+            cont += '=' * 50 + '\n'
+            QMessageBox.information(self, "LCO 정보", cont)
+
+        elif LCO_name == 'LCO 3.4.3':
+            currnet_mode = self.Monitoring_Operation_Mode()
+            cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
+            cont += '=' * 50 + '\n'
+            cont += 'Follow up action :\n'
+            cont += '  - Enter allowable operation region\n'
+            cont += '  - Limit Time : 30 min\n'
+            cont += '=' * 50 + '\n'
+            cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
+            cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
+                                              self.calculate_time(self.Call_CNS_time[1]),
+                                              self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
+            cont += '=' * 50 + '\n'
+            if self.predict_SVM(self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']) != 1:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Ongoing\n'
+            else:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Success\n'
+            cont += '=' * 50 + '\n'
+            QMessageBox.information(self, "LCO 정보", cont)
+        else:
+            pass
+
+    def Make_P_T_SVM(self):
+        # print('SVM 모델 훈련 시작')
+        data = pd.read_csv('SVM_PT_DATA.csv', header=None)
+
+        X = data.loc[:, 0:1].values
+        y = data[2].values
+
+        # 데이터 전처리
+        self.scaler.fit(X)
+        X = self.scaler.transform(X)
+        # SVM 훈련
+        svc = svm.SVC(kernel='rbf', gamma='auto', C=1000)
+        svc.fit(X, y)
+        # print("훈련 세트 정확도 : {: .3f}".format(svc.score(X_train_scaled, y_train)))
+        # print("테스트 세트 정확도 : {: .3f}".format(svc.score(X_test_scaled, y_test)))
+        return svc
+
+    def predict_SVM(self, Temp, Pressure):
+        temp = self.scaler.transform([[Temp, Pressure]])
+        return self.model_svm.predict(temp)[0]
+
 
 class sub_tren_window(QDialog):
+
     def __init__(self, mem):
         super().__init__()
         self.mem = mem

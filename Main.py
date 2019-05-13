@@ -34,7 +34,11 @@ class body:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 interface_function(self.shared_mem),
-                TSMS(self.shared_mem),
+                # TSMS(self.shared_mem),
+            ]
+        elif self.test_mode == 'Data':
+            self.process_list = [
+                clean_mem(self.shared_mem, shut_up=self.shut_up),
             ]
         else:
             self.process_list = [
