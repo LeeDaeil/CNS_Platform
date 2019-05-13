@@ -2885,7 +2885,7 @@ HI TBN TRIP</string>
      <x>1170</x>
      <y>40</y>
      <width>431</width>
-     <height>231</height>
+     <height>161</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -2896,7 +2896,7 @@ HI TBN TRIP</string>
    <property name="geometry">
     <rect>
      <x>1170</x>
-     <y>270</y>
+     <y>197</y>
      <width>431</width>
      <height>271</height>
     </rect>
@@ -2909,9 +2909,9 @@ HI TBN TRIP</string>
    <property name="geometry">
     <rect>
      <x>1170</x>
-     <y>540</y>
+     <y>460</y>
      <width>431</width>
-     <height>321</height>
+     <height>401</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -2922,7 +2922,7 @@ HI TBN TRIP</string>
    <property name="geometry">
     <rect>
      <x>1190</x>
-     <y>293</y>
+     <y>210</y>
      <width>391</width>
      <height>240</height>
     </rect>
@@ -4144,9 +4144,9 @@ HI TBN TRIP</string>
    <property name="geometry">
     <rect>
      <x>1189</x>
-     <y>560</y>
+     <y>470</y>
      <width>391</width>
-     <height>281</height>
+     <height>141</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_4">
@@ -4201,10 +4201,10 @@ HI TBN TRIP</string>
   <widget class="QWidget" name="gridLayoutWidget_5">
    <property name="geometry">
     <rect>
-     <x>1190</x>
-     <y>60</y>
-     <width>391</width>
-     <height>191</height>
+     <x>1180</x>
+     <y>50</y>
+     <width>411</width>
+     <height>141</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_5">
@@ -8367,7 +8367,7 @@ color: rgb(255, 255, 255);</string>
     <rect>
      <x>1180</x>
      <y>10</y>
-     <width>401</width>
+     <width>411</width>
      <height>21</height>
     </rect>
    </property>
@@ -8386,6 +8386,64 @@ color: rgb(255, 255, 255);</string>
       </property>
       <property name="text">
        <string>CNS TIME :</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>1189</x>
+     <y>629</y>
+     <width>391</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLabel" name="label_13">
+      <property name="maximumSize">
+       <size>
+        <width>1000</width>
+        <height>20</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Gadugi</family>
+        <pointsize>10</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color: rgb(255, 255, 255);</string>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <property name="text">
+       <string>[ Autonomous Operation Signal ]</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="Control_out_2">
+      <property name="frameShape">
+       <enum>QFrame::WinPanel</enum>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOn</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
      </widget>
     </item>
@@ -8579,9 +8637,10 @@ color: rgb(255, 255, 255);</string>
   <zorder>D_52</zorder>
   <zorder>D_53</zorder>
   <zorder>horizontalLayoutWidget</zorder>
+  <zorder>verticalLayoutWidget</zorder>
  </widget>
  <resources>
-  <include location="../qt_resource/Study_9_re/Study_9_re.qrc"/>
+  <include location="resource/Study_9_re.qrc"/>
  </resources>
  <connections/>
 </ui>

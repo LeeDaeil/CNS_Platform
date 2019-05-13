@@ -57,3 +57,7 @@ class Test_A3C_module_for_main(unittest.TestCase):
         tester.a3c_test_mode = True
         tester.start()
 
+# import CNS_TSMS
+# class Test_TSMS_module(unittest.TestCase):
+#     def test_t_1(self):
+#

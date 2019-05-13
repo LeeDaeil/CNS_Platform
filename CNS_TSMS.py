@@ -24,13 +24,13 @@ class TSMS(multiprocessing.Process):
             if len(self.mem['QPROREL']['L']) > 0 and self.current_len != len(self.mem['QPROREL']['L']):
                 self.current_len = len(self.mem['QPROREL']['L'])
             # ==========================================================================================#
-                self.TSMS_monitoring.monitoring()
-                self.TSMS_Raw_data_monitoring.Detection()
-                self.TSMS_Raw_data_monitoring.ActionPlanning()
-                self.TSMS_Shutdown_margin_calculation.shutdown_margin_calculation()
-                self.TSMS_Shutdown_margin_calculation_ab.detect()
-                self.TSMS_PT_cal.predict_svm()
-                print(self.TSMS_mem)
+                self.TSMS_monitoring.run()
+                # self.TSMS_Raw_data_monitoring.Detection()
+                # self.TSMS_Raw_data_monitoring.ActionPlanning()
+                # self.TSMS_Shutdown_margin_calculation.shutdown_margin_calculation()
+                # self.TSMS_Shutdown_margin_calculation_ab.detect()
+                # self.TSMS_PT_cal.predict_svm()
+                # print(self.TSMS_mem)
                 time.sleep(1)
 
 
@@ -44,6 +44,10 @@ class TSMS_Monitoring:
         self.mem = mem[0]
         self.TSMS_mem = mem[-3]
 
+    def run(self):
+        self.monitoring()
+        print(self.TSMS_mem['Monitoring_result'])
+
     def monitoring(self):
 
         #KLAMPO124 KLAMPO125 KLAMPO126
@@ -52,7 +56,6 @@ class TSMS_Monitoring:
             self.TSMS_mem['Monitoring_result'] = 0
         else:
             self.TSMS_mem['Monitoring_result'] = 1
-            # print('a2')
 
 
 class TSMS_Raw_data_monitoring:
