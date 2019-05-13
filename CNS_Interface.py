@@ -1074,7 +1074,11 @@ class sub_tren_window(QDialog):
         self.Trend_ui = Trend_ui()
         self.Trend_ui.setupUi(self)
 
-        self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
+        # self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
+        #  ==============================================================
+        self.Trend_ui.listWidget.addItem('RCS_DNBR_1')
+        self.Trend_ui.listWidget.addItem('RCS_DNBR_2')
+        #  ==============================================================
 
         timer = QtCore.QTimer(self)
         for _ in [self.update_window]:
@@ -1090,8 +1094,26 @@ class sub_tren_window(QDialog):
         self.Trend_ui.Test_label.setText('{:0.2f}'.format(self.mem['ZINST58']['V']))
         # self.ui.D_21.setText()  # PZR pressure
 
+    #  ==============================================================
     def print_out(self, item):
-        LCO_name = item.text().split('\t')[1]
-        if LCO_name == 'LCO 1.1.1':
-            content = 'LCO 1.1.1\n불만족 조건: 가압기 압력이 150km/cm^2 이 되면 안됨.\n 현재 가압기 압력 상태:{}'.format(self.mem['ZINST58']['V'])
-            QMessageBox.information(self, "LCO 정보", content)
+        # LCO_name = item.text().split('\t')[1]
+        # if LCO_name == 'LCO 1.1.1':
+        #     content = 'LCO 1.1.1\n불만족 조건: 가압기 압력이 150km/cm^2 이 되면 안됨.\n 현재 가압기 압력 상태:{}'.format(self.mem['ZINST58']['V'])
+        #     QMessageBox.information(self, "LCO 정보", content)
+
+        self.r = 30
+
+        if item.text() == 'RCS_DNBR_1':
+            QMessageBox.information(self, "LCO 정보", self.RCS_DNBR_Parameter_1())
+        elif item.text() == 'RCS_DNBR_2':
+            QMessageBox.information(self, "LCO 정보", self.RCS_DNBR_Parameter_2())
+
+    def RCS_DNBR_Parameter_1(self):
+        return str(self.r)
+
+    def RCS_DNBR_Parameter_2(self):
+        if self.mem['ZINST58']['V'] > 155:
+            return str('불만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
+        elif self.mem['ZINST58']['V'] < 154:
+            return str('만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
+    #  ==============================================================
