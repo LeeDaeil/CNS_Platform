@@ -95,7 +95,8 @@ class generate_mem:
                        'Raw_violation': '', 'Raw_text_result': '', 'Raw_result': 0, 'Raw_action': '',
                        'Shut_BOL': 0, 'Shut_EOL': 0, 'Shut_Burn_up': 0, 'Shut_Fin': 0, 'Shut_Inoper_rod': 0,
                        'Shut_Abnormal_rod_worth': 0, 'Shut_Inoper_ableAbnormal_RodWorth': 0, 'Shut_ShutdownMargin': 0,
-                       'Shut_Result': '', 'Shut_ab_comment': '', 'PT_Result': 0}
+                       'Shut_Result': '', 'Shut_ab_comment': '', 'PT_Result': 0,
+                       'RCS_Status': ''}
         return memory_dict
 
     def make_clean_mem(self):

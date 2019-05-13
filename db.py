@@ -2242,6 +2242,8 @@ class db_make:
 
             'TSMS_PT_Result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
+            'RCS_Status': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+
             # Accident 변수
             'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Normal_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},

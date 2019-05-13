@@ -112,6 +112,8 @@ class UDPSocket(multiprocessing.Process):
         self.append_value_to_old_CNS_data(key='TSMS_Shut_ab_comment', value=self.TSMS_mem['Shut_ab_comment'])
         self.append_value_to_old_CNS_data(key='TSMS_PT_Result', value=self.TSMS_mem['PT_Result'])
 
+        self.append_value_to_old_CNS_data(key='RCS_Status', value=self.TSMS_mem['RCS_Status'])
+
         # 정상 상태 라벨링 업데이트
         temp_list = [1, 0] if self.trigger_mem['Normal'] else [0, 1]
         self.update_other_state_to_old_CNS_data(['Normal_0', 'Normal_1'], temp_list)
