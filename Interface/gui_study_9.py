@@ -1948,12 +1948,9 @@ class Ui_Dialog(object):
         self.label_10.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_10.setObjectName("label_10")
         self.gridLayout_4.addWidget(self.label_10, 0, 0, 1, 1)
-        self.Control_out = QtWidgets.QTextEdit(self.gridLayoutWidget_4)
-        self.Control_out.setFrameShape(QtWidgets.QFrame.WinPanel)
-        self.Control_out.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
-        self.Control_out.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.Control_out.setObjectName("Control_out")
-        self.gridLayout_4.addWidget(self.Control_out, 1, 0, 1, 1)
+        self.Auto_list = QtWidgets.QListWidget(self.gridLayoutWidget_4)
+        self.Auto_list.setObjectName("Auto_list")
+        self.gridLayout_4.addWidget(self.Auto_list, 1, 0, 1, 1)
         self.gridLayoutWidget_5 = QtWidgets.QWidget(Dialog)
         self.gridLayoutWidget_5.setGeometry(QtCore.QRect(1180, 50, 411, 141))
         self.gridLayoutWidget_5.setObjectName("gridLayoutWidget_5")
@@ -4064,4 +4061,4 @@ class Ui_Dialog(object):
         self.label_13.setText(_translate("Dialog", "[ Performance Monitoring ]"))
         self.Open_GP_Window.setText(_translate("Dialog", "TrendGP"))
 
-#import Study_9_re_rc
+# import Study_9_re_rc

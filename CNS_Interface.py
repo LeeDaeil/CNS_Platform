@@ -4,8 +4,10 @@ import pandas as pd
 from sklearn import svm
 from sklearn.preprocessing import MinMaxScaler
 
+import PyQt5
 from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
 from PyQt5 import QtCore
+
 # ------------------------------------------------------
 from Interface.gui_study_9 import Ui_Dialog as Main_ui
 from Interface.resource import Study_9_re_rc
@@ -55,13 +57,18 @@ class MyForm(QDialog):
 
         # x msec마다 업데이트
         update_module = [self.update_comp, self.update_CSF, self.update_display, self.update_alarm, self.update_timmer,
-                         self.Autonomous_operation_strategy, self.run_TSMS]
+                         self.run_TSMS, self.run_AUTO]
         timer = QtCore.QTimer(self)
         for _ in update_module:
             timer.timeout.connect(_)
         timer.start(500)
         self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
         self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
+
+        # Autonomous controller ==========================================
+        self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
+        self.ui.pushButton_5.clicked.connect(self.Auto_Alarm_Click_Auto)
+        # ================================================================
         self.show()
 
     # ======================= Trend Popup===============================
@@ -332,8 +339,6 @@ class MyForm(QDialog):
                 self.Alarm_dis(self.ui.A_82, 'KLAMPO340')
                 self.Alarm_dis(self.ui.A_83, 'KLAMPO341')
 
-                # Autonomous state alram
-                self.Auto_Alarm_dis()
             pass
         pass
 
@@ -353,35 +358,6 @@ class MyForm(QDialog):
         else:
             ui.setStyleSheet(self.back_color['gray'])
         pass
-
-    def Auto_Alarm_dis(self):
-
-        if self.Auto_mem['Auto_state']:     # True
-            self.ui.pushButton_2.setStyleSheet(self.back_color['gray']) # man dis
-            self.ui.pushButton_4.setStyleSheet(self.back_color['gray']) # man on botton
-            self.ui.pushButton_5.setStyleSheet(self.back_color['green'])  # man off botton
-
-            self.ui.pushButton.setStyleSheet(self.back_color['red'])    #auto_dis
-            self.ui.pushButton_6.setStyleSheet(self.back_color['red'])  #auto_on
-            self.ui.pushButton_7.setStyleSheet(self.back_color['gray']) #auto_off
-
-        elif self.Auto_mem['Man_state']:     # True
-            self.ui.pushButton_2.setStyleSheet(self.back_color['red'])  # man dis
-            self.ui.pushButton_4.setStyleSheet(self.back_color['red'])  # man on botton
-            self.ui.pushButton_5.setStyleSheet(self.back_color['gray'])  # man off botton
-
-            self.ui.pushButton.setStyleSheet(self.back_color['gray'])  # auto_dis
-            self.ui.pushButton_6.setStyleSheet(self.back_color['gray'])  # auto_on
-            self.ui.pushButton_7.setStyleSheet(self.back_color['green'])  # auto_off
-        else:
-            pass
-        if self.Auto_mem['Man_require']:     # True
-            if self.ui.pushButton_3.styleSheet() == self.back_color['red']:
-                self.ui.pushButton_3.setStyleSheet(self.back_color['gray'])
-            else:
-                self.ui.pushButton_3.setStyleSheet(self.back_color['red'])
-        else:
-            self.ui.pushButton_3.setStyleSheet(self.back_color['gray'])
 
     # ======================= Comp ======================================
 
@@ -594,7 +570,8 @@ class MyForm(QDialog):
                 self.CSF_switch('RCS_Inven', self.CSF_RCS_Inven())
                 self.CSF_switch('RCSpressure', self.CSF_RCS_integrate())
             except:
-                print('err')
+                pass
+                # print('err')
 
     def CSF_switch(self, safety_function, level):
 
@@ -772,7 +749,7 @@ class MyForm(QDialog):
     def CSF_CORE_HEAT(self):
 
         # self.mem['QPROLD']['V'] * 100
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
             ## CSF 감시 가능 상태
 
             HLT1_Past = self.mem['UHOLEG1']['L'][-2]  # UHOLEG1 Column 첫번째 행
@@ -844,7 +821,7 @@ class MyForm(QDialog):
 
     def CSF_RCS_integrate(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
 
             CLT1_Past = self.mem['UCOLEG1']['L'][-2]  # UCOLEG1 Column 첫번째 행 108 - 1
             CLT2_Past = self.mem['UCOLEG2']['L'][-2]  # UCOLEG2 Column 첫번째 행 109 - 2
@@ -926,7 +903,7 @@ class MyForm(QDialog):
 
     def CSF_CTMT(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
             CMIP_ = self.mem['ZINST26']['V']  # ZINST26 Column 8
             CMSUMPL_ = self.mem['ZINST17']['V']  # ZINST17 Column 단위M 0.xx형식 19
             CMRAD_ = self.mem['ZINST22']['V']  # ZINST22 Column 7
@@ -952,33 +929,37 @@ class MyForm(QDialog):
 
     def CSF_REA(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
             PR = self.mem['ZINST1']['V']  # ZINST1 Column 출력영역 검출기 단위:% 163
             IR = self.mem['ZINST2']['V']  # ZINST2 Column 중간영역 검출기 지시치:A 165
             IRA = self.mem['FSRMDPM']['V']  # FSRMDPM Column 중간영역 기동율 단위:DPM 161
             SR = self.mem['ZINST3']['V']  # ZINST3 Column 선원영역 기동율 단위:CPS 166
-            if PR < 5:
-                if IR <= 0:
-                    if IRA < 10e-9:
-                        if SR <= 0:
+            Trip = self.mem['KLAMPO9']['V']  # ZINST3 Column 선원영역 기동율 단위:CPS 166
+            if Trip == 0:
+                SF = 1
+            else:
+                if PR < 5:
+                    if IR <= 0:
+                        if IRA < 10e-9:
+                            if SR <= 0:
+                                SF = 1
+                            else:
+                                SF = 2
+                        elif IR <= -0.2:
                             SF = 1
                         else:
                             SF = 2
-                    elif IR <= -0.2:
-                        SF = 1
                     else:
-                        SF = 2
+                        SF = 3
                 else:
-                    SF = 3
-            else:
-                SF = 4
+                    SF = 4
             return SF
         else:
             return 0
 
     def CSF_RCS_Inven(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
             PRZL = self.mem['ZPRZNO']['V']  # ZPRZNO Column PZR Water Lvl(0.0-1.0) 153 - 16
             if PRZL < 0.92:
                 if PRZL > 0.17:
@@ -996,7 +977,7 @@ class MyForm(QDialog):
 
     def CSF_RCS_Heat(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 2:
+        if len(self.mem['KCNTOMS']['L']) >= 1:
             SG1NRL = self.mem['ZINST78']['V']  # ZINST78 Column SG1 Lvl NR 13
             SG2NRL = self.mem['ZINST77']['V']  # ZINST77 Column SG2 Lv1 NR 14
             SG3NRL = self.mem['ZINST76']['V']  # ZINST76 Column SG3 Lv1 NR 15
@@ -1079,19 +1060,88 @@ class MyForm(QDialog):
 
     # ======================= Autonomous DIS==============================
 
+    def run_AUTO(self):
+        if self.mem['KCNTOMS']['V'] < 4:
+            self.ui.Strategy_out.clear()
+            self.ui.Auto_list.clear()
+            self.AUTO_State = {
+                'Histoty': {}   # {Start_time: '', Content: ''
+            }
+            self.Auto_Alarm_Click_Auto() # 실행 초기 입력
+
+        # Autonomous state alram
+        self.Auto_Alarm_dis()
+        self.Autonomous_operation_strategy()
+        self.Autonomous_controller()
+
+    def Auto_Alarm_dis(self):
+        if self.Auto_mem['Auto_state']:     # True
+            self.ui.pushButton_2.setStyleSheet(self.back_color['gray']) # man dis
+            self.ui.pushButton_4.setStyleSheet(self.back_color['gray']) # man on botton
+            self.ui.pushButton_5.setStyleSheet(self.back_color['green'])  # man off botton
+
+            self.ui.pushButton.setStyleSheet(self.back_color['red'])    #auto_dis
+            self.ui.pushButton_6.setStyleSheet(self.back_color['red'])  #auto_on
+            self.ui.pushButton_7.setStyleSheet(self.back_color['gray']) #auto_off
+
+        elif self.Auto_mem['Man_state']:     # True
+            self.ui.pushButton_2.setStyleSheet(self.back_color['red'])  # man dis
+            self.ui.pushButton_4.setStyleSheet(self.back_color['red'])  # man on botton
+            self.ui.pushButton_5.setStyleSheet(self.back_color['gray'])  # man off botton
+
+            self.ui.pushButton.setStyleSheet(self.back_color['gray'])  # auto_dis
+            self.ui.pushButton_6.setStyleSheet(self.back_color['gray'])  # auto_on
+            self.ui.pushButton_7.setStyleSheet(self.back_color['green'])  # auto_off
+        else:
+            pass
+        if self.Auto_mem['Man_require']:     # True
+            if self.ui.pushButton_3.styleSheet() == self.back_color['red']:
+                self.ui.pushButton_3.setStyleSheet(self.back_color['gray'])
+            else:
+                self.ui.pushButton_3.setStyleSheet(self.back_color['red'])
+        else:
+            self.ui.pushButton_3.setStyleSheet(self.back_color['gray'])
+
+    def Auto_Alarm_Click_Man(self):
+        self.Auto_mem['Auto_state'] = False
+        self.Auto_mem['Man_state'] = True
+        self.ui.Strategy_out.append('{} Manual Operaion'.format(self.Call_CNS_time[0]))
+
+    def Auto_Alarm_Click_Auto(self):
+        self.Auto_mem['Auto_state'] = True
+        self.Auto_mem['Man_state'] = False
+        self.ui.Strategy_out.append('{} Autonomous Operaion'.format(self.Call_CNS_time[0]))
+
     def Autonomous_controller(self):
+        if self.mem['KLAMPO9']['V'] == 1: self.add_list_signal('Reactor trip')
+        if self.mem['KLAMPO6']['V'] == 1: self.add_list_signal('SI valve open')
+        if self.mem['KLAMPO4']['V'] == 1: self.add_list_signal('Containment ISO')
+        if self.mem['KLAMPO2']['V'] == 1: self.add_list_signal('Feedwater ISO')
+        if self.mem['KLAMPO3']['V'] == 1: self.add_list_signal('Main steam line ISO')
+        if self.mem['KLAMPO134']['V'] == 1: self.add_list_signal('Aux feed pump 1 start')
+        if self.mem['KLAMPO135']['V'] == 1: self.add_list_signal('Aux feed pump 2 start')
+        if self.mem['KLAMPO136']['V'] == 1: self.add_list_signal('Aux feed pump 3 start')
+
+        if self.mem['KLAMPO70']['V'] == 1: self.add_list_signal('Charging pump 2 start')
+        if self.mem['KLAMPO124']['V'] == 0: self.add_list_signal('RCP 1 stop')
+        if self.mem['KLAMPO125']['V'] == 0: self.add_list_signal('RCP 2 stop')
+        if self.mem['KLAMPO126']['V'] == 0: self.add_list_signal('RCP 3 stop')
+
         pass
 
+    def add_list_signal(self, content):
+        if len(self.ui.Auto_list.findItems('{}'.format(content), QtCore.Qt.MatchContains)) == 0:
+            self.ui.Auto_list.addItem('{} {}'.format(self.Call_CNS_time[0], content))
+
     def Autonomous_operation_strategy(self):
+        # =========================================================================
+        # 운전 전략을 보여주는 부분
+        if self.Auto_mem['Auto_state']:
+            self.Auto_mem['Current_op'] = 'LSTM-based Operation'
+        else:
+            self.Auto_mem['Current_op'] = 'Manual Operation'
+
         self.ui.Current_op.setText('{}'.format(self.Auto_mem['Current_op']))
-
-        self.ui.Strategy_out.clear()
-        for _ in self.Auto_mem['Strategy_out']:
-            self.ui.Strategy_out.append(_)
-
-        self.ui.Control_out.clear()
-        for _ in self.Auto_mem['Auto_operation_out']:
-            self.ui.Control_out.append(_)
 
     # ======================= Monitorin DIS ==============================
 
