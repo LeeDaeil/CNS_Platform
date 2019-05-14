@@ -2231,27 +2231,5 @@ class db_make:
             'Accident_4': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_5': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
-            # TSMS 변수
-            'TSMS_Monitoring': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-
-            'TSMS_Raw_violation': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Raw_text_result': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Raw_result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Raw_action': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-
-            'TSMS_Shut_BOL': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_EOL': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Burn_up': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Fin': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Inoper_rod': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Abnormal_rod_worth': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Inoper_ableAbnormal_RodWorth': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_ShutdownMargin': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_Result': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-            'TSMS_Shut_ab_comment': {'V': '', 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-
-            'TSMS_PT_Result': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
-
-            'RCS_Status': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
         }
         return mem_dict

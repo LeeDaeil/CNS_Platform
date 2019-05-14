@@ -257,57 +257,60 @@ class worker:
                        t_para=['Reward', 'Action', 'Done'])
         # === CNS 선언 ===============================================================================================#
         self.CNS.cns_initial()  # CNS 초기화를 요청
-
-        time, cumul_reward, done = 0, 0, False
-        while episode < max_episode:
-            # LSTM 대기 용
-            for _ in range(4):
+        for _ in range(0, 5):
+            for __ in range(0, 10):
                 self.pass_step()
-
-            old_state = self.CNS.state_mem.iloc[-2:].values
-
-            actions, states, rewards = [], [], []
-            for _ in range(0, 5):
-                a = A3C_agent.policy_action([[old_state]])
-                r, done = self.step(a)
-                # Memorize (s, a, r) for training
-                actions.append(a)
-                rewards.append(r)
-                states.append(old_state)
-                # New state
-                new_state = self.CNS.state_mem.iloc[-2:].values
-                # Update current state
-                old_state = new_state
-                cumul_reward += r
-                time += 1
-            self.CNS.save_db()
-            print('done and train')
-
-            # lock.acquire()
-            A3C_agent.train_models(states, actions, rewards)
-            # lock.release()
-            actions, states, rewards = [], [], []
-
-            print('done')
-
-            a = False
-            if a:
-                while not done and episode < max_episode:
-                    # Asynchronous training
-                    if (time % learning_interval == 0 or done):
-                        lock.acquire()
-                        A3C_agent.train_models(states, actions, rewards, done)
-                        lock.release()
-                        actions, states, rewards = [], [], []
-
-                # Export results for Tensorboard
-                score = self.tfSummary('score', cumul_reward)
-                summary_writer.add_summary(score, global_step=episode)
-                summary_writer.flush()
-            # Update episode count
-            with lock:
-                if (episode < max_episode):
-                    episode += 1
+            self.CNS.cns_initial()  # CNS 초기화를 요청
+        # time, cumul_reward, done = 0, 0, False
+        # while episode < max_episode:
+        #     # LSTM 대기 용
+        #     for _ in range(4):
+        #         self.pass_step()
+        #
+        #     old_state = self.CNS.state_mem.iloc[-2:].values
+        #
+        #     actions, states, rewards = [], [], []
+        #     for _ in range(0, 5):
+        #         a = A3C_agent.policy_action([[old_state]])
+        #         r, done = self.step(a)
+        #         # Memorize (s, a, r) for training
+        #         actions.append(a)
+        #         rewards.append(r)
+        #         states.append(old_state)
+        #         # New state
+        #         new_state = self.CNS.state_mem.iloc[-2:].values
+        #         # Update current state
+        #         old_state = new_state
+        #         cumul_reward += r
+        #         time += 1
+        #     self.CNS.save_db()
+        #     print('done and train')
+        #
+        #     # lock.acquire()
+        #     A3C_agent.train_models(states, actions, rewards)
+        #     # lock.release()
+        #     actions, states, rewards = [], [], []
+        #
+        #     print('done')
+        #
+        #     a = False
+        #     if a:
+        #         while not done and episode < max_episode:
+        #             # Asynchronous training
+        #             if (time % learning_interval == 0 or done):
+        #                 lock.acquire()
+        #                 A3C_agent.train_models(states, actions, rewards, done)
+        #                 lock.release()
+        #                 actions, states, rewards = [], [], []
+        #
+        #         # Export results for Tensorboard
+        #         score = self.tfSummary('score', cumul_reward)
+        #         summary_writer.add_summary(score, global_step=episode)
+        #         summary_writer.flush()
+        #     # Update episode count
+        #     with lock:
+        #         if (episode < max_episode):
+        #             episode += 1
 
     def tfSummary(self, tag, val):
         """ Scalar Value Tensorflow Summary
