@@ -4,7 +4,6 @@ from CNS_UDP import *
 from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
-from CNS_TSMS import *
 from CNS_Interface import *
 
 class body:
@@ -34,11 +33,6 @@ class body:
             self.process_list = [
                 clean_mem(self.shared_mem, shut_up=self.shut_up),
                 interface_function(self.shared_mem),
-                # TSMS(self.shared_mem),
-            ]
-        elif self.test_mode == 'Data':
-            self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.shut_up),
             ]
         else:
             self.process_list = [
@@ -80,6 +74,7 @@ class generate_mem:
                                               '[00:04:36] RCP 2 Stop',
                                               '[00:04:36] RCP 3 Stop',
                                               ]}
+        print('자율운전 메모리 생성 완료')
         return memory_dict
 
     def make_test_mem(self):
@@ -94,17 +89,9 @@ class generate_mem:
         memory_list = []
         return memory_list
 
-    def make_TSMS_mem(self):
-        memory_dict = {'Monitoring_result': 0,
-                       'Raw_violation': '', 'Raw_text_result': '', 'Raw_result': 0, 'Raw_action': '',
-                       'Shut_BOL': 0, 'Shut_EOL': 0, 'Shut_Burn_up': 0, 'Shut_Fin': 0, 'Shut_Inoper_rod': 0,
-                       'Shut_Abnormal_rod_worth': 0, 'Shut_Inoper_ableAbnormal_RodWorth': 0, 'Shut_ShutdownMargin': 0,
-                       'Shut_Result': '', 'Shut_ab_comment': '', 'PT_Result': 0,
-                       'RCS_Status': ''}
-        return memory_dict
-
     def make_clean_mem(self):
         memory_dict = {'Clean': True, 'Normal': True, 'Accident_nb': 0}
+        print('Clean 메모리 생성 완료')
         return memory_dict
 
     def make_main_mem_structure(self, max_len_deque=10, show_main_mem=False):
@@ -139,17 +126,16 @@ class generate_mem:
 
         if show_main_mem:
             print(memory_dict)
+        print('Main 메모리 생성 완료')
         return memory_dict
 
     def make_mem_structure(self, show_mem_list=False):
+        print('=' * 25 + '메모리 생성 시작' + '=' * 25)
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
-                       # Manager().dict(self.make_test_mem()),
-                       # Manager().list(self.make_test_list_mem()),
-                       Manager().dict(self.make_autonomous_mem()),                      # [-4]
-                       Manager().dict(self.make_TSMS_mem()),                            # [-3]
-                       Manager().list(self.make_CNS_time_mem()),                        # [-2]
+                       Manager().dict(self.make_autonomous_mem()),                      # [-2]
                        Manager().dict(self.make_clean_mem()),                           # [-1]
                        ]
+        print('=' * 25 + '메모리 생성 완료' + '=' * 25)
         '''
         개인이 설계한 메모리를 추가로 집어 넣을 것.
         ex) 

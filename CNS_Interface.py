@@ -37,7 +37,7 @@ class MyForm(QDialog):
         self.ui.setupUi(self)
         if True: # 메인 메모리와 연결된 부분
             self.mem = mem[0]
-            self.Auto_mem = mem[-4]
+            self.Auto_mem = mem[-2]
 
         self.color_setting()
 
@@ -59,9 +59,6 @@ class MyForm(QDialog):
         timer = QtCore.QTimer(self)
         for _ in update_module:
             timer.timeout.connect(_)
-        # timer.timeout.connect(self.update_gp)
-        # timer.timeout.connect(self.update_label)
-        # timer.timeout.connect(self.update_alarm)
         timer.start(500)
         self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
         self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)

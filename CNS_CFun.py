@@ -26,7 +26,6 @@ class clean_mem(multiprocessing.Process):
                     temp = pd.DataFrame()
                     if len(self.db_mem['KFIGIV']['L']) > 2:     # 아무의미없는 KFIGIV
                         for keys in self.db_mem.keys():
-                            print(keys, len(self.db_mem[keys]['L']))
                             temp[keys] = self.db_mem[keys]['L']
                         now = time.localtime()
                         s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
