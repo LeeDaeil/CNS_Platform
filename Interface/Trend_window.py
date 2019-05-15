@@ -39,6 +39,3 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
         self.Test_label.setText(_translate("Dialog", "Value"))
         self.pushButton.setText(_translate("Dialog", "PushButton"))
-
-print('a')
-print('bbbbbbbbbbb')
