@@ -1151,6 +1151,62 @@ class MyForm(QDialog):
             self.TSMS_State = {}
         self.Monitoring()
 
+    def Calculator_SDM(self):
+
+        self.init_para = {
+            'HFP': 100,  # H
+            'ReatorPower': 90,  # T
+            'BoronConcentration': 1318,  # T
+            'Burnup': 4000,  # T
+            'Burnup_BOL': 150,  # H
+            'Burnup_EOL': 18850,  # H
+            'TotalPowerDefect_BOL': 1780,  # H
+            'TotalPowerDefect_EOL': 3500,  # H
+            'VoidCondtent': 50,  # H
+            'TotalRodWorth': 5790,  # H
+            'WorstStuckRodWorth': 1080,  # H
+            'InoperableRodNumber': 1,  # T
+            'BankWorth_D': 480,  # H
+            'BankWorth_C': 1370,  # H
+            'BankWorth_B': 1810,  # H
+            'BankWorth_A': 760,  # H
+            'AbnormalRodName': 'C',  # T
+            'AbnormalRodNumber': 1,  # T
+            'ShutdownMarginValue': 1770,  # H
+        }
+
+        # 1. BOL, 현출력% -> 0% 하기위한 출력 결손량 계산
+        ReactorPower = self.mem['QPROLD']['V'] * 100
+        PowerDefect_BOL = self.init_para['TotalPowerDefect_BOL'] * ReactorPower / self.init_para['HFP']
+
+        # 2. EOL, 현출력% -> 0% 하기위한 출력 결손량 계산
+        PowerDefect_EOL = self.init_para['TotalPowerDefect_EOL'] * ReactorPower / self.init_para['HFP']
+
+        # 3. 현재 연소도, 현출력% -> 0% 하기위한 출력 결손량 계산
+        A = self.init_para['Burnup_EOL'] - self.init_para['Burnup_BOL']
+        B = PowerDefect_EOL - PowerDefect_BOL
+        C = self.init_para['Burnup'] - self.init_para['Burnup_EOL']
+
+        PowerDefect_Burnup = B * C / A + PowerDefect_BOL
+
+        # 4. 반응도 결손량을 계산
+        PowerDefect_Final = PowerDefect_Burnup + self.init_para['VoidCondtent']
+
+        # 5. 운전불가능 제어봉 제어능을 계산
+        InoperableRodWorth = self.init_para['InoperableRodNumber'] * self.init_para['WorstStuckRodWorth']
+
+        # 6. 비정상 제어봉 제어능을 계산
+        AbnormalRodWorth = self.init_para['BankWorth_{}'.format(
+            self.init_para['AbnormalRodName'])] / 8 * self.init_para['AbnormalRodNumber']
+
+        # 7. 운전 불능, 비정상 제어봉 제어능의 합 계산
+        InoperableAbnormal_RodWorth = InoperableRodWorth + AbnormalRodWorth
+
+        # 8. 현 출력에서의 정지여유도 계산
+        ShutdownMargin = self.init_para['TotalRodWorth'] - InoperableAbnormal_RodWorth - PowerDefect_Final
+
+        return ShutdownMargin
+
     def Monitoring(self):
         # LCO 3.4.4
         if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
@@ -1175,6 +1231,16 @@ class MyForm(QDialog):
                                                 'End_time': self.Call_CNS_time[1]+1800}
                 end_time = self.calculate_time(self.Call_CNS_time[1]+1800)
                 self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.3\tDissatisfaction'.format(self.Call_CNS_time[0],
+                                                                                          end_time))
+
+        # LCO 3.1.1
+        current_SDM = self.Calculator_SDM()
+        if current_SDM < 1770:
+            if not 'LCO 3.1.1' in self.TSMS_State.keys():
+                self.TSMS_State['LCO 3.1.1'] = {'Start_time': self.Call_CNS_time[1],
+                                                'End_time': self.Call_CNS_time[1] + 900}
+                end_time = self.calculate_time(self.Call_CNS_time[1] + 900)
+                self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.1.1\tDissatisfaction'.format(self.Call_CNS_time[0],
                                                                                           end_time))
 
     def Monitoring_Operation_Mode(self):
@@ -1271,6 +1337,32 @@ class MyForm(QDialog):
                     cont += '현재 운전 상태 : Action Success\n'
             cont += '=' * 50 + '\n'
             QMessageBox.information(self, "LCO 정보", cont)
+
+        elif LCO_name == 'LCO 3.1.1':
+            currnet_mode = self.Monitoring_Operation_Mode()
+            cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
+            cont += '=' * 50 + '\n'
+            cont += 'Follow up action :\n'
+            cont += '  - Boron Injectionl\n'
+            cont += '=' * 50 + '\n'
+            cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
+            cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
+                                                self.calculate_time(self.Call_CNS_time[1]),
+                                                self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
+            cont += '=' * 50 + '\n'
+            if self.Calculator_SDM() >= 1770:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Ongoing\n'
+            else:
+                if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
+                    cont += '현재 운전 상태 : Action Fail\n'
+                else:
+                    cont += '현재 운전 상태 : Action Success\n'
+            cont += '=' * 50 + '\n'
+            QMessageBox.information(self, "LCO 정보", cont)
+
         else:
             pass
 
