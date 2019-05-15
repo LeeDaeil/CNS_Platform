@@ -40,3 +40,4 @@ class Ui_Dialog(object):
         self.Test_label.setText(_translate("Dialog", "Value"))
         self.pushButton.setText(_translate("Dialog", "PushButton"))
 
+print('a')
