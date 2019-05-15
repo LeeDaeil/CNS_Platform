@@ -41,3 +41,4 @@ class Ui_Dialog(object):
         self.pushButton.setText(_translate("Dialog", "PushButton"))
 
 print('a')
+print('bbbbbbbbbbb')
