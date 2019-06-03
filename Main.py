@@ -2,6 +2,7 @@ from db import db_make
 from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_Fun import *
+from CNS_Power import Power_increase_module as PI_module
 from CNS_GFun import *
 from CNS_CFun import *
 from CNS_Interface import *
@@ -15,36 +16,32 @@ class body:
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
-        parser.add_argument('--shutup', default=True, required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
+        parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
+        parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
         print(self.args)
         self.shared_mem = generate_mem().make_mem_structure()
         # ---------------------------------------------------------------------------------------- #
         self.UDP_net = [UDPSocket(self.shared_mem, IP=self.args.comip, Port=self.args.comport, shut_up=self.args.shutup)]
-        print('=' * 25 + ' 소켓통신  개방 ' + '=' * 25 + '\n' + 'Sock Port - {}'.format(self.args.comport) + '\n'
+        print('=' * 25 + ' 소켓통신  개방 ' + '=' * 25 + '\n' + 'Sock Port - {}'.format(self.args.comport) + '\n' +
               '=' * 25 + ' 소켓개방  완료 ' + '=' * 25)
         # ---------------------------------------------------------------------------------------- #
+        pro_list = [clean_mem(self.shared_mem, shut_up=self.args.shutup),   # [0]
+                    interface_function(self.shared_mem),                    # [1]
+                    funtion5(self.shared_mem),                              # [2]
+                    PI_module(self.shared_mem, self.args.PIshutup),           # [3]
+                    ]
         if self.args.mode == 'All':
-            self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.args.shutup),
-                interface_function(self.shared_mem),
-                funtion5(self.shared_mem),
-            ]
+            self.process_list = pro_list
         elif self.args.mode == 'Test_interface':
-            self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.args.shutup),
-                interface_function(self.shared_mem),
-            ]
+            self.process_list = [pro_list[0], pro_list[1]]
         elif self.args.mode == 'Test_mode':
-            self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.args.shutup),
-                interface_function(self.shared_mem),
-            ]
-        else:
-            self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.args.shutup),
-            ]
+            self.process_list = [pro_list[0], pro_list[1], pro_list[2]]
+        elif self.args.mode == 'Test_PI':
+            self.process_list = [pro_list[0], pro_list[1], pro_list[3]]
+        else:   # Test_clean_mem
+            self.process_list = [pro_list[0]]
 
     def start(self):
         job_list = []

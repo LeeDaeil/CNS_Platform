@@ -65,4 +65,4 @@ class clean_mem(multiprocessing.Process):
                 self.clean_signal_mem['Clean'] = False
                 self.clean_signal_mem['Normal'] = True
                 self.p_shut('메모리 정리 완료')
-            time.sleep(0.1)
+            # time.sleep(0.1)
