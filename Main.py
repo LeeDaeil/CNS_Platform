@@ -5,42 +5,48 @@ from CNS_Fun import *
 from CNS_GFun import *
 from CNS_CFun import *
 from CNS_Interface import *
+import argparse
+
 
 class body:
     def __init__(self):
-        #==== Initial part for testing===========================================================#
-        self.test_mode = 'TSMS' # 'Normal', 'TSMS', 'Test_clean'
-        self.shut_up = True
-        #========================================================================================#
+        # 초기 입력 인자 전달 -------------------------------------------------------------------- #
+        parser = argparse.ArgumentParser(description='CNS 플랫폼')
+        parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
+        parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
+        parser.add_argument('--shutup', default=True, required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
+        self.args = parser.parse_args()
+        print('=' * 25 + '초기입력 파라메터' + '=' * 25)
+        print(self.args)
         self.shared_mem = generate_mem().make_mem_structure()
-        self.UDP_net = [UDPSocket(self.shared_mem, IP='', Port=7001, shut_up=self.shut_up)]
-
-        if self.test_mode == 'Normal':
+        # ---------------------------------------------------------------------------------------- #
+        self.UDP_net = [UDPSocket(self.shared_mem, IP=self.args.comip, Port=self.args.comport, shut_up=self.args.shutup)]
+        print('=' * 25 + ' 소켓통신  개방 ' + '=' * 25 + '\n' + 'Sock Port - {}'.format(self.args.comport) + '\n'
+              '=' * 25 + ' 소켓개방  완료 ' + '=' * 25)
+        # ---------------------------------------------------------------------------------------- #
+        if self.args.mode == 'All':
             self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.shut_up),
-                # function1(self.shared_mem),
-                # function2(self.shared_mem),
-                # function3(self.shared_mem),
-                # gfunction(self.shared_mem),
-                # gfunction2(self.shared_mem),
-                # function4_1(self.shared_mem),
-                # function4_2(self.shared_mem),
-                # function4_3(self.shared_mem),
-                # function4_4(self.shared_mem),
+                clean_mem(self.shared_mem, shut_up=self.args.shutup),
+                interface_function(self.shared_mem),
                 funtion5(self.shared_mem),
             ]
-        elif self.test_mode == 'TSMS':
+        elif self.args.mode == 'Test_interface':
             self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.shut_up),
+                clean_mem(self.shared_mem, shut_up=self.args.shutup),
+                interface_function(self.shared_mem),
+            ]
+        elif self.args.mode == 'Test_mode':
+            self.process_list = [
+                clean_mem(self.shared_mem, shut_up=self.args.shutup),
                 interface_function(self.shared_mem),
             ]
         else:
             self.process_list = [
-                clean_mem(self.shared_mem, shut_up=self.shut_up),
+                clean_mem(self.shared_mem, shut_up=self.args.shutup),
             ]
 
     def start(self):
-        print('CNS Platfrom mode : {}'.format(self.test_mode))
         job_list = []
         for __ in self.UDP_net:
             __.start()
