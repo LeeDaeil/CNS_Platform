@@ -15,6 +15,8 @@ class body:
         parser = argparse.ArgumentParser(description='CNS 플랫폼')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
+        parser.add_argument('--cnsport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
         parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
@@ -30,7 +32,7 @@ class body:
         pro_list = [clean_mem(self.shared_mem, shut_up=self.args.shutup),   # [0]
                     interface_function(self.shared_mem),                    # [1]
                     funtion5(self.shared_mem),                              # [2]
-                    PI_module(self.shared_mem, self.args.PIshutup),           # [3]
+                    PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
                     ]
         if self.args.mode == 'All':
             self.process_list = pro_list
