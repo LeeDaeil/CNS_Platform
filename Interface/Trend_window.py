@@ -136,3 +136,4 @@ class Ui_Dialog(object):
         self.Dis_Rod_3.setText(_translate("Dialog", "100"))
         self.Dis_Rod_4.setText(_translate("Dialog", "100"))
 
+
