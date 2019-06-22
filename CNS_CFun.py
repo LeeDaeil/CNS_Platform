@@ -37,8 +37,8 @@ class clean_mem(multiprocessing.Process):
                                                                    now.tm_sec)
                             temp.to_csv('{}_{}.csv'.format(self.name, s))
                             print('Save_db')
-                        except Exception as err:
-                            self.p_shut('에러 발생' + err)
+                        except:
+                            pass  # ERROr
                 # ------------------------------------------------------------#
                 nub_mem = 0
                 for __ in self.all_mem[:-1]:
