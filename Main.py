@@ -51,9 +51,9 @@ class body:
             __.start()
             job_list.append(__)
         time.sleep(1)
-        for __ in self.process_list:
-            __.start()
-            job_list.append(__)
+        #for __ in self.process_list:
+        #    __.start()
+        #    job_list.append(__)
         for job in job_list:
             job.join()
 

@@ -26,33 +26,16 @@ class clean_mem(multiprocessing.Process):
                 # ------------------------------------------------------------#
                 # save data part
                 if True:
-                    self.p_shut('파일 저장 시도')
-                    temp = pd.DataFrame()
-                    if len(self.db_mem['KFIGIV']['L']) > 2:     # 아무의미없는 KFIGIV
-                        try:
-                            for keys in self.db_mem.keys():
-                                temp[keys] = self.db_mem[keys]['L']
-                            now = time.localtime()
-                            s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
-                                                                   now.tm_sec)
-                            temp.to_csv('{}_{}.csv'.format(self.name, s))
-                            print('Save_db')
-                        except:
-                            pass  # ERROr
+                    self.p_shut('메인 메모리 정리 시작 -> CNS_UDP로 넘어감)')
                 # ------------------------------------------------------------#
                 nub_mem = 0
                 for __ in self.all_mem[:-1]:
                     # print(type(__).__name__) Show shared memory type
                     if type(__).__name__ == 'DictProxy':    # Dict clear
                         # ----------------------------------------------------#
-                        self.p_shut('메인 메모리 정리 시작')
+                        self.p_shut('메인 메모리 정리 시작 -> CNS_UDP로 넘어감)')
                         if 'KFIGIV' in __.keys():   # Main mem clean
-                            dumy = deepcopy(__)
-                            for dumy_key in dumy.keys():
-                                dumy[dumy_key]['L'].clear()
-                                dumy[dumy_key]['D'].clear()
-                            for _ in dumy.keys():
-                                __[_] = dumy[_]
+                            pass
                         # -----------------------------------------------------#
                         else:
                             # 개인이 만든 메모리 초기화
@@ -65,4 +48,4 @@ class clean_mem(multiprocessing.Process):
                 self.clean_signal_mem['Clean'] = False
                 self.clean_signal_mem['Normal'] = True
                 self.p_shut('메모리 정리 완료')
-            # time.sleep(0.1)
+            time.sleep(0.1)
