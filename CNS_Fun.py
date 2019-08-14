@@ -2,7 +2,6 @@ import multiprocessing
 import time
 import CNS_Send_UDP
 
-
 class function1(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제
     def __init__(self, mem):
@@ -174,7 +173,7 @@ class funtion5(multiprocessing.Process):
             # CNS 초기 조건 발생시 대기하는 부분
             if len(self.mem['QPROREL']['L']) > 2:
             # ==========================================================================================#
-                print(self, self.mem['Normal_0']['V'], self.mem['Normal_1']['V'])
+            #     print(self, self.mem['Normal_0']['V'], self.mem['Normal_1']['V'])
                 if len(self.mem['Normal_0']['L']) > 5:
                     self.trig_mem['Normal'] = False
                     if self.one_time == 0:

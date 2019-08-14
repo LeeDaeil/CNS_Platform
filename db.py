@@ -2220,6 +2220,8 @@ class db_make:
             'KSWO319': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'KSWO320': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'KFZRUN': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            # 자율운전 시스템 변수
+            #'AUTO_STAR_UP': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
             # Accident 변수
             'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},

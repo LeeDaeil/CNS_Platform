@@ -74,6 +74,7 @@ class Power_increase_module(multiprocessing.Process):
     def sub_run_1(self, input_data, time_legnth):
         if len(input_data) == time_legnth:
             act, proba = self.Rod_net.predict_action(input_data)
+            print(act, proba)
             self.p_shut('데이터 길이 완료 - 네트워크 계산 시작 - {}'.format(act))
             if act == 0:
                 self.UDP_sock._send_control_signal(['KSWO33', 'KSWO32'], [0, 0])
