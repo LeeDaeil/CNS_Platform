@@ -90,7 +90,8 @@ class generate_mem:
         return memory_dict
 
     def make_strategy_mem(self):                # 전략 설정 기능 메모리
-        memory_dict = {'operationCond': [], 'strategy': [], 'controlActive': []}
+        memory_dict = {'operationCond': [], # 1, 2, 3 (..),
+                       'strategy': [], 'controlActive': []}
         print('전략설정기능 메모리 생성 완료')
         return memory_dict
 

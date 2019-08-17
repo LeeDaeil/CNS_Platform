@@ -36,7 +36,7 @@ class Fun_diagnosis(multiprocessing.Process):
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
             # ===========================================
 
-            print(self, self.trig_mem)
+            # print(self, self.trig_mem)
 
             time.sleep(1)
 
@@ -67,12 +67,13 @@ class Fun_strategy(multiprocessing.Process):
             if self.trig_diagnosis_mem['trainingCond'][-1] == 1 and self.trig_diagnosis_mem['diagnosis'][-1] == '2301':
                 self.trig_mem['strategy'].append('Auto_LSTM')
                 self.trig_mem['controlActive'].append(10)       # 수정 필요 - 각자
-                print(self, self.trig_mem)
+                # print(self, self.trig_mem)
             else:
-                print(self, self.trig_mem)
+                # print(self, self.trig_mem)
                 pass
         except:
-            print('Hear')
+            pass
+            # print('Hear')
 
 
 class function1(multiprocessing.Process):

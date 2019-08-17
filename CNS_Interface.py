@@ -45,6 +45,7 @@ class MyForm(QDialog):
         if True: # 메인 메모리와 연결된 부분
             self.mem = mem[0]
             self.Auto_mem = mem[-2]
+            self.trig_mem = mem[1]
 
         self.color_setting()
 
@@ -85,7 +86,7 @@ class MyForm(QDialog):
     # ======================= Strategy Popup===============================
 
     def call_strategy_window(self):
-        self.strategy_window = sub_strategy_window(self.mem)
+        self.strategy_window = sub_strategy_window(self.trig_mem)
 
     # ======================= Initial_coloe=============================
 
@@ -1490,23 +1491,34 @@ class sub_tren_window(QDialog):
 class sub_strategy_window(QDialog):
     def __init__(self, mem):
         super().__init__()
-        # self.mem = mem
+        self.trig_mem = mem
 
         self.Strategy_ui = Strategy_ui()
         self.Strategy_ui.setupUi(self)
-        # self.trig_mem = mem[2]
 
+        self.back_color = {
+            'gray': "background-color: rgb(229, 229, 229);",
+            'green': "background-color: rgb(0, 170, 0);",
+            'yellow': "background-color: rgb(255, 255, 0);",
+            'orange': "background-color: rgb(255, 85, 0);",
+            'red': "background-color: rgb(255, 0, 0);",
+        }
 
-        # if True: # 메인 메모리와 연결된 부분                 # Error 발생
-        #     self.mem = mem[0]
-        #     self.strategy_mem = mem[2]
+        timer = QtCore.QTimer(self)
+        for _ in [self.Alarm]:
+            timer.timeout.connect(_)
+        timer.start(500)
 
-        # self.Alarm()
+        self.blick = True
         self.show()
 
     def Alarm(self):
-        if self.strategy_mem['strategy'] == 'Emergency Operation ':
-            print('aaa')
-            self.Strategy_ui.pushButton_3.setStyleSheet(self.back_color['red'])
+        if self.trig_mem['alarm'][-1] == 1:
+            if self.blick:
+                self.Strategy_ui.pushButton_3.setStyleSheet(self.back_color['red'])
+                self.blick = False
+            else:
+                self.Strategy_ui.pushButton_3.setStyleSheet(self.back_color['green'])
+                self.blick = True
         else:
-            pass
+            print('No')
