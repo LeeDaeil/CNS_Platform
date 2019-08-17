@@ -32,6 +32,8 @@ class body:
         pro_list = [clean_mem(self.shared_mem, shut_up=self.args.shutup),   # [0]
                     interface_function(self.shared_mem),                    # [1]
                     funtion5(self.shared_mem),                              # [2]
+                    Fun_diagnosis(self.shared_mem),
+                    Fun_strategy(self.shared_mem),
                     PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
                     ]
         if self.args.mode == 'All':
@@ -80,6 +82,16 @@ class generate_mem:
                                               '[00:04:36] RCP 3 Stop',
                                               ]}
         print('자율운전 메모리 생성 완료')
+        return memory_dict
+
+    def make_diagnosis_mem(self):               # 진단 기능 메모리
+        memory_dict = {'alarm': [], 'diagnosis': [], 'trainingCond': []}
+        print('비상운전 진단용 메모리 생성 완료')
+        return memory_dict
+
+    def make_strategy_mem(self):                # 전략 설정 기능 메모리
+        memory_dict = {'operationCond': [], 'strategy': [], 'controlActive': []}
+        print('전략설정기능 메모리 생성 완료')
         return memory_dict
 
     def make_test_mem(self):
@@ -137,6 +149,8 @@ class generate_mem:
     def make_mem_structure(self, show_mem_list=False):
         print('=' * 25 + '메모리 생성 시작' + '=' * 25)
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
+                       Manager().dict(self.make_diagnosis_mem()),                       # [1]
+                       Manager().dict(self.make_strategy_mem()),                        # [2]
                        Manager().dict(self.make_autonomous_mem()),                      # [-2]
                        Manager().dict(self.make_clean_mem()),                           # [-1]
                        ]

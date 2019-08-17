@@ -2,6 +2,56 @@ import multiprocessing
 import time
 import CNS_Send_UDP
 
+# ---------------------------------------------------------------------------------------------
+# 진단 기능
+# ---------------------------------------------------------------------------------------------
+# 인공지능 알고리즘 결합 필요
+class Fun_diagnosis(multiprocessing.Process):
+    def __init__(self, mem):
+        multiprocessing.Process.__init__(self)
+        self.mem = mem[0]
+        self.trig_mem = mem[1]
+
+    def run(self):
+        while True:
+            if self.mem['KLAMPO9']['V'] != 1:
+                pass
+            else:
+                self.trig_mem['alarm'] = 1                  # O1: 비정상 여부
+                self.trig_mem['trainingCond'] = 1           # O2: 학습 여부
+                self.trig_mem['diagnosis'] = '2301'         # O3: 진단된 비정상 절차서
+                print(self, self.trig_mem)
+            time.sleep(1)
+
+# ---------------------------------------------------------------------------------------------
+# 전략 설정 기능
+# ---------------------------------------------------------------------------------------------
+
+class Fun_strategy(multiprocessing.Process):
+    def __init__(self, mem):
+        multiprocessing.Process.__init__(self)
+        self.mem = mem[0]
+        self.trig_diagnosis_mem = mem[1]
+        self.trig_mem = mem[2]
+        self.strategy_selection()
+
+    def run(self):                                  # I1: 비정상 여부 / O1: 운전 상태
+        while True:
+            if self.trig_diagnosis_mem['alarm'] == 1:
+                self.trig_mem['operationCond'] = 'Abnormal'
+                print(self, self.trig_mem)
+            else:
+                pass
+            time.sleep(1)
+
+    def strategy_selection(self):                   # I1: 학습 여부, I2: 진단된 비정상 절차서 / O1: 제어 기능 활성화 신호, O2: 진단된 비정상 절차서
+        if self.trig_diagnosis_mem['trainingCond'] == 1 and self.trig_diagnosis_mem['diagnosis'] == 2301:
+            self.trig_mem['strategy'] = 'Auto_LSTM'
+            self.trig_mem['controlActive'] = 10       # 수정 필요 - 각자
+            print(self, self.trig_mem)
+        else:
+            pass
+
 class function1(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제
     def __init__(self, mem):
