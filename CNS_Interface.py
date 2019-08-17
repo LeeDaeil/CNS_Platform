@@ -9,10 +9,12 @@ from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
 from PyQt5 import QtCore
 
 # ------------------------------------------------------
-from Interface.gui_study_9 import Ui_Dialog as Main_ui
+#from Interface.gui_study_9 import Ui_Dialog as Main_ui
+from Interface.study_9_rev import Ui_Dialog as Main_ui
 from Interface.resource import Study_9_re_rc
 # ------------------------------------------------------
 from Interface.Trend_window import Ui_Dialog as Trend_ui
+from Interface.current_plant_state import Ui_Dialog as Strategy_ui
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -67,6 +69,7 @@ class MyForm(QDialog):
         timer.start(500)
         self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
         self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
+        self.ui.Open_Strategy.clicked.connect(self.call_strategy_window)
 
         # Autonomous controller ==========================================
         self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
@@ -78,6 +81,11 @@ class MyForm(QDialog):
 
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem)
+
+    # ======================= Strategy Popup===============================
+
+    def call_strategy_window(self):
+        self.strategy_window = sub_strategy_window(self.mem)
 
     # ======================= Initial_coloe=============================
 
@@ -1478,3 +1486,27 @@ class sub_tren_window(QDialog):
         elif self.mem['ZINST58']['V'] < 154:
             return str('만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
     #  ==============================================================
+
+class sub_strategy_window(QDialog):
+    def __init__(self, mem):
+        super().__init__()
+        # self.mem = mem
+
+        self.Strategy_ui = Strategy_ui()
+        self.Strategy_ui.setupUi(self)
+        # self.trig_mem = mem[2]
+
+
+        # if True: # 메인 메모리와 연결된 부분                 # Error 발생
+        #     self.mem = mem[0]
+        #     self.strategy_mem = mem[2]
+
+        # self.Alarm()
+        self.show()
+
+    def Alarm(self):
+        if self.strategy_mem['strategy'] == 'Emergency Operation ':
+            print('aaa')
+            self.Strategy_ui.pushButton_3.setStyleSheet(self.back_color['red'])
+        else:
+            pass
