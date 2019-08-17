@@ -1,6 +1,7 @@
 import multiprocessing
 import time
 import CNS_Send_UDP
+from copy import deepcopy
 
 # ---------------------------------------------------------------------------------------------
 # 진단 기능
@@ -14,13 +15,29 @@ class Fun_diagnosis(multiprocessing.Process):
 
     def run(self):
         while True:
+            # ===========================================
+            self.dumy_mem = deepcopy(self.trig_mem)
+            # ===========================================
+
             if self.mem['KLAMPO9']['V'] != 1:
                 pass
             else:
-                self.trig_mem['alarm'] = 1                  # O1: 비정상 여부
-                self.trig_mem['trainingCond'] = 1           # O2: 학습 여부
-                self.trig_mem['diagnosis'] = '2301'         # O3: 진단된 비정상 절차서
+                self.dumy_mem['alarm'].append(1)                  # O1: 비정상 여부
+                self.dumy_mem['trainingCond'].append(1)           # O2: 학습 여부
+                self.dumy_mem['diagnosis'].append('2301')        # O3: 진단된 비정상 절차서
                 print(self, self.trig_mem)
+
+            self.dumy_mem['alarm'].append(1)  # O1: 비정상 여부
+            self.dumy_mem['trainingCond'].append(1)  # O2: 학습 여부
+            self.dumy_mem['diagnosis'].append('2301')  # O3: 진단된 비정상 절차서
+
+            # ===========================================
+            for key_val in self.trig_mem.keys():
+                self.trig_mem[key_val] = self.dumy_mem[key_val]
+            # ===========================================
+
+            print(self, self.trig_mem)
+
             time.sleep(1)
 
 # ---------------------------------------------------------------------------------------------
@@ -33,10 +50,11 @@ class Fun_strategy(multiprocessing.Process):
         self.mem = mem[0]
         self.trig_diagnosis_mem = mem[1]
         self.trig_mem = mem[2]
-        self.strategy_selection()
 
     def run(self):                                  # I1: 비정상 여부 / O1: 운전 상태
         while True:
+            self.strategy_selection()
+
             if self.trig_diagnosis_mem['alarm'] == 1:
                 self.trig_mem['operationCond'] = 'Abnormal'
                 print(self, self.trig_mem)
@@ -45,12 +63,17 @@ class Fun_strategy(multiprocessing.Process):
             time.sleep(1)
 
     def strategy_selection(self):                   # I1: 학습 여부, I2: 진단된 비정상 절차서 / O1: 제어 기능 활성화 신호, O2: 진단된 비정상 절차서
-        if self.trig_diagnosis_mem['trainingCond'] == 1 and self.trig_diagnosis_mem['diagnosis'] == 2301:
-            self.trig_mem['strategy'] = 'Auto_LSTM'
-            self.trig_mem['controlActive'] = 10       # 수정 필요 - 각자
-            print(self, self.trig_mem)
-        else:
-            pass
+        try:
+            if self.trig_diagnosis_mem['trainingCond'][-1] == 1 and self.trig_diagnosis_mem['diagnosis'][-1] == '2301':
+                self.trig_mem['strategy'].append('Auto_LSTM')
+                self.trig_mem['controlActive'].append(10)       # 수정 필요 - 각자
+                print(self, self.trig_mem)
+            else:
+                print(self, self.trig_mem)
+                pass
+        except:
+            print('Hear')
+
 
 class function1(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제
