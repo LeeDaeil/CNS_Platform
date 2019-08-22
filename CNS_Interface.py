@@ -7,6 +7,8 @@ from sklearn.preprocessing import MinMaxScaler
 import PySide2
 from PySide2.QtWidgets import QDialog, QApplication, QMessageBox, QWidget
 from PySide2 import QtCore, QtWidgets
+from PySide2.QtGui import QFont
+from PySide2.QtCore import QCoreApplication
 from PySide2.QtGui import Qt
 
 # ------------------------------------------------------
@@ -19,6 +21,7 @@ from Interface.resource import Study_9_re_rc
 # ------------------------------------------------------
 from Interface.Trend_window import Ui_Dialog as Trend_ui
 from Interface.current_plant_state import Ui_Dialog as Strategy_ui
+from Interface.popup_window_ss import Ui_MainForm
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -1186,7 +1189,7 @@ class MyForm(QDialog):
         # self.ui.Current_op.setText('{}'.format(self.Auto_mem['Current_op']))
 
 # ======================================================================================================================
-# Alarm function of operation state_by sb
+# alarm function of operation state_by sb
 
     def operation_state(self):
         if self.strategy_selection_mem['operation_mode'] != []:
@@ -1206,20 +1209,20 @@ class MyForm(QDialog):
                 self.ui.pushButton_10.setStyleSheet(self.back_color['gray'])
 
 # ======================================================================================================================
-# History function of strategy selection_by sb
+# history function of strategy selection_by sb
 
     def history_ss(self):
-        self.operation_mode = self.strategy_selection_mem['operation_mode']
-        self.strategy = self.strategy_selection_mem['strategy']
+        self.triger = self.strategy_selection_mem['operation_mode']
+        self.triger_2= self.strategy_selection_mem['strategy']
 
-        if self.operation_mode != []:
-            if self.operation_mode[-1] == 1 and self.strategy[-1] == 'Auto_LSTM' and self.st_triger['ab_on/off'] == False:
+        if self.triger != []:
+            if self.triger[-1] == 1 and self.triger_2[-1] == 'Auto_LSTM' and self.st_triger['ab_on/off'] == False:
                 self.ui.listWidget.addItem('{}\tAbnormal Operation\tAuto_LSTM'.format(self.Call_CNS_time[0]))
                 self.st_triger['ab_on/off'] = True
-            elif self.operation_mode[-1] == 0 and self.st_triger['no_on/off'] == False:
+            elif self.triger[-1] == 0 and self.st_triger['no_on/off'] == False:
                 self.ui.listWidget.addItem('{}\tNormal Operation\tAuto_RL'.format(self.Call_CNS_time[0]))
                 self.st_triger['no_on/off'] = True
-            elif self.operation_mode[-1] == 2 and self.st_triger['em_on/off'] == False:
+            elif self.triger[-1] == 2 and self.st_triger['em_on/off'] == False:
                 self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
                 self.st_triger['em_on/off'] = True
 
@@ -1593,7 +1596,7 @@ class sub_strategy_window(QDialog):
             print('No')
 
 # ======================================================================================================================
-# Widget popup function of strategy selection_by sb
+# popup function of strategy selection_by sb
 
 class popup_ss(QWidget):
     def __init__(self, item, mem):
@@ -1605,18 +1608,32 @@ class popup_ss(QWidget):
         self.show()
 
     def init_widget(self):
-        self.setWindowTitle('Strategy selection')
-        self.setGeometry(100, 100, 640, 480)
+        self.main_ui = Ui_MainForm()
+        self.main_ui.setupUi(self)
+
+        self.font = QFont("Calibri", 15, QFont.Bold)
+        self.main_ui.Sec_label.setFont(self.font)
+        self.main_ui.Fou_label.setFont(self.font)
+        # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
+
+        # self.setWindowTitle('Strategy selection')
+        # self.setGeometry(100, 100, 640, 480)
         # self.frame1 = QtWidgets.QFrame(self)
         # self.frame1.setGeometry(QtCore.QRect(0, 0, 600, 400))
         # self.frame1.setStyleSheet("background-color: rgb(255, 30, 10);")
 
     def flowchart(self, item, mem):
-        strategy_name = item.text().split('\t')[1]
+        operation_state = item.text().split('\t')[1]
+        strategy_name = item.text().split('\t')[2]
 
-        if strategy_name == 'Abnormal Operation':
-            mf.make_flowchart(mem, self)
-            # mf.make_flowchart(self.frame1)
+        if operation_state == 'Abnormal Operation':
+            if strategy_name == 'Auto_LSTM':
+                mf.make_flowchart(mem, self.main_ui.SA_widget)
+                self.main_ui.Sec_label.setText('Abnormal Operation')
+                self.main_ui.Fou_label.setText('Auto Control_LSTM')
+                # mf.make_flowchart(self.frame1)
+            else:
+                pass
 # ======================================================================================================================
 
 
