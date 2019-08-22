@@ -7,7 +7,7 @@ from copy import deepcopy
 # 진단 기능
 # ---------------------------------------------------------------------------------------------
 # 인공지능 알고리즘 결합 필요
-class Fun_diagnosis(multiprocessing.Process):
+class Func_diagnosis(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]
@@ -20,60 +20,71 @@ class Fun_diagnosis(multiprocessing.Process):
             # ===========================================
 
             if self.mem['KLAMPO9']['V'] != 1:
-                pass
+                self.dumy_mem['alarm'].append(0)
+                self.dumy_mem['diagnosis'].append('0')
+                self.dumy_mem['training_cond'].append(0)
+
             else:
-                self.dumy_mem['alarm'].append(1)                  # O1: 비정상 여부
-                self.dumy_mem['trainingCond'].append(1)           # O2: 학습 여부
-                self.dumy_mem['diagnosis'].append('2301')        # O3: 진단된 비정상 절차서
-                print(self, self.trig_mem)
+                self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부
+                self.dumy_mem['diagnosis'].append('2301')        # O2: 진단된 비정상 절차서
+                self.dumy_mem['training_cond'].append(1)         # O3: 학습 여부
+                # print('1')
+            # =================================================
+            # test
+            # =================================================
+            # self.dumy_mem['alarm'].append(1)                    # O1: 비정상 여부
+            # self.dumy_mem['diagnosis'].append('2301')           # O2: 진단된 비정상 절차서
+            # self.dumy_mem['training_cond'].append(1)            # O3: 학습 여부
+            # print('1')
 
-            self.dumy_mem['alarm'].append(1)  # O1: 비정상 여부
-            self.dumy_mem['trainingCond'].append(1)  # O2: 학습 여부
-            self.dumy_mem['diagnosis'].append('2301')  # O3: 진단된 비정상 절차서
-
-            # ===========================================
+            # =================================================         # 노이해..
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
-            # ===========================================
-
-            # print(self, self.trig_mem)
-
+            # =================================================
             time.sleep(1)
 
 # ---------------------------------------------------------------------------------------------
 # 전략 설정 기능
 # ---------------------------------------------------------------------------------------------
 
-class Fun_strategy(multiprocessing.Process):
+class Func_strategy(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]
-        self.trig_diagnosis_mem = mem[1]
-        self.trig_mem = mem[2]
+        self.trig_mem = mem[1]
+        self.dumy_mem = deepcopy(self.trig_mem)
 
-    def run(self):                                  # I1: 비정상 여부 / O1: 운전 상태
+    def run(self):                                              # I1: 비정상 여부 / O1: 운전 모드
         while True:
+            # ===========================================
+            # self.dumy_mem = deepcopy(self.trig_mem)
+            # ===========================================
             self.strategy_selection()
-
-            if self.trig_diagnosis_mem['alarm'] == 1:
-                self.trig_mem['operationCond'] = 'Abnormal'
-                print(self, self.trig_mem)
-            else:
-                pass
-            time.sleep(1)
+            if self.trig_mem['alarm']!= []:
+                if self.trig_mem['alarm'][-1] == 1:
+                    self.dumy_mem['operation_mode'].append(1)
+                    # print('2')
+                elif self.trig_mem['alarm'][-1] ==0:
+                    self.dumy_mem['operation_mode'].append(0)
+                else:
+                    pass
+                time.sleep(1)
 
     def strategy_selection(self):                   # I1: 학습 여부, I2: 진단된 비정상 절차서 / O1: 제어 기능 활성화 신호, O2: 진단된 비정상 절차서
-        try:
-            if self.trig_diagnosis_mem['trainingCond'][-1] == 1 and self.trig_diagnosis_mem['diagnosis'][-1] == '2301':
-                self.trig_mem['strategy'].append('Auto_LSTM')
-                self.trig_mem['controlActive'].append(10)       # 수정 필요 - 각자
-                # print(self, self.trig_mem)
-            else:
-                # print(self, self.trig_mem)
-                pass
-        except:
-            pass
-            # print('Hear')
+
+            if self.trig_mem['training_cond'] != [] and self.trig_mem['diagnosis'] != []:
+
+                if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == '2301':
+                    self.dumy_mem['strategy'].append('Auto_LSTM')
+                    self.dumy_mem['control_activation'].append(10)       # 수정 필요 - 각자
+                    # print('3')
+                else:
+                    pass
+
+                for key_val in self.trig_mem.keys():
+                    self.trig_mem[key_val] = self.dumy_mem[key_val]
+
+                # print(self.trig_mem)
 
 
 class function1(multiprocessing.Process):
