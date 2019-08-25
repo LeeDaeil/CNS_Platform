@@ -101,7 +101,7 @@ class make_flowchart(QWidget):                                          # QWidge
 
     def control(self, mem):
         print(mem['strategy'])
-        if mem['strategy'][-1] == 'Auto_LSTM':                  # a 누르면 변신
+        if mem['strategy'][-1] == 'NA':                  # a 누르면 변신
             self.sub_1.color = Qt.lightGray
             self.sub_2.color = Qt.lightGray
             self.sub_3.color = Qt.lightGray

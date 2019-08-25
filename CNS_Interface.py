@@ -12,9 +12,6 @@ from PySide2.QtCore import QCoreApplication
 from PySide2.QtGui import Qt
 
 # ------------------------------------------------------
-#from Interface.gui_study_9 import Ui_Dialog as Main_ui
-# from Interface.study_9_rev import Ui_Dialog as Main_ui
-# from Interface.study_9_rev2 import Ui_Dialog as Main_ui
 from Interface.study_9_rev3 import Ui_Dialog as Main_ui
 from Interface.resource import Study_9_re_rc
 
@@ -116,8 +113,11 @@ class MyForm(QDialog):
 # ======================================================================================================================
 # loading popup function of strategy selection
 
-    def call_popup_ss(self, item):
-        self.popup_ss = popup_ss(item, self.strategy_selection_mem)
+    # def call_popup_ss(self, item):
+    #     self.popup_ss = popup_ss(item, self.strategy_selection_mem)
+    # #===================================================================
+    def call_popup_ss(self):
+        self.popup_ss = popup_ss(self.strategy_selection_mem)
 
     # ======================= Initial_coloe=============================
 
@@ -1110,7 +1110,7 @@ class MyForm(QDialog):
             self.AUTO_State = {
                 'Histoty': {}   # {Start_time: '', Content: ''
             }
-            self.Auto_Alarm_Click_Auto()                        # 실행 초기 입력
+            # self.Auto_Alarm_Click_Auto()                       # 실행 초기 입력 # 주석 후, 알람 안뜨는 현상 해결
 
         # Autonomous state alram
         self.Auto_Alarm_dis()
@@ -1118,7 +1118,7 @@ class MyForm(QDialog):
         self.Autonomous_controller()
         self.operation_state()
         self.history_ss()
-        # self.tt()
+
 
     def Auto_Alarm_dis(self):
         if self.Auto_mem['Auto_state']:     # True
@@ -1151,11 +1151,14 @@ class MyForm(QDialog):
     def Auto_Alarm_Click_Man(self):
         self.Auto_mem['Auto_state'] = False
         self.Auto_mem['Man_state'] = True
-        self.ui.listWidget.addItem('{}\tManual Control'.format(self.Call_CNS_time[0]))
+        # self.ui.listWidget.addItem('{}\tManual Control'.format(self.Call_CNS_time[0]))
 
     def Auto_Alarm_Click_Auto(self):
         self.Auto_mem['Auto_state'] = True
         self.Auto_mem['Man_state'] = False
+        self.st_triger['no_on/off'] = False
+        print(self, self.Auto_mem['Man_state'],  self.st_triger['no_on/off'])
+
         # append->addItem
         # self.ui.listWidget.addItem('{} Autonomous Operaion'.format(self.Call_CNS_time[0]))
 
@@ -1195,17 +1198,17 @@ class MyForm(QDialog):
 
     def operation_state(self):
         if self.strategy_selection_mem['operation_mode'] != []:
-            if self.strategy_selection_mem['operation_mode'][-1] == 1:
+            if self.strategy_selection_mem['operation_mode'][-1] == 1:              # 비정상
                 self.ui.pushButton_8.setStyleSheet(self.back_color['gray'])
                 self.ui.pushButton_9.setStyleSheet(self.back_color['yellow'])
                 self.ui.pushButton_10.setStyleSheet(self.back_color['gray'])
 
-            elif self.strategy_selection_mem['operation_mode'][-1] == 2:
+            elif self.strategy_selection_mem['operation_mode'][-1] == 2:            # 비상
                 self.ui.pushButton_8.setStyleSheet(self.back_color['gray'])
                 self.ui.pushButton_9.setStyleSheet(self.back_color['gray'])
                 self.ui.pushButton_10.setStyleSheet(self.back_color['red'])
 
-            else:
+            else:                                                                   # 정상
                 self.ui.pushButton_8.setStyleSheet(self.back_color['green'])
                 self.ui.pushButton_9.setStyleSheet(self.back_color['gray'])
                 self.ui.pushButton_10.setStyleSheet(self.back_color['gray'])
@@ -1214,38 +1217,23 @@ class MyForm(QDialog):
 # history function of strategy selection_by sb
 
     def history_ss(self):
-        # 오호니 좋은데??
-        # 계속 가져다 쓸 변수는 self로 선언해서 쓰도록 하고 그런 것이 아니라면은 그냥 함수안에 평범하게 변수 지정해.
-        # 그렇다면 이건? 함수 안에 self.? 뭐로 선언하면 아래 함수가 상속받아서 self. 로 불러올 수 있을까????
-        triger = self.strategy_selection_mem['operation_mode']
-        triger_2= self.strategy_selection_mem['strategy']
 
-        if triger != []:
-            if triger[-1] == 1 and self.st_triger['ab_on/off'] == False:
-                if triger_2[-1] == '2301_LSTM':
-                    self.ui.listWidget.addItem('{}\tAbnormal Operation\tRCS Leak\tAuto by LSTM'.format(self.Call_CNS_time[0]))
-                    self.st_triger['ab_on/off'] = True
-            elif triger[-1] == 0 and self.st_triger['no_on/off'] == False:
-                self.ui.listWidget.addItem('{}\tNormal Operation\t\tAuto by RL'.format(self.Call_CNS_time[0]))
+        triger_2 = self.strategy_selection_mem['strategy']
+
+        if triger_2 != []:
+            if triger_2[-1] == 'NA' and self.st_triger['no_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tNormal Operation\tAutonomous control by RL'.format(self.Call_CNS_time[0]))
                 self.st_triger['no_on/off'] = True
-            elif triger == 2 and self.st_triger['em_on/off'] == False:
-                self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
-                self.st_triger['em_on/off'] = True
-
-        # 시험 삼아 바꿔보자. 그냥 변수로 쓰면 안되? 어차피 여기에서 밖에 안쓸건데.
-        # self.triger = self.strategy_selection_mem['operation_mode']
-        # self.triger_2= self.strategy_selection_mem['strategy']
-        #
-        # if self.triger != []:
-        #     if self.triger[-1] == 1 and self.triger_2[-1] == '2301_LSTM' and self.st_triger['ab_on/off'] == False:
-        #         self.ui.listWidget.addItem('{}\tAbnormal Operation\tAuto_LSTM'.format(self.Call_CNS_time[0]))
-        #         self.st_triger['ab_on/off'] = True
-        #     elif self.triger[-1] == 0 and self.st_triger['no_on/off'] == False:
-        #         self.ui.listWidget.addItem('{}\tNormal Operation\tAuto_RL'.format(self.Call_CNS_time[0]))
-        #         self.st_triger['no_on/off'] = True
-        #     elif self.triger[-1] == 2 and self.st_triger['em_on/off'] == False:
-        #         self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
-        #         self.st_triger['em_on/off'] = True
+                # print('NAAAAA입니다')
+            elif triger_2[-1] == 'NM' and self.st_triger['no_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tNormal Operation\tManual control'.format(self.Call_CNS_time[0]))
+                self.st_triger['no_on/off'] = True
+                # print('NMMMM입니다')
+            elif triger_2[-1] == 'AA_2301' and self.st_triger['ab_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tAbnormal Operation\tAutonomous control by LSTM'.format(self.Call_CNS_time[0]))
+                self.st_triger['ab_on/off'] = True
+        else:
+            pass
 
 # ======================= Monitoring DIS ===============================================================================
 
@@ -1531,45 +1519,82 @@ class sub_strategy_window(QDialog):
 # popup function of strategy selection_by sb
 
 class popup_ss(QWidget):
-    def __init__(self, item, mem):
+
+    def __init__(self, mem):
         self.trig_mem = mem
-        # print(self.trig_mem['strategy'])
         QWidget.__init__(self)
+
         self.init_widget()
-        self.flowchart(item, self.trig_mem)
+        self.flowchart(self.trig_mem)
         self.show()
 
     def init_widget(self):
         self.main_ui = SS_ui()
-        self.main_ui.setupUi(self)
+        self.main_ui.setupUi(self)                                                          #만약 self 없으면 어떻게 되?
 
-        self.font = QFont("Calibri", 15, QFont.Bold)
+        self.font = QFont("Calibri", 14, QFont.Bold)
         self.main_ui.Sec_label.setFont(self.font)
         self.main_ui.Sec_label_2.setFont(self.font)
         self.main_ui.Fou_label.setFont(self.font)
 
-        # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
+    def flowchart(self, mem):
 
-        # self.setWindowTitle('Strategy selection')
-        # self.setGeometry(100, 100, 640, 480)
-        # self.frame1 = QtWidgets.QFrame(self)
-        # self.frame1.setGeometry(QtCore.QRect(0, 0, 600, 400))
-        # self.frame1.setStyleSheet("background-color: rgb(255, 30, 10);")
+        if mem['strategy'][-1] == 'AA_2301':
+            mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
+            self.main_ui.Sec_label.setText('Abnormal Operation')
+            self.main_ui.Sec_label_2.setText('RCS Leak')
+            self.main_ui.Fou_label.setText('Autonomous Control By LSTM')
 
-    def flowchart(self, item, mem):
-        operation_state = item.text().split('\t')[1]
-        strategy_name = item.text().split('\t')[3]
+        elif mem['strategy'][-1] == 'NA':
+            mf.make_flowchart(mem, self.main_ui.SA_widget)
+            self.main_ui.Sec_label.setText('Normal Operation')
+            self.main_ui.Sec_label_2.setText('Startup')
+            self.main_ui.Fou_label.setText('Autonomous Control By RL')
+        else:
+            pass
 
-        if operation_state == 'Abnormal Operation':
-            if strategy_name == 'Auto by LSTM':
-
-                mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
-                self.main_ui.Sec_label.setText('Abnormal Operation')
-                self.main_ui.Sec_label_2.setText('RCS Leak')
-                self.main_ui.Fou_label.setText('Auto Control by LSTM')
-                # mf.make_flowchart(self.frame1)
-            else:
-                pass
+#     =======================================================================================
+#     리스트 위젯의 텍스트 별로 접근하는 방법
+#
+#     def __init__(self, item, mem):
+#         self.trig_mem = mem
+#
+#         QWidget.__init__(self)
+#         self.init_widget()
+#         self.flowchart(item, self.trig_mem)
+#         self.show()
+#
+#     def init_widget(self):
+#         self.main_ui = SS_ui()
+#         self.main_ui.setupUi(self)
+#
+#         self.font = QFont("Calibri", 15, QFont.Bold)
+#         self.main_ui.Sec_label.setFont(self.font)
+#         self.main_ui.Sec_label_2.setFont(self.font)
+#         self.main_ui.Fou_label.setFont(self.font)
+#
+#         # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
+#
+#         # self.setWindowTitle('Strategy selection')
+#         # self.setGeometry(100, 100, 640, 480)
+#         # self.frame1 = QtWidgets.QFrame(self)
+#         # self.frame1.setGeometry(QtCore.QRect(0, 0, 600, 400))
+#         # self.frame1.setStyleSheet("background-color: rgb(255, 30, 10);")
+#
+#     def flowchart(self, item, mem):
+#         operation_state = item.text().split('\t')[1]
+#         strategy_name = item.text().split('\t')[3]
+#
+#         if operation_state == 'Abnormal Operation':
+#             if strategy_name == 'Auto by LSTM':
+#
+#                 mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
+#                 self.main_ui.Sec_label.setText('Abnormal Operation')
+#                 self.main_ui.Sec_label_2.setText('RCS Leak')
+#                 self.main_ui.Fou_label.setText('Auto Control by LSTM')
+#                 # mf.make_flowchart(self.frame1)
+#             else:
+#                 pass
 # ======================================================================================================================
 
 

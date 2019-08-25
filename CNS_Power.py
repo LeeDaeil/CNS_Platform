@@ -9,6 +9,7 @@ class Power_increase_module(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]  # main mem connection
         self.trig_mem = mem[-1]  # main mem connection
+        self.trig_mem_2 = mem[1] #
         self.shut = shut
 
         self.UDP_sock = CNS_Send_UDP.CNS_Send_Signal(cns_ip, cns_port)
@@ -42,7 +43,14 @@ class Power_increase_module(multiprocessing.Process):
                     self.p_shut('CNS가 동작 상태 - 모듈 동작')
                     self.mem_len = len(self.mem['KCNTOMS']['L'])
                     input_data = self.make_input_data(time_legnth=self.time_legnth)
-                    self.sub_run_1(input_data=input_data, time_legnth=self.time_legnth)
+
+                    if self.trig_mem_2['strategy'][-1] == 'NA':
+                        self.sub_run_1(input_data=input_data, time_legnth=self.time_legnth)
+                        print('동작 중이지롱')
+                    elif self.trig_mem_2['strategy'][-1] == 'AA_2301':
+                        self.UDP_sock._send_control_signal(['KSWO33', 'KSWO32'], [0, 0])
+                        print('동작 멈춤')
+
             time.sleep(0.5)
 
     def make_input_data(self, time_legnth):
