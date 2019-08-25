@@ -187,7 +187,7 @@ class make_flowchart(QWidget):                                          # QWidge
 
     def control(self, mem):
         print(mem['strategy'])
-        if mem['strategy'][-1] == '2301_LSTM':                  # a 누르면 변신
+        if mem['strategy'][-1] == 'AA_2301':                  # a 누르면 변신
             self.btn_2.color = Qt.lightGray
             self.btn_3.color = Qt.lightGray
             self.btn_4.color = Qt.lightGray

@@ -28,7 +28,7 @@ class Func_diagnosis(multiprocessing.Process):
                 self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부/
                 self.dumy_mem['diagnosis'].append(2301)        # O2: 진단된 비정상 절차서
                 self.dumy_mem['training_cond'].append(1)         # O3: 학습 여부
-                # print('1')
+
             # =================================================
             # test
             # =================================================
@@ -40,6 +40,8 @@ class Func_diagnosis(multiprocessing.Process):
             # =================================================         # 노이해..
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
+
+            # print(self, self.trig_mem)
             # =================================================
             time.sleep(1)
 
@@ -50,41 +52,64 @@ class Func_strategy(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]
+        self.mem_2 = mem[-2]
         self.trig_mem = mem[1]
-        self.dumy_mem = deepcopy(self.trig_mem)
+        # self.dumy_mem = deepcopy(self.trig_mem)
 
     def run(self):
         while True:
-            self.strategy_selection()
+            self.dumy_mem = deepcopy(self.trig_mem)
             self.Identification_operation_mode()
+            self.strategy_selection()
+
 
     def Identification_operation_mode(self):
+
         if self.trig_mem['alarm'] != []:
             if self.trig_mem['alarm'][-1] == 1:                 # 비정상 운전 상태 식별
                 self.dumy_mem['operation_mode'].append(1)
-                # print('2')
+
             elif self.trig_mem['alarm'][-1] == 0:               # 정상 운전 상태 식별
-                self.dumy_mem['operation_mode'].append(0)       # 추후 추가) 정상-Startup 운전
+                self.dumy_mem['operation_mode'].append(0)
+
             elif self.trig_mem['alarm'][-1] == 2:               # 비상 운전 상태 식별
                 self.dumy_mem['operation_mode'].append(2)
             else:
                 pass
-            time.sleep(1)
 
-    def strategy_selection(self):                   # I1: 학습 여부, I2: 진단 절차서 / O1: 전략, O2: 제어 기능 활성화 신호
-            if self.trig_mem['training_cond'] != [] and self.trig_mem['diagnosis'] != []:
-                if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == 2301:
-                    self.dumy_mem['strategy'].append('2301_LSTM')
-                    self.dumy_mem['control_activation'].append(10)       # 필요하려나?..
-                    # print('3')
-                else:
-                    pass
+            for key_val in self.trig_mem.keys():
+                self.trig_mem[key_val] = self.dumy_mem[key_val]
 
-                for key_val in self.trig_mem.keys():
-                    self.trig_mem[key_val] = self.dumy_mem[key_val]
+            # print(self, self.trig_mem)
 
-                # print(self.trig_mem)
+            time.sleep(1.5)
 
+    def strategy_selection(self):                   # I1: 운전 모드, I2: 기타 정보 / O1: 세부 전략, O2: 제어 기능 활성화 신호
+        if self.trig_mem['operation_mode'] != []:
+
+            if self.trig_mem['operation_mode'][-1] == 1:                                                        # 비정상 전략
+                if self.trig_mem['training_cond'] != [] and self.trig_mem['diagnosis'] != []:
+                    if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == 2301:      # 전략: Autonomous control by LSTM for leak of RCS
+                        self.dumy_mem['strategy'].append('AA_2301')
+                        self.dumy_mem['control_activation'].append(10)       # 필요하려나?..
+
+                    else:
+                        pass
+
+            elif self.trig_mem['operation_mode'][-1] == 0:                                                      # 정상 전략
+                if self.mem_2['Man_state'] == True:                                                             # 전략: 수동
+                    self.dumy_mem['strategy'].append('NM')
+
+                    # for key_val in self.trig_mem.keys():
+                    #     self.trig_mem[key_val] = self.dumy_mem[key_val]
+
+                elif self.mem_2['Man_state'] == False:                                                          # 전략: Autonomous control by RL for startup
+                    self.dumy_mem['strategy'].append('NA')
+
+            for key_val in self.trig_mem.keys():
+                self.trig_mem[key_val] = self.dumy_mem[key_val]
+
+            time.sleep(1.5)
 
 class function1(multiprocessing.Process):
     ## 단순한 값만 읽어 오는 예제

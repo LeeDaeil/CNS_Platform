@@ -16,7 +16,7 @@ class body:
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7003, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsport', type=int, default=7002, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
         parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
@@ -62,7 +62,7 @@ class body:
 
 class generate_mem:
     def make_autonomous_mem(self):
-        memory_dict = {'Man_state': False, 'Auto_state': True, 'Man_require': False,
+        memory_dict = {'Man_state': True, 'Auto_state': False, 'Man_require': False,
                        'Current_op': 'LSTM-based algorithm', #'['LSTM-based algorithm', 'Tech Spec action', 'Ruel-based algorithm'],
                        'Strategy_out': ['[00:00:00] Start - Normal Operation - LSTM-base algorithm',
                                         '[00:00:46] Emergency Operation - LSTM-base algorithm'],
@@ -93,17 +93,6 @@ class generate_mem:
                        'control_activation': []}
         print('전략 설정용 메모리 설정 완료')
         return memory_dict
-
-    # def make_diagnosis_mem(self):               # 진단 기능 메모리
-    #     memory_dict = {'alarm': [], 'diagnosis': [], 'trainingCond': []}
-    #     print('비상운전 진단용 메모리 생성 완료')
-    #     return memory_dict
-    #
-    # def make_strategy_mem(self):                # 전략 설정 기능 메모리
-    #     memory_dict = {'operationCond': [], # 1, 2, 3 (..),
-    #                    'strategy': [], 'controlActive': []}
-    #     print('전략설정기능 메모리 생성 완료')
-    #     return memory_dict
 
     def make_test_mem(self):
         memory_dict = {'4_1_state': True, '4_2_state': '', '4_4_state': False}
