@@ -21,11 +21,12 @@ from Interface.resource import Study_9_re_rc
 # ------------------------------------------------------
 from Interface.Trend_window import Ui_Dialog as Trend_ui
 from Interface.current_plant_state import Ui_Dialog as Strategy_ui
-from Interface.popup_window_ss import Ui_MainForm
+from Interface.popup_ss import Ui_MainForm as SS_ui
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 import Interface.Flowchart as mf
+import Interface.Flowchart_abnormal as mf_abnormal
 
 
 class interface_function(multiprocessing.Process):
@@ -106,7 +107,8 @@ class MyForm(QDialog):
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem)
 
-    # ======================= Strategy Popup===============================
+# ======================= Strategy Popup===============================
+# 추후 삭제
 
     def call_strategy_window(self):
         self.strategy_window = sub_strategy_window(self.trig_mem)
@@ -1212,19 +1214,38 @@ class MyForm(QDialog):
 # history function of strategy selection_by sb
 
     def history_ss(self):
-        self.triger = self.strategy_selection_mem['operation_mode']
-        self.triger_2= self.strategy_selection_mem['strategy']
+        # 오호니 좋은데??
+        # 계속 가져다 쓸 변수는 self로 선언해서 쓰도록 하고 그런 것이 아니라면은 그냥 함수안에 평범하게 변수 지정해.
+        # 그렇다면 이건? 함수 안에 self.? 뭐로 선언하면 아래 함수가 상속받아서 self. 로 불러올 수 있을까????
+        triger = self.strategy_selection_mem['operation_mode']
+        triger_2= self.strategy_selection_mem['strategy']
 
-        if self.triger != []:
-            if self.triger[-1] == 1 and self.triger_2[-1] == 'Auto_LSTM' and self.st_triger['ab_on/off'] == False:
-                self.ui.listWidget.addItem('{}\tAbnormal Operation\tAuto_LSTM'.format(self.Call_CNS_time[0]))
-                self.st_triger['ab_on/off'] = True
-            elif self.triger[-1] == 0 and self.st_triger['no_on/off'] == False:
-                self.ui.listWidget.addItem('{}\tNormal Operation\tAuto_RL'.format(self.Call_CNS_time[0]))
+        if triger != []:
+            if triger[-1] == 1 and self.st_triger['ab_on/off'] == False:
+                if triger_2[-1] == '2301_LSTM':
+                    self.ui.listWidget.addItem('{}\tAbnormal Operation\tRCS Leak\tAuto by LSTM'.format(self.Call_CNS_time[0]))
+                    self.st_triger['ab_on/off'] = True
+            elif triger[-1] == 0 and self.st_triger['no_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tNormal Operation\t\tAuto by RL'.format(self.Call_CNS_time[0]))
                 self.st_triger['no_on/off'] = True
-            elif self.triger[-1] == 2 and self.st_triger['em_on/off'] == False:
+            elif triger == 2 and self.st_triger['em_on/off'] == False:
                 self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
                 self.st_triger['em_on/off'] = True
+
+        # 시험 삼아 바꿔보자. 그냥 변수로 쓰면 안되? 어차피 여기에서 밖에 안쓸건데.
+        # self.triger = self.strategy_selection_mem['operation_mode']
+        # self.triger_2= self.strategy_selection_mem['strategy']
+        #
+        # if self.triger != []:
+        #     if self.triger[-1] == 1 and self.triger_2[-1] == '2301_LSTM' and self.st_triger['ab_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tAbnormal Operation\tAuto_LSTM'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['ab_on/off'] = True
+        #     elif self.triger[-1] == 0 and self.st_triger['no_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tNormal Operation\tAuto_RL'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['no_on/off'] = True
+        #     elif self.triger[-1] == 2 and self.st_triger['em_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['em_on/off'] = True
 
 # ======================= Monitoring DIS ===============================================================================
 
@@ -1481,7 +1502,7 @@ class sub_tren_window(QDialog):
         self.Trend_ui.setupUi(self)
         # ===============================================================
         # rod gp
-        self.draw_rod_his_gp()
+        #self.draw_rod_his_gp()
 
         # self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
         #  ==============================================================
@@ -1608,12 +1629,14 @@ class popup_ss(QWidget):
         self.show()
 
     def init_widget(self):
-        self.main_ui = Ui_MainForm()
+        self.main_ui = SS_ui()
         self.main_ui.setupUi(self)
 
         self.font = QFont("Calibri", 15, QFont.Bold)
         self.main_ui.Sec_label.setFont(self.font)
+        self.main_ui.Sec_label_2.setFont(self.font)
         self.main_ui.Fou_label.setFont(self.font)
+
         # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
 
         # self.setWindowTitle('Strategy selection')
@@ -1624,13 +1647,15 @@ class popup_ss(QWidget):
 
     def flowchart(self, item, mem):
         operation_state = item.text().split('\t')[1]
-        strategy_name = item.text().split('\t')[2]
+        strategy_name = item.text().split('\t')[3]
 
         if operation_state == 'Abnormal Operation':
-            if strategy_name == 'Auto_LSTM':
-                mf.make_flowchart(mem, self.main_ui.SA_widget)
+            if strategy_name == 'Auto by LSTM':
+
+                mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
                 self.main_ui.Sec_label.setText('Abnormal Operation')
-                self.main_ui.Fou_label.setText('Auto Control_LSTM')
+                self.main_ui.Sec_label_2.setText('RCS Leak')
+                self.main_ui.Fou_label.setText('Auto Control by LSTM')
                 # mf.make_flowchart(self.frame1)
             else:
                 pass

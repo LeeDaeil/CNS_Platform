@@ -85,11 +85,11 @@ class generate_mem:
         return memory_dict
 
     def make_strategy_selection_mem(self):
-        memory_dict = {'alarm': [],                         # 0: normal
-                       'diagnosis': [],                     # 0
-                       'training_cond': [],                 # 0
+        memory_dict = {'alarm': [],                         # 0: normal, 1: abnormal, 2: emergency
+                       'diagnosis': [],                     # 0: x, 2301: RCS Leak .... Rule) 절차서 번호
+                       'training_cond': [],                 # 0: x, 1: Trained, 2: Untrained
                        'operation_mode': [],                # 0: Normal, 1: Abnormal, 2: Emergency
-                       'strategy': [],                      # Auto_LSTM
+                       'strategy': [],                      # Auto_LSTM # '2301_LSTM' .... Rule) '절차서번호_알고리즘'
                        'control_activation': []}
         print('전략 설정용 메모리 설정 완료')
         return memory_dict

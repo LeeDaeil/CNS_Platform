@@ -3,10 +3,10 @@ import time
 import CNS_Send_UDP
 from copy import deepcopy
 
-# ---------------------------------------------------------------------------------------------
-# 진단 기능
-# ---------------------------------------------------------------------------------------------
-# 인공지능 알고리즘 결합 필요
+# ======================================================================================================================
+# 진단 기능 결합 필요
+# 비정상 시, 3가지 출력 값만 잘 주면 됨.
+
 class Func_diagnosis(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
@@ -21,12 +21,12 @@ class Func_diagnosis(multiprocessing.Process):
 
             if self.mem['KLAMPO9']['V'] != 1:
                 self.dumy_mem['alarm'].append(0)
-                self.dumy_mem['diagnosis'].append('0')
+                self.dumy_mem['diagnosis'].append(0)
                 self.dumy_mem['training_cond'].append(0)
 
             else:
-                self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부
-                self.dumy_mem['diagnosis'].append('2301')        # O2: 진단된 비정상 절차서
+                self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부/
+                self.dumy_mem['diagnosis'].append(2301)        # O2: 진단된 비정상 절차서
                 self.dumy_mem['training_cond'].append(1)         # O3: 학습 여부
                 # print('1')
             # =================================================
@@ -43,9 +43,8 @@ class Func_diagnosis(multiprocessing.Process):
             # =================================================
             time.sleep(1)
 
-# ---------------------------------------------------------------------------------------------
+# ======================================================================================================================
 # 전략 설정 기능
-# ---------------------------------------------------------------------------------------------
 
 class Func_strategy(multiprocessing.Process):
     def __init__(self, mem):
@@ -54,29 +53,29 @@ class Func_strategy(multiprocessing.Process):
         self.trig_mem = mem[1]
         self.dumy_mem = deepcopy(self.trig_mem)
 
-    def run(self):                                              # I1: 비정상 여부 / O1: 운전 모드
+    def run(self):
         while True:
-            # ===========================================
-            # self.dumy_mem = deepcopy(self.trig_mem)
-            # ===========================================
             self.strategy_selection()
-            if self.trig_mem['alarm']!= []:
-                if self.trig_mem['alarm'][-1] == 1:
-                    self.dumy_mem['operation_mode'].append(1)
-                    # print('2')
-                elif self.trig_mem['alarm'][-1] ==0:
-                    self.dumy_mem['operation_mode'].append(0)
-                else:
-                    pass
-                time.sleep(1)
+            self.Identification_operation_mode()
 
-    def strategy_selection(self):                   # I1: 학습 여부, I2: 진단된 비정상 절차서 / O1: 제어 기능 활성화 신호, O2: 진단된 비정상 절차서
+    def Identification_operation_mode(self):
+        if self.trig_mem['alarm'] != []:
+            if self.trig_mem['alarm'][-1] == 1:                 # 비정상 운전 상태 식별
+                self.dumy_mem['operation_mode'].append(1)
+                # print('2')
+            elif self.trig_mem['alarm'][-1] == 0:               # 정상 운전 상태 식별
+                self.dumy_mem['operation_mode'].append(0)       # 추후 추가) 정상-Startup 운전
+            elif self.trig_mem['alarm'][-1] == 2:               # 비상 운전 상태 식별
+                self.dumy_mem['operation_mode'].append(2)
+            else:
+                pass
+            time.sleep(1)
 
+    def strategy_selection(self):                   # I1: 학습 여부, I2: 진단 절차서 / O1: 전략, O2: 제어 기능 활성화 신호
             if self.trig_mem['training_cond'] != [] and self.trig_mem['diagnosis'] != []:
-
-                if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == '2301':
-                    self.dumy_mem['strategy'].append('Auto_LSTM')
-                    self.dumy_mem['control_activation'].append(10)       # 수정 필요 - 각자
+                if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == 2301:
+                    self.dumy_mem['strategy'].append('2301_LSTM')
+                    self.dumy_mem['control_activation'].append(10)       # 필요하려나?..
                     # print('3')
                 else:
                     pass
