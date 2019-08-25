@@ -1,44 +1,55 @@
 import matplotlib.pyplot as plt
-from Interface.Trend_window import Ui_Dialog as Trend_ui
-from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
-from PyQt5 import QtCore
+from Interface.Trend_window import Ui_Dialog as Rod_UI
+from PyQt5.QtWidgets import QDialog, QApplication, QWidget
+from PyQt5 import QtCore, QtGui, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-
+import sys
+import CNS_Send_UDP
 
 class sub_tren_window(QDialog):
-
-    def __init__(self, mem):
+    def __init__(self, mem=None):
         super().__init__()
-        self.mem = mem
-
-        self.Trend_ui = Trend_ui()
+        # ===============================================================
+        # 메모리 호출 부분 없으면 Test
+        if mem != None:
+            self.mem = mem
+        else:
+            print('TEST_interface')
+        # ===============================================================
+        # CNS 정보 읽기
+        with open('pro.txt', 'r') as f:
+            self.cns_ip, self.cns_port = f.read().split('\t') # [cns ip],[cns port]
+        self.CNS_udp = CNS_Send_UDP.CNS_Send_Signal(self.cns_ip, int(self.cns_port))
+        # ===============================================================
+        self.Trend_ui = Rod_UI()
         self.Trend_ui.setupUi(self)
         # ===============================================================
         # rod gp
         self.draw_rod_his_gp()
-
-        # self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
-        #  ==============================================================
-        self.Trend_ui.listWidget.addItem('RCS_DNBR_1')
-        self.Trend_ui.listWidget.addItem('RCS_DNBR_2')
-        #  ==============================================================
+        # ===============================================================
+        # rod control
+        self.Trend_ui.rodup.clicked.connect(self.rod_up)
+        self.Trend_ui.roddown.clicked.connect(self.rod_down)
+        # ===============================================================
 
         timer = QtCore.QTimer(self)
         for _ in [self.update_window, self.update_rod_his_gp]:
             timer.timeout.connect(_)
         timer.start(500)
 
-        self.Trend_ui.listWidget.itemClicked.connect(self.print_out)
-        # self.Trend_ui.listWidget.itemClicked(self.print_out)
-
         self.show()
 
+    def rod_up(self):
+        self.CNS_udp._send_control_signal(['KSWO33', 'KSWO32'], [1, 0])
+
+    def rod_down(self):
+        self.CNS_udp._send_control_signal(['KSWO33', 'KSWO32'], [0, 1])
+
     def update_window(self):
-        self.Trend_ui.Test_label.setText('{:0.2f}'.format(self.mem['ZINST58']['V']))
-        self.Trend_ui.Rod_1.setGeometry(30, 100, 41, abs(self.mem['KBCDO10']['V'] - 228))
-        self.Trend_ui.Rod_2.setGeometry(90, 100, 41, abs(self.mem['KBCDO9']['V'] - 228))
-        self.Trend_ui.Rod_3.setGeometry(150, 100, 41, abs(self.mem['KBCDO8']['V'] - 228))
-        self.Trend_ui.Rod_4.setGeometry(210, 100, 41, abs(self.mem['KBCDO7']['V'] - 228))
+        self.Trend_ui.Rod_1.setGeometry(10, 80, 41, abs(self.mem['KBCDO10']['V'] - 228))
+        self.Trend_ui.Rod_2.setGeometry(70, 80, 41, abs(self.mem['KBCDO9']['V'] - 228))
+        self.Trend_ui.Rod_3.setGeometry(130, 80, 41, abs(self.mem['KBCDO8']['V'] - 228))
+        self.Trend_ui.Rod_4.setGeometry(190, 80, 41, abs(self.mem['KBCDO7']['V'] - 228))
         self.Trend_ui.Dis_Rod_4.setText(str(self.mem['KBCDO7']['V']))
         self.Trend_ui.Dis_Rod_3.setText(str(self.mem['KBCDO8']['V']))
         self.Trend_ui.Dis_Rod_2.setText(str(self.mem['KBCDO9']['V']))
@@ -67,27 +78,3 @@ class sub_tren_window(QDialog):
         self.rod_ax.set_yticklabels(['Down', 'Stay', 'UP'])
         self.rod_ax.grid()
         self.rod_canvas.draw()
-
-
-
-    def print_out(self, item):
-        # LCO_name = item.text().split('\t')[1]
-        # if LCO_name == 'LCO 1.1.1':
-        #     content = 'LCO 1.1.1\n불만족 조건: 가압기 압력이 150km/cm^2 이 되면 안됨.\n 현재 가압기 압력 상태:{}'.format(self.mem['ZINST58']['V'])
-        #     QMessageBox.information(self, "LCO 정보", content)
-
-        self.r = 30
-
-        if item.text() == 'RCS_DNBR_1':
-            QMessageBox.information(self, "LCO 정보", self.RCS_DNBR_Parameter_1())
-        elif item.text() == 'RCS_DNBR_2':
-            QMessageBox.information(self, "LCO 정보", self.RCS_DNBR_Parameter_2())
-
-    def RCS_DNBR_Parameter_1(self):
-        return str(self.r)
-
-    def RCS_DNBR_Parameter_2(self):
-        if self.mem['ZINST58']['V'] > 155:
-            return str('불만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
-        elif self.mem['ZINST58']['V'] < 154:
-            return str('만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))

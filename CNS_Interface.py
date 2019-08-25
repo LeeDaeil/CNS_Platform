@@ -103,7 +103,7 @@ class MyForm(QDialog):
         self.show()
 
     # ======================= Trend Popup===============================
-
+    # 제어봉 조작 패널
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem)
 

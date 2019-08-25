@@ -6,41 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>721</width>
-    <height>548</height>
+    <width>700</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="Test_label">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>56</width>
-     <height>12</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Value</string>
-   </property>
-  </widget>
-  <widget class="QListWidget" name="listWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>30</y>
-     <width>256</width>
-     <height>31</height>
-    </rect>
-   </property>
-  </widget>
   <widget class="QLabel" name="Rod_1">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>100</y>
+     <x>10</x>
+     <y>80</y>
      <width>41</width>
      <height>141</height>
     </rect>
@@ -58,8 +35,8 @@
   <widget class="QLabel" name="Rod_1_back">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>100</y>
+     <x>10</x>
+     <y>80</y>
      <width>41</width>
      <height>228</height>
     </rect>
@@ -83,8 +60,8 @@
   <widget class="QLabel" name="Rod_2">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>100</y>
+     <x>70</x>
+     <y>80</y>
      <width>41</width>
      <height>141</height>
     </rect>
@@ -102,8 +79,8 @@
   <widget class="QLabel" name="Rod_2_back">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>100</y>
+     <x>70</x>
+     <y>80</y>
      <width>41</width>
      <height>228</height>
     </rect>
@@ -127,8 +104,8 @@
   <widget class="QLabel" name="Rod_3_back">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>100</y>
+     <x>130</x>
+     <y>80</y>
      <width>41</width>
      <height>228</height>
     </rect>
@@ -152,8 +129,8 @@
   <widget class="QLabel" name="Rod_4_back">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>100</y>
+     <x>190</x>
+     <y>80</y>
      <width>41</width>
      <height>228</height>
     </rect>
@@ -177,8 +154,8 @@
   <widget class="QLabel" name="Rod_3">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>100</y>
+     <x>130</x>
+     <y>80</y>
      <width>41</width>
      <height>141</height>
     </rect>
@@ -196,8 +173,8 @@
   <widget class="QLabel" name="Rod_4">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>100</y>
+     <x>190</x>
+     <y>80</y>
      <width>41</width>
      <height>141</height>
     </rect>
@@ -215,8 +192,8 @@
   <widget class="QLabel" name="Dis_Rod_1">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>70</y>
+     <x>10</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -238,8 +215,8 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="Dis_Rod_2">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>70</y>
+     <x>70</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -261,8 +238,8 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="Dis_Rod_3">
    <property name="geometry">
     <rect>
-     <x>150</x>
-     <y>70</y>
+     <x>130</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -284,8 +261,8 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="Dis_Rod_4">
    <property name="geometry">
     <rect>
-     <x>210</x>
-     <y>70</y>
+     <x>190</x>
+     <y>50</y>
      <width>41</width>
      <height>20</height>
     </rect>
@@ -307,20 +284,184 @@ background-color: rgb(255, 255, 255);</string>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>270</x>
-     <y>100</y>
-     <width>421</width>
+     <x>250</x>
+     <y>80</y>
+     <width>441</width>
      <height>221</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="Rod_his"/>
   </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>680</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(178, 206, 240);
+border-style: outset;
+border-width: 2px;
+border-color: black;
+font: bold 14px;</string>
+   </property>
+   <property name="text">
+    <string>Autonomous Rod Controller</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>700</width>
+     <height>400</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color:rgb(216, 216, 216);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>330</y>
+     <width>110</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+border-style: outset;
+border-width: 0.5px;
+border-color: black;
+font: bold 14px;</string>
+   </property>
+   <property name="text">
+    <string>Manual
+Control</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>320</y>
+     <width>680</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(221, 221, 221);
+border-style: outset;
+border-width: 2px;
+border-color: black;
+font: bold 14px;</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>140</x>
+     <y>330</y>
+     <width>110</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+border-style: outset;
+border-width: 0.5px;
+border-color: black;
+font: bold 14px;</string>
+   </property>
+   <property name="text">
+    <string>Autonomous
+Control</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="rodup">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>330</y>
+     <width>200</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 0.5px;
+	border-color: black;
+	font: bold 35px;
+}
+QPushButton:pressed {
+    background-color: rgb(220, 220, 220);
+    border-style: inset;
+}</string>
+   </property>
+   <property name="text">
+    <string>▲</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="roddown">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>330</y>
+     <width>200</width>
+     <height>50</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QPushButton {
+	background-color: rgb(255, 255, 255);
+	border-style: outset;
+	border-width: 0.5px;
+	border-color: black;
+	font: bold 35px;
+}
+QPushButton:pressed {
+    background-color: rgb(220, 220, 220);
+    border-style: inset;
+}</string>
+   </property>
+   <property name="text">
+    <string>▼</string>
+   </property>
+  </widget>
+  <zorder>label_2</zorder>
   <zorder>Rod_2_back</zorder>
   <zorder>Rod_1_back</zorder>
   <zorder>Rod_4_back</zorder>
   <zorder>Rod_3_back</zorder>
-  <zorder>Test_label</zorder>
-  <zorder>listWidget</zorder>
   <zorder>Rod_1</zorder>
   <zorder>Rod_2</zorder>
   <zorder>Rod_3</zorder>
@@ -330,6 +471,12 @@ background-color: rgb(255, 255, 255);</string>
   <zorder>Dis_Rod_3</zorder>
   <zorder>Dis_Rod_4</zorder>
   <zorder>horizontalLayoutWidget</zorder>
+  <zorder>label</zorder>
+  <zorder>label_4</zorder>
+  <zorder>label_3</zorder>
+  <zorder>label_5</zorder>
+  <zorder>rodup</zorder>
+  <zorder>roddown</zorder>
  </widget>
  <resources/>
  <connections/>

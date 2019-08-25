@@ -22,6 +22,10 @@ class body:
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
+
+        with open('pro.txt', 'w') as f:                             # 타기능에서 CNS 정보 확인 용
+            f.write(f'{self.args.cnsip}\t{self.args.cnsport}')
+
         print(self.args)
         self.shared_mem = generate_mem().make_mem_structure()
         # ---------------------------------------------------------------------------------------- #
@@ -46,6 +50,7 @@ class body:
             self.process_list = [pro_list[0], pro_list[1], pro_list[3]]
         else:   # Test_clean_mem
             self.process_list = [pro_list[0]]
+
 
     def start(self):
         job_list = []
