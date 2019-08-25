@@ -4,20 +4,29 @@ import pandas as pd
 from sklearn import svm
 from sklearn.preprocessing import MinMaxScaler
 
-import PyQt5
-from PyQt5.QtWidgets import QDialog, QApplication, QMessageBox
-from PyQt5 import QtCore
+import PySide2
+from PySide2.QtWidgets import QDialog, QApplication, QMessageBox, QWidget
+from PySide2 import QtCore, QtWidgets
+from PySide2.QtGui import QFont
+from PySide2.QtCore import QCoreApplication
+from PySide2.QtGui import Qt
 
 # ------------------------------------------------------
 #from Interface.gui_study_9 import Ui_Dialog as Main_ui
-from Interface.study_9_rev import Ui_Dialog as Main_ui
+# from Interface.study_9_rev import Ui_Dialog as Main_ui
+# from Interface.study_9_rev2 import Ui_Dialog as Main_ui
+from Interface.study_9_rev3 import Ui_Dialog as Main_ui
 from Interface.resource import Study_9_re_rc
+
 # ------------------------------------------------------
 from Interface.Trend_window import Ui_Dialog as Trend_ui
 from Interface.current_plant_state import Ui_Dialog as Strategy_ui
+from Interface.popup_ss import Ui_MainForm as SS_ui
 
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+import Interface.Flowchart as mf
+import Interface.Flowchart_abnormal as mf_abnormal
 
 
 class interface_function(multiprocessing.Process):
@@ -45,7 +54,7 @@ class MyForm(QDialog):
         if True: # 메인 메모리와 연결된 부분
             self.mem = mem[0]
             self.Auto_mem = mem[-2]
-            self.trig_mem = mem[1]
+            self.strategy_selection_mem = mem[1]
 
         self.color_setting()
 
@@ -60,6 +69,15 @@ class MyForm(QDialog):
         self.Alarm_test_mode = True
         if self.Alarm_test_mode:
             self.Alarm_upcont = 0
+
+# ======================================================================================================================
+# 전략 설정 기능 트리거
+        self.st_triger = {
+            'ab_on/off': False,
+            'em_on/off': False,
+            'no_on/off': False
+        }
+# ======================================================================================================================
 
         # x msec마다 업데이트
         update_module = [self.update_comp, self.update_CSF, self.update_display, self.update_alarm, self.update_timmer,
@@ -76,6 +94,12 @@ class MyForm(QDialog):
         self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
         self.ui.pushButton_5.clicked.connect(self.Auto_Alarm_Click_Auto)
         # ================================================================
+
+# ======================================================================================================================
+# connecting popup function of strategy selection
+
+        self.ui.listWidget.itemClicked.connect(self.call_popup_ss)
+
         self.show()
 
     # ======================= Trend Popup===============================
@@ -83,10 +107,17 @@ class MyForm(QDialog):
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem)
 
-    # ======================= Strategy Popup===============================
+# ======================= Strategy Popup===============================
+# 추후 삭제
 
     def call_strategy_window(self):
         self.strategy_window = sub_strategy_window(self.trig_mem)
+
+# ======================================================================================================================
+# loading popup function of strategy selection
+
+    def call_popup_ss(self, item):
+        self.popup_ss = popup_ss(item, self.strategy_selection_mem)
 
     # ======================= Initial_coloe=============================
 
@@ -1070,21 +1101,24 @@ class MyForm(QDialog):
         else:
             return 0
 
-    # ======================= Autonomous DIS==============================
+# ======================= Autonomous DIS================================================================================
 
     def run_AUTO(self):
         if self.mem['KCNTOMS']['V'] < 4:
-            self.ui.Strategy_out.clear()
+            # self.ui.listWidget.clear()                        # 주석 후, listWidget 초기화 현상 해결 (어떤 로직?)
             self.ui.Auto_list.clear()
             self.AUTO_State = {
                 'Histoty': {}   # {Start_time: '', Content: ''
             }
-            self.Auto_Alarm_Click_Auto() # 실행 초기 입력
+            self.Auto_Alarm_Click_Auto()                        # 실행 초기 입력
 
         # Autonomous state alram
         self.Auto_Alarm_dis()
         self.Autonomous_operation_strategy()
         self.Autonomous_controller()
+        self.operation_state()
+        self.history_ss()
+        # self.tt()
 
     def Auto_Alarm_dis(self):
         if self.Auto_mem['Auto_state']:     # True
@@ -1117,12 +1151,13 @@ class MyForm(QDialog):
     def Auto_Alarm_Click_Man(self):
         self.Auto_mem['Auto_state'] = False
         self.Auto_mem['Man_state'] = True
-        self.ui.Strategy_out.append('{} Manual Operaion'.format(self.Call_CNS_time[0]))
+        self.ui.listWidget.addItem('{}\tManual Control'.format(self.Call_CNS_time[0]))
 
     def Auto_Alarm_Click_Auto(self):
         self.Auto_mem['Auto_state'] = True
         self.Auto_mem['Man_state'] = False
-        self.ui.Strategy_out.append('{} Autonomous Operaion'.format(self.Call_CNS_time[0]))
+        # append->addItem
+        # self.ui.listWidget.addItem('{} Autonomous Operaion'.format(self.Call_CNS_time[0]))
 
     def Autonomous_controller(self):
         if self.mem['KLAMPO9']['V'] == 1: self.add_list_signal('Reactor trip')
@@ -1153,9 +1188,66 @@ class MyForm(QDialog):
         else:
             self.Auto_mem['Current_op'] = 'Manual Operation'
 
-        self.ui.Current_op.setText('{}'.format(self.Auto_mem['Current_op']))
+        # self.ui.Current_op.setText('{}'.format(self.Auto_mem['Current_op']))
 
-    # ======================= Monitorin DIS ==============================
+# ======================================================================================================================
+# alarm function of operation state_by sb
+
+    def operation_state(self):
+        if self.strategy_selection_mem['operation_mode'] != []:
+            if self.strategy_selection_mem['operation_mode'][-1] == 1:
+                self.ui.pushButton_8.setStyleSheet(self.back_color['gray'])
+                self.ui.pushButton_9.setStyleSheet(self.back_color['yellow'])
+                self.ui.pushButton_10.setStyleSheet(self.back_color['gray'])
+
+            elif self.strategy_selection_mem['operation_mode'][-1] == 2:
+                self.ui.pushButton_8.setStyleSheet(self.back_color['gray'])
+                self.ui.pushButton_9.setStyleSheet(self.back_color['gray'])
+                self.ui.pushButton_10.setStyleSheet(self.back_color['red'])
+
+            else:
+                self.ui.pushButton_8.setStyleSheet(self.back_color['green'])
+                self.ui.pushButton_9.setStyleSheet(self.back_color['gray'])
+                self.ui.pushButton_10.setStyleSheet(self.back_color['gray'])
+
+# ======================================================================================================================
+# history function of strategy selection_by sb
+
+    def history_ss(self):
+        # 오호니 좋은데??
+        # 계속 가져다 쓸 변수는 self로 선언해서 쓰도록 하고 그런 것이 아니라면은 그냥 함수안에 평범하게 변수 지정해.
+        # 그렇다면 이건? 함수 안에 self.? 뭐로 선언하면 아래 함수가 상속받아서 self. 로 불러올 수 있을까????
+        triger = self.strategy_selection_mem['operation_mode']
+        triger_2= self.strategy_selection_mem['strategy']
+
+        if triger != []:
+            if triger[-1] == 1 and self.st_triger['ab_on/off'] == False:
+                if triger_2[-1] == '2301_LSTM':
+                    self.ui.listWidget.addItem('{}\tAbnormal Operation\tRCS Leak\tAuto by LSTM'.format(self.Call_CNS_time[0]))
+                    self.st_triger['ab_on/off'] = True
+            elif triger[-1] == 0 and self.st_triger['no_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tNormal Operation\t\tAuto by RL'.format(self.Call_CNS_time[0]))
+                self.st_triger['no_on/off'] = True
+            elif triger == 2 and self.st_triger['em_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
+                self.st_triger['em_on/off'] = True
+
+        # 시험 삼아 바꿔보자. 그냥 변수로 쓰면 안되? 어차피 여기에서 밖에 안쓸건데.
+        # self.triger = self.strategy_selection_mem['operation_mode']
+        # self.triger_2= self.strategy_selection_mem['strategy']
+        #
+        # if self.triger != []:
+        #     if self.triger[-1] == 1 and self.triger_2[-1] == '2301_LSTM' and self.st_triger['ab_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tAbnormal Operation\tAuto_LSTM'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['ab_on/off'] = True
+        #     elif self.triger[-1] == 0 and self.st_triger['no_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tNormal Operation\tAuto_RL'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['no_on/off'] = True
+        #     elif self.triger[-1] == 2 and self.st_triger['em_on/off'] == False:
+        #         self.ui.listWidget.addItem('{}\tEmergency Operation'.format(self.Call_CNS_time[0]))
+        #         self.st_triger['em_on/off'] = True
+
+# ======================= Monitoring DIS ===============================================================================
 
     def run_TSMS(self):
         if self.mem['KCNTOMS']['V'] < 4:
@@ -1410,7 +1502,7 @@ class sub_tren_window(QDialog):
         self.Trend_ui.setupUi(self)
         # ===============================================================
         # rod gp
-        self.draw_rod_his_gp()
+        #self.draw_rod_his_gp()
 
         # self.Trend_ui.listWidget.addItem('[00:00:01]\tLCO 1.1.1')
         #  ==============================================================
@@ -1464,7 +1556,7 @@ class sub_tren_window(QDialog):
         self.rod_canvas.draw()
 
 
-    #  ==============================================================
+
     def print_out(self, item):
         # LCO_name = item.text().split('\t')[1]
         # if LCO_name == 'LCO 1.1.1':
@@ -1486,8 +1578,9 @@ class sub_tren_window(QDialog):
             return str('불만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
         elif self.mem['ZINST58']['V'] < 154:
             return str('만족 {} {}'.format(self.r, self.mem['ZINST58']['V']))
-    #  ==============================================================
 
+
+# ======================================================================================================================
 class sub_strategy_window(QDialog):
     def __init__(self, mem):
         super().__init__()
@@ -1522,3 +1615,56 @@ class sub_strategy_window(QDialog):
                 self.blick = True
         else:
             print('No')
+
+# ======================================================================================================================
+# popup function of strategy selection_by sb
+
+class popup_ss(QWidget):
+    def __init__(self, item, mem):
+        self.trig_mem = mem
+        # print(self.trig_mem['strategy'])
+        QWidget.__init__(self)
+        self.init_widget()
+        self.flowchart(item, self.trig_mem)
+        self.show()
+
+    def init_widget(self):
+        self.main_ui = SS_ui()
+        self.main_ui.setupUi(self)
+
+        self.font = QFont("Calibri", 15, QFont.Bold)
+        self.main_ui.Sec_label.setFont(self.font)
+        self.main_ui.Sec_label_2.setFont(self.font)
+        self.main_ui.Fou_label.setFont(self.font)
+
+        # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
+
+        # self.setWindowTitle('Strategy selection')
+        # self.setGeometry(100, 100, 640, 480)
+        # self.frame1 = QtWidgets.QFrame(self)
+        # self.frame1.setGeometry(QtCore.QRect(0, 0, 600, 400))
+        # self.frame1.setStyleSheet("background-color: rgb(255, 30, 10);")
+
+    def flowchart(self, item, mem):
+        operation_state = item.text().split('\t')[1]
+        strategy_name = item.text().split('\t')[3]
+
+        if operation_state == 'Abnormal Operation':
+            if strategy_name == 'Auto by LSTM':
+
+                mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
+                self.main_ui.Sec_label.setText('Abnormal Operation')
+                self.main_ui.Sec_label_2.setText('RCS Leak')
+                self.main_ui.Fou_label.setText('Auto Control by LSTM')
+                # mf.make_flowchart(self.frame1)
+            else:
+                pass
+# ======================================================================================================================
+
+
+
+
+
+
+
+
