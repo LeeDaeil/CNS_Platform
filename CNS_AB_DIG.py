@@ -29,7 +29,7 @@ class Abnormal_dig_module(multiprocessing.Process):
 
         self.Dig_net = MainNet(net_type='LSTM', input_pa=136, output_pa=21, time_leg=10)
         self.Dig_net.load_model()
-        with open('minmax.bin', 'rb') as f:
+        with open('FIN_all_db_min_max_sc.bin', 'rb') as f:
             self.mix_max = pickle.load(f)
 
         self.p_shut('네트워크 모델 로드')
@@ -70,18 +70,18 @@ class Abnormal_dig_module(multiprocessing.Process):
             try:
                 tick = self.mem['KCNTOMS']['D'][_]
                 input_para = [
-                    # self.mem['BFV122']['D'][_],
-                    # self.mem['BFV478']['D'][_],
-                    # self.mem['BFV479']['D'][_],
-                    # self.mem['BFV488']['D'][_],
-                    # self.mem['BFV489']['D'][_],
-                    # self.mem['BFV498']['D'][_],
-                    # self.mem['BFV499']['D'][_],
-                    # self.mem['BHSV']['D'][_],
-                    # self.mem['BHTBY']['D'][_],
-                    # self.mem['BHV033']['D'][_],
-                    # self.mem['BHV1']['D'][_],
-                    # self.mem['BHV108']['D'][_],
+                    self.mem['BFV122']['D'][_],
+                    self.mem['BFV478']['D'][_],
+                    self.mem['BFV479']['D'][_],
+                    self.mem['BFV488']['D'][_],
+                    self.mem['BFV489']['D'][_],
+                    self.mem['BFV498']['D'][_],
+                    self.mem['BFV499']['D'][_],
+                    self.mem['BHSV']['D'][_],
+                    self.mem['BHTBY']['D'][_],
+                    self.mem['BHV033']['D'][_],
+                    self.mem['BHV1']['D'][_],
+                    self.mem['BHV108']['D'][_],
                     self.mem['BHV2']['D'][_],
                     self.mem['BHV208']['D'][_],
                     self.mem['BHV3']['D'][_],
@@ -133,20 +133,8 @@ class Abnormal_dig_module(multiprocessing.Process):
                     self.mem['KLAMPO209']['D'][_],
                     self.mem['KLAMPO216']['D'][_],
                     self.mem['KLAMPO28']['D'][_],
-                    self.mem['KLAMPO28']['D'][_],
-                    self.mem['KLAMPO28']['D'][_],
-                    self.mem['KLAMPO28']['D'][_],
-                    self.mem['KLAMPO29']['D'][_],
-                    self.mem['KLAMPO29']['D'][_],
-                    self.mem['KLAMPO29']['D'][_],
                     self.mem['KLAMPO29']['D'][_],
                     self.mem['KLAMPO30']['D'][_],
-                    self.mem['KLAMPO30']['D'][_],
-                    self.mem['KLAMPO30']['D'][_],
-                    self.mem['KLAMPO30']['D'][_],
-                    self.mem['KLAMPO31']['D'][_],
-                    self.mem['KLAMPO31']['D'][_],
-                    self.mem['KLAMPO31']['D'][_],
                     self.mem['KLAMPO31']['D'][_],
                     self.mem['KLAMPO69']['D'][_],
                     self.mem['KLAMPO70']['D'][_],
@@ -218,15 +206,16 @@ class Abnormal_dig_module(multiprocessing.Process):
                     self.mem['ZSGNOR2']['D'][_],
                     self.mem['ZSGNOR3']['D'][_],
                     self.mem['ZVCT']['D'][_],
+                    self.mem['ZVCT']['D'][_], # 이거 뺴야함 137번째 더미 값
                 ]
 
-                # out_min_max = self.mix_max.transform([input_para])
-                # print(np.shape(out_min_max))
-
-                temp.append(input_para)
+                out_min_max = self.mix_max.transform([input_para])[0] # 137번 값 제거
+                print(np.shape(out_min_max[0:136]))
+                temp.append(out_min_max[0:136])
 
             except Exception as e:
-                print(self, e)
+                pass
+                # print(self, e)
 
         return temp
 
@@ -236,7 +225,7 @@ class Abnormal_dig_module(multiprocessing.Process):
     def sub_run_1(self, input_data, time_legnth):
         if len(input_data) == time_legnth:
             proba = self.Dig_net.predict_action(input_data)
-            print(proba)
+            # print(proba)
             self.p_shut('데이터 길이 완료 - 네트워크 계산 시작 - {}'.format(proba))
         else:
             self.p_shut('데이터 길이 부족함 - 네트워크 계산 대기')
@@ -258,7 +247,7 @@ class MainNet:
         shared = LSTM(256)(state)
         shared = Dense(256, activation='relu')(shared)
         shared = Dense(512, activation='relu')(shared)
-        shared = Dense(2, activation='softmax')(shared)
+        shared = Dense(21, activation='softmax')(shared)
 
         model = Model(inputs=state, outputs=shared)
         return model
@@ -268,4 +257,4 @@ class MainNet:
         return predict_result
 
     def load_model(self):
-        self.all_dig.load_weights("ab_nor_model.h5")
+        self.all_dig.load_weights("ab_all_model.h5")

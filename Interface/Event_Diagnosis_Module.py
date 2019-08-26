@@ -37,8 +37,12 @@ class sub_event_window(QDialog):
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
 
     def update_window(self):
-        # 비정상 확률 등 라벨을 여기에 표기
-        pass
+        try:
+            if self.auto_mem['Abnormal_Dig_result']['Result'][0] < 0.9:
+                self.EDM_ui.label_4.setText('23-01(1차측 누설)')
+        except Exception as e:
+            pass
+            #print(self, e)
 
     def draw_dig_his_gp(self):
         # 위 그래프
