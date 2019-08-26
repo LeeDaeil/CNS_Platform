@@ -106,16 +106,15 @@ class sub_tren_window(QDialog):
 
         self.rod_ax.clear()
         temp = []
-        for _ in range(len(self.mem['KSWO33']['L'])):
-            if self.mem['KSWO33']['L'][_] == 0 and self.mem['KSWO32']['L'][_] == 0:
+        for _ in range(len(self.mem['KSWO33']['D'])):
+            if self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 0:
                 temp.append(0)
-            elif self.mem['KSWO33']['L'][_] == 1 and self.mem['KSWO32']['L'][_] == 0:
+            elif self.mem['KSWO33']['D'][_] == 1 and self.mem['KSWO32']['D'][_] == 0:
                 temp.append(1)
-            elif self.mem['KSWO33']['L'][_] == 0 and self.mem['KSWO32']['L'][_] == 1:
+            elif self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 1:
                 temp.append(-1)
         self.rod_ax.plot(temp)
         self.rod_ax.set_ylim(-1.2, 1.2)
-        self.rod_ax.set_xlim(len(self.mem['KSWO33']['L']) - 100, len(self.mem['KSWO33']['L']))
         self.rod_ax.set_yticks([-1, 0, 1])
         self.rod_ax.set_yticklabels(['Down', 'Stay', 'UP'])
         self.rod_ax.grid()

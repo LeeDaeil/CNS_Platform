@@ -8,6 +8,7 @@ from CNS_CFun import *
 from CNS_Interface import *
 import argparse
 
+import LIGHT
 
 class body:
     def __init__(self):
@@ -86,7 +87,9 @@ class generate_mem:
                                               '[00:04:36] RCP 2 Stop',
                                               '[00:04:36] RCP 3 Stop',
                                               ],
-                       'Start_up_operation_his': {'power': [], 'up_cond': [], 'low_cond': []}}
+                       'Start_up_operation_his': {'power': [], 'up_cond': [], 'low_cond': []}, # Start-up 시 제어봉 제어 결과 표시
+                       'Abnormal_Dig_result': {'Result': []},
+                       }
         print('자율운전 메모리 생성 완료')
         return memory_dict
 
@@ -154,13 +157,25 @@ class generate_mem:
 
     def make_mem_structure(self, show_mem_list=False):
         print('=' * 25 + '메모리 생성 시작' + '=' * 25)
-        memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
-                       Manager().dict(self.make_strategy_selection_mem()),              # [1]
-                       # Manager().dict(self.make_diagnosis_mem()),                     # [1]
-                       # Manager().dict(self.make_strategy_mem()),                      # [2]
-                       Manager().dict(self.make_autonomous_mem()),                      # [-2]
-                       Manager().dict(self.make_clean_mem()),                           # [-1]
-                       ]
+        if LIGHT.LIGHT:
+            # LIGHT 버전이 동작하고 있으면 메모리에서는 'L'에 데이터를 축적하지 않음.
+            # 모든 데이터는 일회성 'D' 에 기입됨.
+            print('=' * 25 + '라이트 버전으로 동작' + '=' * 25)
+            memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=50)),  # [0]
+                           Manager().dict(self.make_strategy_selection_mem()),              # [1]
+                           # Manager().dict(self.make_diagnosis_mem()),                     # [1]
+                           # Manager().dict(self.make_strategy_mem()),                      # [2]
+                           Manager().dict(self.make_autonomous_mem()),                      # [-2]
+                           Manager().dict(self.make_clean_mem()),                           # [-1]
+                           ]
+        else:
+            memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
+                           Manager().dict(self.make_strategy_selection_mem()),              # [1]
+                           # Manager().dict(self.make_diagnosis_mem()),                     # [1]
+                           # Manager().dict(self.make_strategy_mem()),                      # [2]
+                           Manager().dict(self.make_autonomous_mem()),                      # [-2]
+                           Manager().dict(self.make_clean_mem()),                           # [-1]
+                           ]
         print('=' * 25 + '메모리 생성 완료' + '=' * 25)
         '''
         개인이 설계한 메모리를 추가로 집어 넣을 것.

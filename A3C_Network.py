@@ -89,7 +89,7 @@ class A3C:
         return discounted_r
 
     def train_models(self, states, actions, rewards):
-        """ Update actor and critic networks from experience
+        """ Update all_dig and critic networks from experience
         """
         # Compute discounted rewards and Advantage (TD. Error)
         discounted_rewards = self.discount(rewards)

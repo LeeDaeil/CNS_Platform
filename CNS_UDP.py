@@ -5,6 +5,8 @@ from copy import deepcopy
 from time import sleep
 import time
 import pandas as pd
+import LIGHT
+
 
 class UDPSocket(multiprocessing.Process):
     def __init__(self, mem, IP, Port, shut_up = False):
@@ -37,69 +39,69 @@ class UDPSocket(multiprocessing.Process):
 
         # data, client = udpSocket.recvfrom(44388) # 최대 버퍼 수
         while True:
-            try:
-                data, client = udpSocket.recvfrom(44388)
-                # print(len(data))
-                pid_list = self.update_mem(data[8:]) # 주소값을 가지는 8바이트를 제외한 나머지 부분
+            # try:
+            data, client = udpSocket.recvfrom(44388)
+            # print(len(data))
+            pid_list = self.update_mem(data[8:]) # 주소값을 가지는 8바이트를 제외한 나머지 부분
 
-                # 코드가 처음 돌때만 동작 ----------------------
-                if self.old_CNS_data['KCNTOMS']['L'] == []:
-                    if not self.shut_up: print('List mem empty')
-                    self.update_old_CNS_data()
-                # ----------------------------------------------
+            # 코드가 처음 돌때만 동작 ----------------------
+            if self.old_CNS_data['KCNTOMS']['L'] == []:
+                if not self.shut_up: print('List mem empty')
+                self.update_old_CNS_data()
+            # ----------------------------------------------
 
-                if self.read_CNS_data['KCNTOMS']['V'] == 0:
-                    if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
-                        self.mem[-1]['Clean'] = True
-                        if not self.shut_up: print(self, 'Memory clear')
+            if self.read_CNS_data['KCNTOMS']['V'] == 0:
+                if self.old_CNS_data['KCNTOMS']['L'][-1] != self.read_CNS_data['KCNTOMS']['V']:
+                    self.mem[-1]['Clean'] = True
+                    if not self.shut_up: print(self, 'Memory clear')
 
-                        dumy = deepcopy(self.mem[0])
-                        for dumy_key in dumy.keys():
-                            dumy[dumy_key]['L'].clear()
-                            dumy[dumy_key]['D'].clear()
-                        for _ in dumy.keys():
-                            self.mem[0][_] = dumy[_]
+                    dumy = deepcopy(self.mem[0])
+                    for dumy_key in dumy.keys():
+                        dumy[dumy_key]['L'].clear()
+                        dumy[dumy_key]['D'].clear()
+                    for _ in dumy.keys():
+                        self.mem[0][_] = dumy[_]
 
-                        self.old_CNS_data = deepcopy(self.mem[0])  # main mem copy
-                        self.read_CNS_data = deepcopy(self.mem[0])
-                        for __ in self.old_CNS_data.keys():
-                            self.mem[0][__] = self.old_CNS_data[__]
-                    else:
-                        if not self.shut_up: print(self, 'initial stedy')
+                    self.old_CNS_data = deepcopy(self.mem[0])  # main mem copy
+                    self.read_CNS_data = deepcopy(self.mem[0])
+                    for __ in self.old_CNS_data.keys():
+                        self.mem[0][__] = self.old_CNS_data[__]
+                else:
+                    if not self.shut_up: print(self, 'initial stedy')
 
-                        # 초기 상태인 경우 수집된 데이터를 저장하기위한 파일 이름을 선정 -------
-                        now = time.localtime()
-                        s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
-                                                               now.tm_sec)
-                        self.save_file_name = '{}.csv'.format(s)
-                        self.initial_save = False  # 초기 상태가 호출된 경우 1번만 저장하는 기능
-                        # ---------------------------------------------------------
+                    # 초기 상태인 경우 수집된 데이터를 저장하기위한 파일 이름을 선정 -------
+                    now = time.localtime()
+                    s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
+                                                           now.tm_sec)
+                    self.save_file_name = '{}.csv'.format(s)
+                    self.initial_save = False  # 초기 상태가 호출된 경우 1번만 저장하는 기능
+                    # ---------------------------------------------------------
 
-                        for __ in self.old_CNS_data.keys():
-                            self.old_CNS_data[__]['V'] = self.read_CNS_data[__]['V'] # 초기 상태여도 V는 업데이트
-                            self.mem[0][__] = self.old_CNS_data[__]
+                    for __ in self.old_CNS_data.keys():
+                        self.old_CNS_data[__]['V'] = self.read_CNS_data[__]['V'] # 초기 상태여도 V는 업데이트
+                        self.mem[0][__] = self.old_CNS_data[__]
 
-                else:   # not 0
-                    if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
-                        if not self.shut_up: print(self, 'run CNS')
-                        self.initial_save = False  # run에서 stop으로 상태가 바뀔때 데이터 저장을 위해서 사용
+            else:   # not 0
+                if self.old_CNS_data['KCNTOMS']['D'][-1] != self.read_CNS_data['KCNTOMS']['V']:
+                    if not self.shut_up: print(self, 'run CNS')
+                    self.initial_save = False  # run에서 stop으로 상태가 바뀔때 데이터 저장을 위해서 사용
 
-                        # 일정 시간마다 데이터 저장하는 파트 -------
-                        if self.history_min != time.localtime().tm_min:
-                            self.save_file(self.save_file_name)
-                            self.history_min = time.localtime().tm_min  #timer  업데이터
-                        # ------------------------------------------
-
-                        self.update_old_CNS_data()
-
-                        for __ in self.old_CNS_data.keys():
-                            self.mem[0][__] = self.old_CNS_data[__]
-                    else:
-                        if not self.shut_up: print(self, 'stop CNS')
+                    # 일정 시간마다 데이터 저장하는 파트 -------
+                    if self.history_min != time.localtime().tm_min:
                         self.save_file(self.save_file_name)
-                        pass
-            except Exception as e:
-                print(e)
+                        self.history_min = time.localtime().tm_min  #timer  업데이터
+                    # ------------------------------------------
+
+                    self.update_old_CNS_data()
+
+                    for __ in self.old_CNS_data.keys():
+                        self.mem[0][__] = self.old_CNS_data[__]
+                else:
+                    if not self.shut_up: print(self, 'stop CNS')
+                    self.save_file(self.save_file_name)
+                    pass
+            # except Exception as e:
+            #     print(e)
 
     def update_mem(self, data):
         pid_list = []
@@ -118,7 +120,13 @@ class UDPSocket(multiprocessing.Process):
 
     def append_value_to_old_CNS_data(self, key, value):
         self.old_CNS_data[key]['V'] = value
-        self.old_CNS_data[key]['L'].append(value)
+        if LIGHT.LIGHT:
+            if len(self.old_CNS_data[key]['L']) > 0:
+                pass
+            else:
+                self.old_CNS_data[key]['L'].append(value)
+        else:
+            self.old_CNS_data[key]['L'].append(value)
         self.old_CNS_data[key]['D'].append(value)
 
     def update_other_state_to_old_CNS_data(self, para, value):
@@ -145,7 +153,11 @@ class UDPSocket(multiprocessing.Process):
         if not self.initial_save:
             if not self.shut_up: print(self, 'CNS file save')
             temp = pd.DataFrame()
-            for keys in self.mem[0].keys():
-                temp[keys] = self.mem[0][keys]['L']
+            if LIGHT.LIGHT:
+                for keys in self.mem[0].keys():
+                    temp[keys] = self.mem[0][keys]['D']
+            else:
+                for keys in self.mem[0].keys():
+                    temp[keys] = self.mem[0][keys]['L']
             temp.to_csv(file_name)
             self.initial_save = True

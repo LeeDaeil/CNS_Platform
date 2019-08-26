@@ -178,7 +178,7 @@ class function4_1(multiprocessing.Process):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) > 2:
+            if len(self.mem['QPROREL']['D']) > 2:
             # ==========================================================================================#
                 if self.trigger_mem['4_1_state']:
                     print('{} 출력 증감발 기능이 운전 중'.format(self))
@@ -199,7 +199,7 @@ class function4_2(multiprocessing.Process):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) > 2:
+            if len(self.mem['QPROREL']['D']) > 2:
             # ==========================================================================================#
                 if self.mem['QPROREL']['V'] < 0.80:
                     print('{} 출력 80% 이하 감지 진단'.format(self))
@@ -224,7 +224,7 @@ class function4_3(multiprocessing.Process):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) > 2:
+            if len(self.mem['QPROREL']['D']) > 2:
             # ==========================================================================================#
                 if self.trigger_mem['4_2_state'] == '80%Min':
                     print('{} 출력 80% 이하 감지로 전략 조정'.format(self))
@@ -253,7 +253,7 @@ class function4_4(multiprocessing.Process):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) > 2:
+            if len(self.mem['QPROREL']['D']) > 2:
             # ==========================================================================================#
                 if self.trigger_mem['4_4_state']:
                     print('{} 조치 기능이 운전 중'.format(self))
@@ -280,10 +280,10 @@ class funtion5(multiprocessing.Process):
         while True:
             #==========================================================================================#
             # CNS 초기 조건 발생시 대기하는 부분
-            if len(self.mem['QPROREL']['L']) > 2:
+            if len(self.mem['QPROREL']['D']) > 2:
             # ==========================================================================================#
             #     print(self, self.mem['Normal_0']['V'], self.mem['Normal_1']['V'])
-                if len(self.mem['Normal_0']['L']) > 5:
+                if len(self.mem['Normal_0']['D']) > 5:
                     self.trig_mem['Normal'] = False
                     if self.one_time == 0:
                         self.UDP_sock._send_control_signal(['KFZRUN', 'KSWO280', 'KSWO279', 'KSWO278'],

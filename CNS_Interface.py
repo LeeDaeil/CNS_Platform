@@ -792,12 +792,12 @@ class MyForm(QDialog):
     def CSF_CORE_HEAT(self):
 
         # self.mem['QPROLD']['V'] * 100
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
             ## CSF 감시 가능 상태
 
-            HLT1_Past = self.mem['UHOLEG1']['L'][-2]  # UHOLEG1 Column 첫번째 행
-            HLT2_Past = self.mem['UHOLEG2']['L'][-2]  # UHOLEG2 Column 첫번째 행
-            HLT3_Past = self.mem['UHOLEG3']['L'][-2]  # UHOLEG3 Column 첫번째 행
+            HLT1_Past = self.mem['UHOLEG1']['D'][-2]  # UHOLEG1 Column 첫번째 행
+            HLT2_Past = self.mem['UHOLEG2']['D'][-2]  # UHOLEG2 Column 첫번째 행
+            HLT3_Past = self.mem['UHOLEG3']['D'][-2]  # UHOLEG3 Column 첫번째 행
             HLT1 = self.mem['UHOLEG1']['V']  # UHOLEG1 Column 111 - 4
             HLT2 = self.mem['UHOLEG2']['V']  # UHOLEG2 Column 112 - 5
             HLT3 = self.mem['UHOLEG3']['V']  # UHOLEG3 Column 113 - 6
@@ -864,11 +864,11 @@ class MyForm(QDialog):
 
     def CSF_RCS_integrate(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
 
-            CLT1_Past = self.mem['UCOLEG1']['L'][-2]  # UCOLEG1 Column 첫번째 행 108 - 1
-            CLT2_Past = self.mem['UCOLEG2']['L'][-2]  # UCOLEG2 Column 첫번째 행 109 - 2
-            CLT3_Past = self.mem['UCOLEG3']['L'][-2]  # UCOLEG3 Column 첫번째 행 110 - 3
+            CLT1_Past = self.mem['UCOLEG1']['D'][-2]  # UCOLEG1 Column 첫번째 행 108 - 1
+            CLT2_Past = self.mem['UCOLEG2']['D'][-2]  # UCOLEG2 Column 첫번째 행 109 - 2
+            CLT3_Past = self.mem['UCOLEG3']['D'][-2]  # UCOLEG3 Column 첫번째 행 110 - 3
             CLT1 = self.mem['UCOLEG1']['V']  # UCOLEG1 Column
             CLT2 = self.mem['UCOLEG2']['V']  # UCOLEG2 Column
             CLT3 = self.mem['UCOLEG3']['V']  # UCOLEG3 Column
@@ -946,7 +946,7 @@ class MyForm(QDialog):
 
     def CSF_CTMT(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
             CMIP_ = self.mem['ZINST26']['V']  # ZINST26 Column 8
             CMSUMPL_ = self.mem['ZINST17']['V']  # ZINST17 Column 단위M 0.xx형식 19
             CMRAD_ = self.mem['ZINST22']['V']  # ZINST22 Column 7
@@ -972,7 +972,7 @@ class MyForm(QDialog):
 
     def CSF_REA(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
             PR = self.mem['ZINST1']['V']  # ZINST1 Column 출력영역 검출기 단위:% 163
             IR = self.mem['ZINST2']['V']  # ZINST2 Column 중간영역 검출기 지시치:A 165
             IRA = self.mem['FSRMDPM']['V']  # FSRMDPM Column 중간영역 기동율 단위:DPM 161
@@ -1002,7 +1002,7 @@ class MyForm(QDialog):
 
     def CSF_RCS_Inven(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
             PRZL = self.mem['ZPRZNO']['V']  # ZPRZNO Column PZR Water Lvl(0.0-1.0) 153 - 16
             if PRZL < 0.92:
                 if PRZL > 0.17:
@@ -1020,7 +1020,7 @@ class MyForm(QDialog):
 
     def CSF_RCS_Heat(self):
 
-        if len(self.mem['KCNTOMS']['L']) >= 1:
+        if len(self.mem['KCNTOMS']['D']) >= 1:
             SG1NRL = self.mem['ZINST78']['V']  # ZINST78 Column SG1 Lvl NR 13
             SG2NRL = self.mem['ZINST77']['V']  # ZINST77 Column SG2 Lv1 NR 14
             SG3NRL = self.mem['ZINST76']['V']  # ZINST76 Column SG3 Lv1 NR 15
