@@ -19,6 +19,9 @@ class Power_increase_module(multiprocessing.Process):
         self.UDP_sock = CNS_Send_UDP.CNS_Send_Signal(cns_ip, cns_port)
         self.time_legnth = 10
 
+        self.save_para = False
+        self.save_tick = 0
+
     def p_shut(self, txt):
         if not self.shut:
             print(self, txt)
@@ -63,7 +66,17 @@ class Power_increase_module(multiprocessing.Process):
         for _ in reversed(range(-1, -(time_legnth*2), -2)):
             try:
                 tick = self.mem['KCNTOMS']['D'][_]
+                Mwe_power = self.mem['KBCDO22']['D'][_]
+                load_set = self.mem['KBCDO20']['D'][_]
                 power = self.mem['QPROREL']['D'][_]
+
+                if power >= 0.97 and self.save_tick == 0:
+                    self.save_para = True
+                    self.save_tick = tick
+
+                if self.save_para:
+                    tick = self.save_tick
+
                 base_condition = tick / 30000
                 up_base_condition = (tick * 53) / 1470000
                 low_base_condition = (tick * 3) / 98000
@@ -73,18 +86,15 @@ class Power_increase_module(multiprocessing.Process):
                 distance_up = up_base_condition + 0.04 - power
                 distance_low = power - low_base_condition
 
-                Mwe_power = self.mem['KBCDO22']['D'][_]
-                load_set = self.mem['KBCDO20']['D'][_]
-
                 temp.append([power, distance_up, distance_low, stady_condition, Mwe_power/1000, load_set/100])
             except:
                 pass
-
         # ------------------------------------------
         # 제어봉 Display로 정보를 전달하기 위해서 Autonomous mem 에 정보를 전달
         self.dumy_auto_mem['Start_up_operation_his']['power'].append(power)
         self.dumy_auto_mem['Start_up_operation_his']['up_cond'].append(up_base_condition + 0.04)
         self.dumy_auto_mem['Start_up_operation_his']['low_cond'].append(low_base_condition)
+        self.dumy_auto_mem['Start_up_operation_his']['time'].append(self.mem['KCNTOMS']['D'][-1]/5)
 
         for key_val in self.auto_mem.keys():
             self.auto_mem[key_val] = self.dumy_auto_mem[key_val]
@@ -224,9 +234,12 @@ class Power_increase_module(multiprocessing.Process):
             self.send_action_append(['KSWO192'], [1])
 
         # 9) 제어봉 조작 신호를 보내기
-        if R_A == 0: self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
-        elif R_A == 1: self.send_action_append(['KSWO33', 'KSWO32'], [1, 0])  # Out
-        elif R_A == 2: self.send_action_append(['KSWO33', 'KSWO32'], [0, 1])  # In
+        if self.save_para:      # 파라가 save 즉 0.97 보다 파워가 큼
+            self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
+        else:
+            if R_A == 0: self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
+            elif R_A == 1: self.send_action_append(['KSWO33', 'KSWO32'], [1, 0])  # Out
+            elif R_A == 2: self.send_action_append(['KSWO33', 'KSWO32'], [0, 1])  # In
 
         self.UDP_sock._send_control_signal(self.para, self.val)
 

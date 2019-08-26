@@ -37,7 +37,7 @@ class sub_tren_window(QDialog):
         timer = QtCore.QTimer(self)
         for _ in [self.update_window, self.update_rod_his_gp]:
             timer.timeout.connect(_)
-        timer.start(500)
+        timer.start(600)
 
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.show()
@@ -97,26 +97,34 @@ class sub_tren_window(QDialog):
         self.Trend_ui.Rod_his.addWidget(self.rod_canvas)
 
     def update_rod_his_gp(self):
-        self.rod_cond_ax.clear()
-        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['power'])
-        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['up_cond'])
-        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['low_cond'])
-        self.rod_cond_ax.grid()
-        self.rod_cond_canv.draw()
+        try:
+            self.rod_ax.clear()
+            temp = []
+            cns_time = []
+            for _ in range(len(self.mem['KSWO33']['D'])):
+                if self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 0:
+                    temp.append(0)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_]/5)
+                elif self.mem['KSWO33']['D'][_] == 1 and self.mem['KSWO32']['D'][_] == 0:
+                    temp.append(1)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_] / 5)
+                elif self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 1:
+                    temp.append(-1)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_] / 5)
+            self.rod_ax.plot(cns_time, temp)
+            self.rod_ax.set_ylim(-1.2, 1.2)
+            # self.rod_ax.set_xlim(0, 50)
+            self.rod_ax.set_yticks([-1, 0, 1])
+            self.rod_ax.set_yticklabels(['Down', 'Stay', 'UP'])
+            self.rod_ax.grid()
+            self.rod_canvas.draw()
 
-        self.rod_ax.clear()
-        temp = []
-        for _ in range(len(self.mem['KSWO33']['D'])):
-            if self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 0:
-                temp.append(0)
-            elif self.mem['KSWO33']['D'][_] == 1 and self.mem['KSWO32']['D'][_] == 0:
-                temp.append(1)
-            elif self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 1:
-                temp.append(-1)
-        self.rod_ax.plot(temp)
-        self.rod_ax.set_ylim(-1.2, 1.2)
-        self.rod_ax.set_yticks([-1, 0, 1])
-        self.rod_ax.set_yticklabels(['Down', 'Stay', 'UP'])
-        self.rod_ax.grid()
-        self.rod_canvas.draw()
-
+            self.rod_cond_ax.clear()
+            rod_cond_time = self.auto_mem['Start_up_operation_his']['time']
+            self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['power'])
+            self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['up_cond'])
+            self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['low_cond'])
+            self.rod_cond_ax.grid()
+            self.rod_cond_canv.draw()
+        except Exception as e:
+            print(self, e)

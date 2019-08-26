@@ -18,7 +18,7 @@ class body:
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7002, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsport', type=int, default=7003, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
         parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
@@ -89,7 +89,7 @@ class generate_mem:
                                               '[00:04:36] RCP 2 Stop',
                                               '[00:04:36] RCP 3 Stop',
                                               ],
-                       'Start_up_operation_his': {'power': [], 'up_cond': [], 'low_cond': []}, # Start-up 시 제어봉 제어 결과 표시
+                       'Start_up_operation_his': {'time': [], 'power': [], 'up_cond': [], 'low_cond': []}, # Start-up 시 제어봉 제어 결과 표시
                        'Abnormal_Dig_result': {'Result': []},
                        }
         print('자율운전 메모리 생성 완료')
