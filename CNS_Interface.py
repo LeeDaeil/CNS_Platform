@@ -17,6 +17,7 @@ from Interface.resource import Study_9_re_rc
 
 # ------------------------------------------------------
 from Interface.ROD_Controller import sub_tren_window
+from Interface.Event_Diagnosis_Module import sub_event_window
 # ------------------------------------------------------
 
 from Interface.current_plant_state import Ui_Dialog as Strategy_ui
@@ -59,6 +60,11 @@ class MyForm(QDialog):
         # self.draw_power_gp()
         # self.draw_turbin_gp()
 
+        self.btn_event_diagnosis_module = QtWidgets.QPushButton(self)
+        self.btn_event_diagnosis_module.setGeometry(QtCore.QRect(905,10,100,23))
+        self.btn_event_diagnosis_module.setText("Event Diagnosis")
+
+
         # self.blick_switch = True
         self.CSF_test_mode = True
         if self.CSF_test_mode:
@@ -87,6 +93,9 @@ class MyForm(QDialog):
         self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
         self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
         self.ui.Open_Strategy.clicked.connect(self.call_strategy_window)
+        self.btn_event_diagnosis_module.clicked.connect(self.call_event_window)
+
+        ## 버튼 연결 - 비정상 진단 모듈
 
         # Autonomous controller ==========================================
         self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
@@ -104,6 +113,12 @@ class MyForm(QDialog):
     # 제어봉 조작 패널
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem, self.Auto_mem, self.strategy_selection_mem)
+
+# ======================================================================================================================
+# connecting popup function of abnormal event diagnosis module
+
+    def call_event_window(self):
+        self.event_window = sub_event_window(self.mem, self.Auto_mem, self.strategy_selection_mem)
 
 # ======================= Strategy Popup===============================
 # 추후 삭제

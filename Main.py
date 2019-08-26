@@ -3,6 +3,7 @@ from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_Fun import *
 from CNS_Power import Power_increase_module as PI_module
+from CNS_AB_DIG import Abnormal_dig_module as AB_DIG_module
 from CNS_GFun import *
 from CNS_CFun import *
 from CNS_Interface import *
@@ -40,6 +41,7 @@ class body:
                     Func_diagnosis(self.shared_mem),
                     Func_strategy(self.shared_mem),
                     PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
+                    AB_DIG_module(self.shared_mem, self.args.PIshutup),           # [4]
                     ]
         if self.args.mode == 'All':
             self.process_list = pro_list
