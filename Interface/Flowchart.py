@@ -8,14 +8,15 @@ from PySide2.QtGui import QPainter, QPen
 from PySide2.QtGui import Qt
 from Interface.Button import btn_frame
 
-class make_flowchart(QWidget):                                          # QWidget 확인하기
-    def __init__(self, mem, parent=None):                                    #
-        super(make_flowchart, self).__init__(parent)                    #
+class make_flowchart(QWidget):
+    def __init__(self, mem, parent=None):
+        super(make_flowchart, self).__init__(parent)
         print(mem)
         # self.parent = parent
         # self.setGeometry(self.parent.geometry())
         # self.trig_mem = mem
         self.setGeometry(0, 0, 1000, 1000)                              # 부모의 Geometry를 따라가야하는 이유는 ?
+
         self.sub_1 = btn_frame(self, x=550, y=20, w=100, h=50, text='Start', type=3)
         self.sub_2 = btn_frame(self, x=500, y=90, w=200, h=50, text='Did an alarm or trip occur?', type=4)
         self.sub_3 = btn_frame(self, x=500, y=160, w=200, h=50, text='Abnormal Operation Mode', type=1)
@@ -121,9 +122,6 @@ class make_flowchart(QWidget):                                          # QWidge
             self.sub_6_2.color = Qt.white
 
         self.update()
-
-
-
 
     def mousePressEvent(self, e):
         print(e.pos())
