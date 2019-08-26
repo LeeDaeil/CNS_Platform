@@ -38,7 +38,7 @@ class sub_event_window(QDialog):
 
     def update_window(self):
         try:
-            if self.auto_mem['Abnormal_Dig_result']['Result'][0] < 0.9:
+            if self.auto_mem['Abnormal_Dig_result']['Result'][-1][0] < 0.9:
                 self.EDM_ui.label_4.setText('23-01(1차측 누설)')
         except Exception as e:
             pass
@@ -46,14 +46,22 @@ class sub_event_window(QDialog):
 
     def draw_dig_his_gp(self):
         # 위 그래프
-        self.dig_fig = plt.figure()
-        self.dig_fig_ax = self.dig_fig.add_subplot(111)
+        self.dig_fig = plt.figure(figsize=(15, 15))
+
+        self.gs = self.dig_fig.add_gridspec(1, 1)
+        self.dig_ax = [self.dig_fig.add_subplot(self.gs[:, :])]
         self.dig_canv = FigureCanvasQTAgg(self.dig_fig)
         self.EDM_ui.horizontalLayout.addWidget(self.dig_canv)
 
     def update_dig_his_gp(self):
-        self.dig_fig_ax.clear()
-        self.dig_fig_ax.plot(self.auto_mem['Abnormal_Dig_result']['Result'])
-        self.dig_fig_ax.grid()
+        [ax.clear() for ax in self.dig_ax]
+        self.dig_ax[0].plot(self.auto_mem['Abnormal_Dig_result']['Result'])
+        self.dig_ax[0].legend(['Normal', 'ab_21-01', 'ab_21-02', 'ab_20-01', 'ab_20-04', 'ab_15-07', 'ab_15-08', 'ab_63-04',
+                               'ab_63-02', 'ab_63-03', 'ab_21-12', 'ab-19-02', 'ab_21-11', 'ab_23-03', 'ab_80-02', 'ab_60-02',
+                               'ab_59-02', 'ab_23-01', 'ab_23-06', 'ab_59-01', 'ab_64-03'], loc=7)
+        self.dig_ax[0].grid()
+        # for _ in range(0, len(self.dig_fig)):
+        #     self.dig_ax[_].plot([out[_] for out in self.auto_mem['Abnormal_Dig_result']['Result']])
+        #     self.dig_ax[_].grid()
         self.dig_canv.draw()
 
