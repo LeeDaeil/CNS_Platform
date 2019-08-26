@@ -13,3 +13,7 @@
          처리한다.
     - 3) pyrcc5 -o Study_9_re_2.py Study_9_re.qrc 를 입력한다.
     - 4) 인터페이스(즉, study_9.py를 불러오는 곳)에서 from Interface.resource import Study_9_re_rc를 가져온다.
+# 3. 검증 시 동작 과정
+    - 1) 2% -> 100% 출력 증가 수행
+    - 2) 100% 출력에 도달하면 정상 운전으로 전환 (제어봉 Auto)
+    - 2) 100% 에서 비정상 상태 발생 및 진단.s
