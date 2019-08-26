@@ -80,8 +80,8 @@ class Power_increase_module(multiprocessing.Process):
         # ------------------------------------------
         # 제어봉 Display로 정보를 전달하기 위해서 Autonomous mem 에 정보를 전달
         self.dumy_auto_mem['Start_up_operation_his']['power'].append(power)
-        self.dumy_auto_mem['Start_up_operation_his']['up_cond'].append(up_base_condition + 0.04)
-        self.dumy_auto_mem['Start_up_operation_his']['low_cond'].append(low_base_condition)
+        self.dumy_auto_mem['Start_up_operation_his']['up_cond'].append(up_base_condition + 0.07)
+        self.dumy_auto_mem['Start_up_operation_his']['low_cond'].append(low_base_condition + 0.01)
 
         for key_val in self.auto_mem.keys():
             self.auto_mem[key_val] = self.dumy_auto_mem[key_val]
