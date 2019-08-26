@@ -12,22 +12,42 @@ class Func_diagnosis(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
         self.mem = mem[0]
         self.trig_mem = mem[1]
+        self.trig_mem_2 = mem[-2]
 
     def run(self):
         while True:
+
             # ===========================================
             self.dumy_mem = deepcopy(self.trig_mem)
             # ===========================================
 
-            if self.mem['KLAMPO9']['V'] != 1:
+            if self.mem['KLAMPO9']['V'] == 1:
+                self.dumy_mem['alarm'].append(2)
+                self.dumy_mem['diagnosis'].append(0)
+                self.dumy_mem['training_cond'].append(0)
+
+            elif self.trig_mem_2['Abnormal_Dig_result']['Result'] != []:
+                # print(self.trig_mem_2['Abnormal_Dig_result']['Result'][-1][0])
+                if self.trig_mem_2['Abnormal_Dig_result']['Result'][-1][0] < 0.9:
+                    self.dumy_mem['alarm'].append(1)
+                    self.dumy_mem['diagnosis'].append(2301)
+                    self.dumy_mem['training_cond'].append(1)
+            else:
                 self.dumy_mem['alarm'].append(0)
                 self.dumy_mem['diagnosis'].append(0)
                 self.dumy_mem['training_cond'].append(0)
 
-            else:
-                self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부/
-                self.dumy_mem['diagnosis'].append(2301)        # O2: 진단된 비정상 절차서
-                self.dumy_mem['training_cond'].append(1)         # O3: 학습 여부
+
+
+            # if self.mem['KLAMPO9']['V'] != 1:                   ############### 대일 로직 [Result] < 0.9
+            #     self.dumy_mem['alarm'].append(0)
+            #     self.dumy_mem['diagnosis'].append(0)
+            #     self.dumy_mem['training_cond'].append(0)
+            #
+            # else:
+            #     self.dumy_mem['alarm'].append(1)                 # O1: 비정상 여부/
+            #     self.dumy_mem['diagnosis'].append(2301)        # O2: 진단된 비정상 절차서
+            #     self.dumy_mem['training_cond'].append(1)         # O3: 학습 여부
 
             # =================================================
             # test
@@ -41,7 +61,7 @@ class Func_diagnosis(multiprocessing.Process):
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
 
-            # print(self, self.trig_mem)
+            print(self, self.trig_mem)
             # =================================================
             time.sleep(1)
 
@@ -87,6 +107,9 @@ class Func_strategy(multiprocessing.Process):
     def strategy_selection(self):                   # I1: 운전 모드, I2: 기타 정보 / O1: 세부 전략, O2: 제어 기능 활성화 신호
         if self.trig_mem['operation_mode'] != []:
 
+            if self.trig_mem['operation_mode'][-1] == 2:                                                        # 비상 전략
+                self.dumy_mem['strategy'].append('EA')                                                          # 추후 변경/ 전략: Autonomous control by what??
+
             if self.trig_mem['operation_mode'][-1] == 1:                                                        # 비정상 전략
                 if self.trig_mem['training_cond'] != [] and self.trig_mem['diagnosis'] != []:
                     if self.trig_mem['training_cond'][-1] == 1 and self.trig_mem['diagnosis'][-1] == 2301:      # 전략: Autonomous control by LSTM for leak of RCS
@@ -108,6 +131,8 @@ class Func_strategy(multiprocessing.Process):
 
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
+
+            print(self, self.trig_mem)
 
             time.sleep(1.5)
 

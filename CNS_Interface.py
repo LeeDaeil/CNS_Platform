@@ -1248,6 +1248,9 @@ class MyForm(QDialog):
             elif triger_2[-1] == 'AA_2301' and self.st_triger['ab_on/off'] == False:
                 self.ui.listWidget.addItem('{}\tAbnormal Operation\tAutonomous control by LSTM'.format(self.Call_CNS_time[0]))
                 self.st_triger['ab_on/off'] = True
+            elif triger_2[-1] == 'EA' and self.st_triger['em_on/off'] == False:
+                self.ui.listWidget.addItem('{}\tEmergency Operation\tAutonomous control by LSTM'.format(self.Call_CNS_time[0]))
+                self.st_triger['em_on/off'] = True
         else:
             pass
 
