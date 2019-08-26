@@ -7,12 +7,14 @@ import sys
 import CNS_Send_UDP
 
 class sub_tren_window(QDialog):
-    def __init__(self, mem=None):
+    def __init__(self, mem=None, auto_mem = None, strage_mem=None):
         super().__init__()
         # ===============================================================
         # 메모리 호출 부분 없으면 Test
         if mem != None:
             self.mem = mem
+            self.auto_mem = auto_mem
+            self.strage_mem = strage_mem
         else:
             print('TEST_interface')
         # ===============================================================
@@ -37,6 +39,7 @@ class sub_tren_window(QDialog):
             timer.timeout.connect(_)
         timer.start(500)
 
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.show()
 
     def rod_up(self):
@@ -46,22 +49,61 @@ class sub_tren_window(QDialog):
         self.CNS_udp._send_control_signal(['KSWO33', 'KSWO32'], [0, 1])
 
     def update_window(self):
-        self.Trend_ui.Rod_1.setGeometry(10, 80, 41, abs(self.mem['KBCDO10']['V'] - 228))
-        self.Trend_ui.Rod_2.setGeometry(70, 80, 41, abs(self.mem['KBCDO9']['V'] - 228))
-        self.Trend_ui.Rod_3.setGeometry(130, 80, 41, abs(self.mem['KBCDO8']['V'] - 228))
-        self.Trend_ui.Rod_4.setGeometry(190, 80, 41, abs(self.mem['KBCDO7']['V'] - 228))
+        self.Trend_ui.Rod_1.setGeometry(10, 70, 41, abs(self.mem['KBCDO10']['V'] - 228))
+        self.Trend_ui.Rod_2.setGeometry(70, 70, 41, abs(self.mem['KBCDO9']['V'] - 228))
+        self.Trend_ui.Rod_3.setGeometry(130, 70, 41, abs(self.mem['KBCDO8']['V'] - 228))
+        self.Trend_ui.Rod_4.setGeometry(190, 70, 41, abs(self.mem['KBCDO7']['V'] - 228))
         self.Trend_ui.Dis_Rod_4.setText(str(self.mem['KBCDO7']['V']))
         self.Trend_ui.Dis_Rod_3.setText(str(self.mem['KBCDO8']['V']))
         self.Trend_ui.Dis_Rod_2.setText(str(self.mem['KBCDO9']['V']))
         self.Trend_ui.Dis_Rod_1.setText(str(self.mem['KBCDO10']['V']))
 
+        # 아래 자율/수동 패널
+        if self.strage_mem['strategy'][-1] == 'NA':
+            self.Trend_ui.label_5.setStyleSheet('background-color: rgb(255, 144, 146);'
+                                                'border-style: outset;'
+                                                'border-width: 0.5px;'
+                                                'border-color: black;'
+                                                'font: bold 14px;')
+            self.Trend_ui.label_3.setStyleSheet('background-color: rgb(255, 255, 255);'
+                                                'border-style: outset;'
+                                                'border-width: 0.5px;'
+                                                'border-color: black;'
+                                                'font: bold 14px;')
+        else:
+            self.Trend_ui.label_5.setStyleSheet('background-color: rgb(255, 255, 255);'
+                                                'border-style: outset;'
+                                                'border-width: 0.5px;'
+                                                'border-color: black;'
+                                                'font: bold 14px;')
+            self.Trend_ui.label_3.setStyleSheet('background-color: rgb(255, 144, 146);'
+                                                'border-style: outset;'
+                                                'border-width: 0.5px;'
+                                                'border-color: black;'
+                                                'font: bold 14px;')
+
+
     def draw_rod_his_gp(self):
+        # 위 그래프
+        self.rod_cond = plt.figure()
+        self.rod_cond_ax = self.rod_cond.add_subplot(111)
+        self.rod_cond_canv = FigureCanvasQTAgg(self.rod_cond)
+        self.Trend_ui.Rod_his_cond.addWidget(self.rod_cond_canv)
+
+        # 아래 제어신호
         self.rod_fig = plt.figure()
         self.rod_ax = self.rod_fig.add_subplot(111)
         self.rod_canvas = FigureCanvasQTAgg(self.rod_fig)
         self.Trend_ui.Rod_his.addWidget(self.rod_canvas)
 
     def update_rod_his_gp(self):
+        self.rod_cond_ax.clear()
+        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['power'])
+        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['up_cond'])
+        self.rod_cond_ax.plot(self.auto_mem['Start_up_operation_his']['low_cond'])
+        self.rod_cond_ax.grid()
+        self.rod_cond_canv.draw()
+
         self.rod_ax.clear()
         temp = []
         for _ in range(len(self.mem['KSWO33']['L'])):
@@ -78,3 +120,4 @@ class sub_tren_window(QDialog):
         self.rod_ax.set_yticklabels(['Down', 'Stay', 'UP'])
         self.rod_ax.grid()
         self.rod_canvas.draw()
+

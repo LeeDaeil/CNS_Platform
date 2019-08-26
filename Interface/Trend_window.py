@@ -11,15 +11,15 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(700, 400)
+        Dialog.resize(700, 571)
         self.Rod_1 = QtWidgets.QLabel(Dialog)
-        self.Rod_1.setGeometry(QtCore.QRect(10, 80, 41, 141))
+        self.Rod_1.setGeometry(QtCore.QRect(10, 70, 41, 141))
         self.Rod_1.setStyleSheet("background-color: rgb(0, 22, 147);")
         self.Rod_1.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_1.setText("")
         self.Rod_1.setObjectName("Rod_1")
         self.Rod_1_back = QtWidgets.QLabel(Dialog)
-        self.Rod_1_back.setGeometry(QtCore.QRect(10, 80, 41, 228))
+        self.Rod_1_back.setGeometry(QtCore.QRect(10, 70, 41, 228))
         self.Rod_1_back.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Rod_1_back.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_1_back.setFrameShadow(QtWidgets.QFrame.Plain)
@@ -27,13 +27,13 @@ class Ui_Dialog(object):
         self.Rod_1_back.setText("")
         self.Rod_1_back.setObjectName("Rod_1_back")
         self.Rod_2 = QtWidgets.QLabel(Dialog)
-        self.Rod_2.setGeometry(QtCore.QRect(70, 80, 41, 141))
+        self.Rod_2.setGeometry(QtCore.QRect(70, 70, 41, 141))
         self.Rod_2.setStyleSheet("background-color: rgb(0, 22, 147);")
         self.Rod_2.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_2.setText("")
         self.Rod_2.setObjectName("Rod_2")
         self.Rod_2_back = QtWidgets.QLabel(Dialog)
-        self.Rod_2_back.setGeometry(QtCore.QRect(70, 80, 41, 228))
+        self.Rod_2_back.setGeometry(QtCore.QRect(70, 70, 41, 228))
         self.Rod_2_back.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Rod_2_back.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_2_back.setFrameShadow(QtWidgets.QFrame.Plain)
@@ -41,7 +41,7 @@ class Ui_Dialog(object):
         self.Rod_2_back.setText("")
         self.Rod_2_back.setObjectName("Rod_2_back")
         self.Rod_3_back = QtWidgets.QLabel(Dialog)
-        self.Rod_3_back.setGeometry(QtCore.QRect(130, 80, 41, 228))
+        self.Rod_3_back.setGeometry(QtCore.QRect(130, 70, 41, 228))
         self.Rod_3_back.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Rod_3_back.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_3_back.setFrameShadow(QtWidgets.QFrame.Plain)
@@ -49,7 +49,7 @@ class Ui_Dialog(object):
         self.Rod_3_back.setText("")
         self.Rod_3_back.setObjectName("Rod_3_back")
         self.Rod_4_back = QtWidgets.QLabel(Dialog)
-        self.Rod_4_back.setGeometry(QtCore.QRect(190, 80, 41, 228))
+        self.Rod_4_back.setGeometry(QtCore.QRect(190, 70, 41, 228))
         self.Rod_4_back.setStyleSheet("background-color: rgb(255, 255, 255);")
         self.Rod_4_back.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_4_back.setFrameShadow(QtWidgets.QFrame.Plain)
@@ -57,13 +57,13 @@ class Ui_Dialog(object):
         self.Rod_4_back.setText("")
         self.Rod_4_back.setObjectName("Rod_4_back")
         self.Rod_3 = QtWidgets.QLabel(Dialog)
-        self.Rod_3.setGeometry(QtCore.QRect(130, 80, 41, 141))
+        self.Rod_3.setGeometry(QtCore.QRect(130, 70, 41, 141))
         self.Rod_3.setStyleSheet("background-color: rgb(0, 22, 147);")
         self.Rod_3.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_3.setText("")
         self.Rod_3.setObjectName("Rod_3")
         self.Rod_4 = QtWidgets.QLabel(Dialog)
-        self.Rod_4.setGeometry(QtCore.QRect(190, 80, 41, 141))
+        self.Rod_4.setGeometry(QtCore.QRect(190, 70, 41, 141))
         self.Rod_4.setStyleSheet("background-color: rgb(0, 22, 147);")
         self.Rod_4.setFrameShape(QtWidgets.QFrame.Box)
         self.Rod_4.setText("")
@@ -97,7 +97,7 @@ class Ui_Dialog(object):
         self.Dis_Rod_4.setAlignment(QtCore.Qt.AlignCenter)
         self.Dis_Rod_4.setObjectName("Dis_Rod_4")
         self.horizontalLayoutWidget = QtWidgets.QWidget(Dialog)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(250, 80, 441, 221))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(10, 310, 681, 181))
         self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
         self.Rod_his = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.Rod_his.setContentsMargins(0, 0, 0, 0)
@@ -112,13 +112,13 @@ class Ui_Dialog(object):
         self.label.setAlignment(QtCore.Qt.AlignCenter)
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(Dialog)
-        self.label_2.setGeometry(QtCore.QRect(0, 0, 700, 400))
+        self.label_2.setGeometry(QtCore.QRect(0, 0, 700, 700))
         self.label_2.setStyleSheet("background-color:rgb(216, 216, 216);")
         self.label_2.setText("")
         self.label_2.setAlignment(QtCore.Qt.AlignCenter)
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(Dialog)
-        self.label_3.setGeometry(QtCore.QRect(20, 330, 110, 50))
+        self.label_3.setGeometry(QtCore.QRect(20, 510, 110, 40))
         self.label_3.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "border-style: outset;\n"
 "border-width: 0.5px;\n"
@@ -127,7 +127,7 @@ class Ui_Dialog(object):
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
         self.label_4 = QtWidgets.QLabel(Dialog)
-        self.label_4.setGeometry(QtCore.QRect(10, 320, 680, 71))
+        self.label_4.setGeometry(QtCore.QRect(10, 500, 680, 61))
         self.label_4.setStyleSheet("background-color: rgb(221, 221, 221);\n"
 "border-style: outset;\n"
 "border-width: 2px;\n"
@@ -137,7 +137,7 @@ class Ui_Dialog(object):
         self.label_4.setAlignment(QtCore.Qt.AlignCenter)
         self.label_4.setObjectName("label_4")
         self.label_5 = QtWidgets.QLabel(Dialog)
-        self.label_5.setGeometry(QtCore.QRect(140, 330, 110, 50))
+        self.label_5.setGeometry(QtCore.QRect(140, 510, 110, 40))
         self.label_5.setStyleSheet("background-color: rgb(255, 255, 255);\n"
 "border-style: outset;\n"
 "border-width: 0.5px;\n"
@@ -146,7 +146,7 @@ class Ui_Dialog(object):
         self.label_5.setAlignment(QtCore.Qt.AlignCenter)
         self.label_5.setObjectName("label_5")
         self.rodup = QtWidgets.QPushButton(Dialog)
-        self.rodup.setGeometry(QtCore.QRect(270, 330, 200, 50))
+        self.rodup.setGeometry(QtCore.QRect(270, 510, 200, 40))
         self.rodup.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(255, 255, 255);\n"
 "    border-style: outset;\n"
@@ -160,7 +160,7 @@ class Ui_Dialog(object):
 "}")
         self.rodup.setObjectName("rodup")
         self.roddown = QtWidgets.QPushButton(Dialog)
-        self.roddown.setGeometry(QtCore.QRect(480, 330, 200, 50))
+        self.roddown.setGeometry(QtCore.QRect(480, 510, 200, 40))
         self.roddown.setStyleSheet("QPushButton {\n"
 "    background-color: rgb(255, 255, 255);\n"
 "    border-style: outset;\n"
@@ -173,6 +173,12 @@ class Ui_Dialog(object):
 "    border-style: inset;\n"
 "}")
         self.roddown.setObjectName("roddown")
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(Dialog)
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(240, 70, 451, 231))
+        self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
+        self.Rod_his_cond = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.Rod_his_cond.setContentsMargins(0, 0, 0, 0)
+        self.Rod_his_cond.setObjectName("Rod_his_cond")
         self.label_2.raise_()
         self.Rod_2_back.raise_()
         self.Rod_1_back.raise_()
@@ -193,6 +199,7 @@ class Ui_Dialog(object):
         self.label_5.raise_()
         self.rodup.raise_()
         self.roddown.raise_()
+        self.horizontalLayoutWidget_2.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)

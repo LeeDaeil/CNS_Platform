@@ -102,7 +102,7 @@ class MyForm(QDialog):
     # ======================= Trend Popup===============================
     # 제어봉 조작 패널
     def call_trend_window(self):
-        self.trend_window = sub_tren_window(self.mem)
+        self.trend_window = sub_tren_window(self.mem, self.Auto_mem, self.strategy_selection_mem)
 
 # ======================= Strategy Popup===============================
 # 추후 삭제

@@ -2,18 +2,21 @@ import multiprocessing
 import time
 import numpy as np
 import CNS_Send_UDP
+import copy
 
 
 class Power_increase_module(multiprocessing.Process):
     def __init__(self, mem, shut, cns_ip, cns_port):
         multiprocessing.Process.__init__(self)
-        self.mem = mem[0]  # main mem connection
-        self.trig_mem = mem[-1]  # main mem connection
-        self.trig_mem_2 = mem[1] #
+        self.mem = mem[0]           # main mem connection
+
+        self.auto_mem = mem[-2]     # 자율 운전 메모리
+        self.dumy_auto_mem = copy.deepcopy(self.auto_mem)
+
+        self.trig_mem = mem[1]      # 전략 설정 기능으로 부터의 로직
         self.shut = shut
 
         self.UDP_sock = CNS_Send_UDP.CNS_Send_Signal(cns_ip, cns_port)
-
         self.time_legnth = 10
 
     def p_shut(self, txt):
@@ -42,19 +45,18 @@ class Power_increase_module(multiprocessing.Process):
                 else:
                     self.p_shut('CNS가 동작 상태 - 모듈 동작')
                     self.mem_len = len(self.mem['KCNTOMS']['L'])
-                    input_data = self.make_input_data(time_legnth=self.time_legnth)
-
-                    if self.trig_mem_2['strategy'][-1] == 'NA':
+                    if self.trig_mem['strategy'][-1] == 'NA':
+                        input_data = self.make_input_data(time_legnth=self.time_legnth)
                         self.sub_run_1(input_data=input_data, time_legnth=self.time_legnth)
-                        print('동작 중이지롱')
-                    elif self.trig_mem_2['strategy'][-1] == 'AA_2301':
+                    elif self.trig_mem['strategy'][-1] == 'AA_2301':
                         self.UDP_sock._send_control_signal(['KSWO33', 'KSWO32'], [0, 0])
-                        print('동작 멈춤')
 
             time.sleep(0.5)
 
     def make_input_data(self, time_legnth):
         temp = []
+        self.dumy_auto_mem = copy.deepcopy(self.auto_mem)
+
         for _ in reversed(range(-1, -(time_legnth*2), -2)):
             try:
                 tick = self.mem['KCNTOMS']['L'][_]
@@ -65,7 +67,7 @@ class Power_increase_module(multiprocessing.Process):
 
                 stady_condition = base_condition + 0.02
 
-                distance_up = up_base_condition  + 0.04 - power
+                distance_up = up_base_condition + 0.04 - power
                 distance_low = power - low_base_condition
 
                 Mwe_power = self.mem['KBCDO22']['L'][_]
@@ -74,6 +76,16 @@ class Power_increase_module(multiprocessing.Process):
                 temp.append([power, distance_up, distance_low, stady_condition, Mwe_power/1000, load_set/100])
             except:
                 pass
+
+        # ------------------------------------------
+        # 제어봉 Display로 정보를 전달하기 위해서 Autonomous mem 에 정보를 전달
+        self.dumy_auto_mem['Start_up_operation_his']['power'].append(power)
+        self.dumy_auto_mem['Start_up_operation_his']['up_cond'].append(up_base_condition + 0.04)
+        self.dumy_auto_mem['Start_up_operation_his']['low_cond'].append(low_base_condition)
+
+        for key_val in self.auto_mem.keys():
+            self.auto_mem[key_val] = self.dumy_auto_mem[key_val]
+        # ------------------------------------------
         return temp
 
     # ================================================================================================================#
@@ -82,7 +94,7 @@ class Power_increase_module(multiprocessing.Process):
     def sub_run_1(self, input_data, time_legnth):
         if len(input_data) == time_legnth:
             act, proba = self.Rod_net.predict_action(input_data)
-            print(act, proba)
+            # print(act, proba)
             self.p_shut('데이터 길이 완료 - 네트워크 계산 시작 - {}'.format(act))
             if act == 0:
                 self.UDP_sock._send_control_signal(['KSWO33', 'KSWO32'], [0, 0])
