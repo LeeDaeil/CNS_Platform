@@ -16,7 +16,7 @@ class body:
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7003, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsport', type=int, default=7002, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
         parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
@@ -95,7 +95,7 @@ class generate_mem:
                        'diagnosis': [],                     # 0: x, 2301: RCS Leak .... Rule) 절차서 번호
                        'training_cond': [],                 # 0: x, 1: Trained, 2: Untrained
                        'operation_mode': [],                # 0: Normal, 1: Abnormal, 2: Emergency
-                       'strategy': [],                      # Auto_LSTM # '2301_LSTM' .... Rule) '절차서번호_알고리즘'
+                       'strategy': [],                      # Auto_LSTM # '2301_LSTM' .... Rule) '절차서번호_알고리즘' 1: RCS _LSTM 2: CVCS_RL
                        'control_activation': []}
         print('전략 설정용 메모리 설정 완료')
         return memory_dict

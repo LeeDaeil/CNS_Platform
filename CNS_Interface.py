@@ -23,6 +23,7 @@ from Interface.current_plant_state import Ui_Dialog as Strategy_ui
 from Interface.popup_ss import Ui_MainForm as SS_ui
 
 import Interface.Flowchart as mf
+import Interface.Flowchart_normal as mf_normal
 import Interface.Flowchart_abnormal as mf_abnormal
 
 
@@ -1546,7 +1547,7 @@ class popup_ss(QWidget):
             self.main_ui.Fou_label.setText('Autonomous Control By LSTM')
 
         elif mem['strategy'][-1] == 'NA':
-            mf.make_flowchart(mem, self.main_ui.SA_widget)
+            mf_normal.make_flowchart(mem, self.main_ui.SA_widget)
             self.main_ui.Sec_label.setText('Normal Operation')
             self.main_ui.Sec_label_2.setText('Startup')
             self.main_ui.Fou_label.setText('Autonomous Control By RL')
