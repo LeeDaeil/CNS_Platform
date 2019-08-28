@@ -11,7 +11,7 @@ from Interface.Button import btn_frame
 class make_flowchart(QWidget):
     def __init__(self, mem, parent=None):
         super(make_flowchart, self).__init__(parent)
-        print(mem)
+        # print(mem)
         # self.parent = parent
         # self.setGeometry(self.parent.geometry())
         # self.trig_mem = mem

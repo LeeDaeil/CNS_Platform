@@ -1130,7 +1130,6 @@ class MyForm(QDialog):
 
         # Autonomous state alram
         self.Auto_Alarm_dis()
-        self.Autonomous_operation_strategy()
         self.Autonomous_controller()
         self.operation_state()
         self.history_ss()
@@ -1187,8 +1186,8 @@ class MyForm(QDialog):
         if self.mem['KLAMPO134']['V'] == 1: self.add_list_signal('Aux feed pump 1 start')
         if self.mem['KLAMPO135']['V'] == 1: self.add_list_signal('Aux feed pump 2 start')
         if self.mem['KLAMPO136']['V'] == 1: self.add_list_signal('Aux feed pump 3 start')
-
         if self.mem['KLAMPO70']['V'] == 1: self.add_list_signal('Charging pump 2 start')
+        if self.mem['KLAMPO69']['V'] == 1: self.add_list_signal('Charging pump 3 start')
         if self.mem['KLAMPO124']['V'] == 0: self.add_list_signal('RCP 1 stop')
         if self.mem['KLAMPO125']['V'] == 0: self.add_list_signal('RCP 2 stop')
         if self.mem['KLAMPO126']['V'] == 0: self.add_list_signal('RCP 3 stop')
@@ -1198,16 +1197,6 @@ class MyForm(QDialog):
     def add_list_signal(self, content):
         if len(self.ui.Auto_list.findItems('{}'.format(content), QtCore.Qt.MatchContains)) == 0:
             self.ui.Auto_list.addItem('{} {}'.format(self.Call_CNS_time[0], content))
-
-    def Autonomous_operation_strategy(self):
-        # =========================================================================
-        # 운전 전략을 보여주는 부분
-        if self.Auto_mem['Auto_state']:
-            self.Auto_mem['Current_op'] = 'LSTM-based Operation'
-        else:
-            self.Auto_mem['Current_op'] = 'Manual Operation'
-
-        # self.ui.Current_op.setText('{}'.format(self.Auto_mem['Current_op']))
 
 # ======================================================================================================================
 # alarm function of operation state_by sb

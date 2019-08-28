@@ -61,7 +61,7 @@ class Func_diagnosis(multiprocessing.Process):
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
 
-            print(self, self.trig_mem)
+            # print(self, self.trig_mem)
             # =================================================
             time.sleep(1)
 
@@ -132,7 +132,7 @@ class Func_strategy(multiprocessing.Process):
             for key_val in self.trig_mem.keys():
                 self.trig_mem[key_val] = self.dumy_mem[key_val]
 
-            print(self, self.trig_mem)
+            # print(self, self.trig_mem)
 
             time.sleep(1.5)
 

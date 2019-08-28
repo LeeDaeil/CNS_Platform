@@ -2,7 +2,7 @@ from db import db_make
 from multiprocessing import Manager
 from CNS_UDP import *
 from CNS_Fun import *
-# from CNS_Power import Power_increase_module as PI_module
+from CNS_Power import Power_increase_module as PI_module
 from CNS_AB_DIG import Abnormal_dig_module as AB_DIG_module
 from CNS_GFun import *
 from CNS_CFun import *
@@ -11,6 +11,7 @@ import argparse
 
 import LIGHT
 
+
 class body:
     def __init__(self):
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
@@ -18,7 +19,7 @@ class body:
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7002, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsport', type=int, default=7003, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--mode', default='All', required=False, help='구동할 프로레서를 선택 [default="all"]')
         parser.add_argument('--shutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
         parser.add_argument('--PIshutup', action="store_false", required=False, help='세부 정보를 출력할 것인지 판단[default=True]')
@@ -40,8 +41,8 @@ class body:
                     funtion5(self.shared_mem),                              # [2]
                     Func_diagnosis(self.shared_mem),
                     Func_strategy(self.shared_mem),
-                    #PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
-                    AB_DIG_module(self.shared_mem, self.args.PIshutup),           # [4]
+                    # PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
+                    AB_DIG_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [4]
                     ]
         if self.args.mode == 'All':
             self.process_list = pro_list
@@ -71,7 +72,6 @@ class body:
 class generate_mem:
     def make_autonomous_mem(self):
         memory_dict = {'Man_state': True, 'Auto_state': False, 'Man_require': False,
-                       'Current_op': 'LSTM-based algorithm', #'['LSTM-based algorithm', 'Tech Spec action', 'Ruel-based algorithm'],
                        'Strategy_out': ['[00:00:00] Start - Normal Operation - LSTM-base algorithm',
                                         '[00:00:46] Emergency Operation - LSTM-base algorithm'],
                        'Auto_operation_out': ['[00:00:00] Start',
