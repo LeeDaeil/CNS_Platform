@@ -1260,7 +1260,10 @@ class MyForm(QDialog):
         if self.mem['KCNTOMS']['V'] < 4:
             self.ui.Performace_Mn.clear()
             self.TSMS_State = {}
-        self.Monitoring()
+
+        if self.strategy_selection_mem['operation_mode'] != []:
+            if self.strategy_selection_mem['operation_mode'][-1] == 2:
+                self.Monitoring()
 
     def Calculator_SDM(self):
 
