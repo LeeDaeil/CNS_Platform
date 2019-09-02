@@ -18,6 +18,7 @@ from Interface.resource import Study_9_re_rc
 # ------------------------------------------------------
 from Interface.ROD_Controller import sub_tren_window
 from Interface.Event_Diagnosis_Module import sub_event_window
+from Interface.TSMS_GUI import POP_TSMS
 # ------------------------------------------------------
 
 from Interface.current_plant_state import Ui_Dialog as Strategy_ui
@@ -64,6 +65,12 @@ class MyForm(QDialog):
         self.btn_event_diagnosis_module.setGeometry(QtCore.QRect(905,10,100,23))
         self.btn_event_diagnosis_module.setText("Event Diagnosis")
 
+        # =======================================================================
+        # btn_TSMS_module 임시 추가
+        self.btn_TSMS_module = QtWidgets.QPushButton(self)
+        self.btn_TSMS_module.setGeometry(QtCore.QRect(705, 10, 100, 23))
+        self.btn_TSMS_module.setText("TSMS")
+        # =======================================================================
 
         # self.blick_switch = True
         self.CSF_test_mode = True
@@ -94,6 +101,7 @@ class MyForm(QDialog):
         self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
         self.ui.Open_Strategy.clicked.connect(self.call_strategy_window)
         self.btn_event_diagnosis_module.clicked.connect(self.call_event_window)
+        self.btn_TSMS_module.clicked.connect(self.call_POP_TSMS)
 
         ## 버튼 연결 - 비정상 진단 모듈
 
@@ -119,6 +127,11 @@ class MyForm(QDialog):
 
     def call_event_window(self):
         self.event_window = sub_event_window(self.mem, self.Auto_mem, self.strategy_selection_mem)
+
+# ======================================================================================================================
+# connecting popup function of tech spec monitoring  module
+    def call_POP_TSMS(self):
+        self.pop_TSMS = POP_TSMS(self.mem, self.Auto_mem, self.strategy_selection_mem)
 
 # ======================= Strategy Popup===============================
 # 추후 삭제
@@ -1256,7 +1269,7 @@ class MyForm(QDialog):
 
 # ======================= Monitoring DIS ===============================================================================
 
-    def run_TSMS(self):
+    def run_TSMS(self):                                                 # TSMS의 작동 조건 제어
         if self.mem['KCNTOMS']['V'] < 4:
             self.ui.Performace_Mn.clear()
             self.TSMS_State = {}
@@ -1361,6 +1374,7 @@ class MyForm(QDialog):
         if self.mem['CRETIV']['V'] >= 0:
             if self.mem['ZINST1']['V'] > 5:
                 mode = 1
+
             elif self.mem['ZINST1']['V'] <= 5:
                 mode = 2
         elif self.mem['CRETIV']['V'] < 0:

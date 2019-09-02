@@ -51,7 +51,7 @@ class Abnormal_dig_module(multiprocessing.Process):
                     input_data = self.make_input_data(time_legnth=self.time_legnth)
                     if len(input_data) >= 10:
                         proba = self.Dig_net.predict_action(input_data)
-                        print(proba)
+                        # print(proba)
                         # ------------------------------------------
                         # 비정상 상태 진단 정보를 전달하기 위해서 Autonomous mem 에 정보를 전달
                         self.dumy_auto_mem['Abnormal_Dig_result']['Result'].append(proba[0])
@@ -210,7 +210,7 @@ class Abnormal_dig_module(multiprocessing.Process):
                 ]
 
                 out_min_max = self.mix_max.transform([input_para])[0] # 137번 값 제거
-                print(np.shape(out_min_max[0:136]))
+                # print(np.shape(out_min_max[0:136]))
                 temp.append(out_min_max[0:136])
 
             except Exception as e:

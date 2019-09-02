@@ -4,10 +4,12 @@ from CNS_UDP import *
 from CNS_Fun import *
 # from CNS_Power import Power_increase_module as PI_module
 from CNS_AB_DIG import Abnormal_dig_module as AB_DIG_module
+from CNS_TSMS import TSMS_module
 from CNS_GFun import *
 from CNS_CFun import *
 from CNS_Interface import *
 import argparse
+
 
 import LIGHT
 
@@ -42,6 +44,7 @@ class body:
                     Func_strategy(self.shared_mem),
                     #PI_module(self.shared_mem, self.args.PIshutup, self.args.cnsip, self.args.cnsport),           # [3]
                     AB_DIG_module(self.shared_mem, self.args.PIshutup),           # [4]
+                    TSMS_module(self.shared_mem)                            # [5]
                     ]
         if self.args.mode == 'All':
             self.process_list = pro_list
@@ -104,7 +107,18 @@ class generate_mem:
                        'control_activation': []}
         print('전략 설정용 메모리 설정 완료')
         return memory_dict
-
+    # =================================================================
+    # making the memory of TSMS module
+    def make_TSMS_mem(self):
+        memory_dict = {'operation_mode': [],
+                       'LCO3.1.1': {'alarm': [], 'alarm_action': [], 'start_time': 0, 'end_time': 0},
+                       'LCO3.4.1': {'alarm': [], 'alarm_action': [], 'start_time': 0, 'end_time': 0},
+                       'LCO3.4.3': {'alarm': [], 'alarm_action': [], 'start_time': 0, 'end_time': 0},
+                       'LCO3.4.4': {'alarm': [], 'alarm_action': [], 'start_time': 0, 'end_time': 0},
+                       }
+        print('TSMS 메모리 생성 완료')
+        return memory_dict
+    # =================================================================
     def make_test_mem(self):
         memory_dict = {'4_1_state': True, '4_2_state': '', '4_4_state': False}
         return memory_dict
@@ -165,16 +179,14 @@ class generate_mem:
             print('=' * 25 + '라이트 버전으로 동작' + '=' * 25)
             memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=50)),  # [0]
                            Manager().dict(self.make_strategy_selection_mem()),              # [1]
-                           # Manager().dict(self.make_diagnosis_mem()),                     # [1]
-                           # Manager().dict(self.make_strategy_mem()),                      # [2]
+                           Manager().dict(self.make_TSMS_mem()),                            # [2]
                            Manager().dict(self.make_autonomous_mem()),                      # [-2]
                            Manager().dict(self.make_clean_mem()),                           # [-1]
                            ]
         else:
             memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),  # [0]
                            Manager().dict(self.make_strategy_selection_mem()),              # [1]
-                           # Manager().dict(self.make_diagnosis_mem()),                     # [1]
-                           # Manager().dict(self.make_strategy_mem()),                      # [2]
+                           Manager().dict(self.make_TSMS_mem()),                            # [2]
                            Manager().dict(self.make_autonomous_mem()),                      # [-2]
                            Manager().dict(self.make_clean_mem()),                           # [-1]
                            ]
