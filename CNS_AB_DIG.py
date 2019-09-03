@@ -63,7 +63,7 @@ class Abnormal_dig_module(multiprocessing.Process):
                             # ------------------------------------------
                             if proba[0][0] < 0.9: # 비정상 상태 발생
                                 action = self.Dig_net.predict_cont_action(input_cont_data) #액션 호출
-                                self.send_action(action[0])
+                                self.send_action(action[0], input_cont_data)
                             # ------------------------------------------
                             # 비정상 상태 진단 정보를 전달하기 위해서 Autonomous mem 에 정보를 전달
                             self.dumy_auto_mem['Abnormal_Dig_result']['Result'].append(proba[0])
@@ -313,7 +313,7 @@ class Abnormal_dig_module(multiprocessing.Process):
             self.para.append(pa[_])
             self.val.append(va[_])
 
-    def send_action(self, action):
+    def send_action(self, action, input_cont_data):
 
         # 전송될 변수와 값 저장하는 리스트
         self.para = []
@@ -334,6 +334,15 @@ class Abnormal_dig_module(multiprocessing.Process):
         if action[1] >= 0.01 and self.charging_pump2 != 1:
             print('charging pp2 start')
             self.send_action_append(['KSWO70'], [1])
+
+        if action[3] > input_cont_data[-1][0]: # up
+            self.send_action_append(['KSWO101', 'KSWO102'], [1, 0])
+        elif action[3] < input_cont_data[-1][0]: #down
+            self.send_action_append(['KSWO101', 'KSWO102'], [0, 1])
+        else:   #stay
+            self.send_action_append(['KSWO101', 'KSWO102'], [0, 0])
+
+        print(action[0], action[1], action[3])
         if self.para != []:
             self.UDP_sock._send_control_signal(self.para, self.val)
 

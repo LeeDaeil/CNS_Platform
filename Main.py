@@ -163,7 +163,7 @@ class generate_mem:
             # LIGHT 버전이 동작하고 있으면 메모리에서는 'L'에 데이터를 축적하지 않음.
             # 모든 데이터는 일회성 'D' 에 기입됨.
             print('=' * 25 + '라이트 버전으로 동작' + '=' * 25)
-            memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=50)),  # [0]
+            memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=1000)),  # [0]
                            Manager().dict(self.make_strategy_selection_mem()),              # [1]
                            # Manager().dict(self.make_diagnosis_mem()),                     # [1]
                            # Manager().dict(self.make_strategy_mem()),                      # [2]
