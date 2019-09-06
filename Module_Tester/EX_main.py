@@ -47,7 +47,7 @@ class generate_mem:
 
     def make_mem_structure(self):
         print('=' * 25 + '메모리 생성 시작' + '=' * 25)
-        memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=1000)),  # [0]
+        memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),    # [0]
                        Manager().dict(self.make_clean_mem()),                             # [-1]
                        ]
         print('=' * 25 + '메모리 생성 완료' + '=' * 25)

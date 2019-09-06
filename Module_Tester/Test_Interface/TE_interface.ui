@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>269</width>
-    <height>221</height>
+    <height>301</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>75</width>
+     <width>120</width>
      <height>23</height>
     </rect>
    </property>
@@ -29,9 +29,9 @@
   <widget class="QPushButton" name="Freeze">
    <property name="geometry">
     <rect>
-     <x>90</x>
+     <x>140</x>
      <y>10</y>
-     <width>75</width>
+     <width>120</width>
      <height>23</height>
     </rect>
    </property>
@@ -43,7 +43,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>40</y>
+     <y>90</y>
      <width>251</width>
      <height>171</height>
     </rect>
@@ -159,6 +159,143 @@
      </rect>
     </property>
    </widget>
+  </widget>
+  <widget class="QFrame" name="frame_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>40</y>
+     <width>251</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QPushButton" name="Initial">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>75</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Initial</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="Initial_list">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>10</y>
+      <width>151</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>1. 100%</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>2. 80%</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>3. 70%</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>4. 60% (??)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>5. 13% (??)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>6. 7% (??)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>7. 2% (??)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>8. Reactor Critical</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>9. Hotstandby</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>10. Hotshutdown</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>11. Cold shutdown</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>12. Hot standby</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>13. Cold shutdown 1</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>14. Hot showdown(colddown)</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>15. Hot shut to Hot standby</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>16. Test 70%</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>17. 2%(real)</string>
+     </property>
+    </item>
+   </widget>
+  </widget>
+  <widget class="QPushButton" name="Go_db">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>270</y>
+     <width>231</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Save_DB</string>
+   </property>
   </widget>
  </widget>
  <resources/>

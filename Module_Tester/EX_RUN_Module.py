@@ -55,23 +55,26 @@ class RUN_FREEZE(multiprocessing.Process):
         udpSocket.settimeout(5)     # 5초 대기 후 연결 없으면 연결 안됨을 호출
 
         while True:
-            data, client = udpSocket.recvfrom(44388)
-            pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
+            try:
+                data, client = udpSocket.recvfrom(44388)
+                pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
 
-            # Run 버튼 누르면 CNS 동작하는 모듈
-            if self.trig_mem['Loop'] and self.trig_mem['Run'] is False:
-                self.CNS_udp._send_control_signal(['KFZRUN'], [3])
-                while True:
-                    data, client = udpSocket.recvfrom(44388)
-                    pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
-                    if self.CNS_data['KFZRUN']['V'] == 4 or self.CNS_data['KFZRUN']['V'] == 10:
-                        [self.update_local_mem(key) for key in self.CNS_data.keys()]
-                        self.trig_mem['Run'] = True
-                        break
+                # Run 버튼 누르면 CNS 동작하는 모듈
+                if self.trig_mem['Loop'] and self.trig_mem['Run'] is False:
+                    self.CNS_udp._send_control_signal(['KFZRUN'], [3])
+                    while True:
+                        data, client = udpSocket.recvfrom(44388)
+                        pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
+                        if self.CNS_data['KFZRUN']['V'] == 4 or self.CNS_data['KFZRUN']['V'] == 10:
+                            [self.update_local_mem(key) for key in self.CNS_data.keys()]
+                            self.trig_mem['Run'] = True
+                            break
 
-            # CNS 초기화 선언시 모든 메모리 초기화
-            if self.CNS_data['KFZRUN']['V'] == 1:
-                [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
-                [self.CNS_data[_]['D'].clear() for _ in self.CNS_data.keys()]
+                # CNS 초기화 선언시 모든 메모리 초기화
+                if self.CNS_data['KFZRUN']['V'] == 1:
+                    [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
+                    [self.CNS_data[_]['D'].clear() for _ in self.CNS_data.keys()]
 
-            [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
+                [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
+            except Exception as f:
+                print("CNS time out")

@@ -13,7 +13,7 @@ class EX_module(multiprocessing.Process):
         while True:
             if self.trig_mem['Loop'] and self.trig_mem['Run']:
                 print('계산중....', end='\t')
-                sleep(1)
+                # sleep(1)
                 print('계산 종료! ....', end='\t')
                 print(self, self.mem['KCNTOMS'], self.trig_mem['Loop'], self.trig_mem['Run'])
                 self.trig_mem['Run'] = False
