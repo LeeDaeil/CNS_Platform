@@ -12,7 +12,7 @@ class body:
         parser = argparse.ArgumentParser(description='CNS 플랫폼_TE Ver')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7001, required=False, help="현재 컴퓨터의 port [default=7001]")
-        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
+        parser.add_argument('--cnsip', type=str, default='192.168.0.2', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--cnsport', type=int, default=7003, required=False, help="현재 컴퓨터의 port [default=7001]")
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
