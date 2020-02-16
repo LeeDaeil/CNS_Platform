@@ -1,23 +1,22 @@
 from multiprocessing import Manager
-from Module_Tester.EX_db import db_make
-from Module_Tester.EX_interface import *
-from Module_Tester.EX_RUN_Module import *
-from Module_Tester.EX_Module import *
+from db import db_make
+from CNS_Platform_controller import interface_function
+from CNS_Run_Freeze import RUN_FREEZE
+from CNS_TEST_module import EX_module
 import argparse
-
 
 class body:
     def __init__(self):
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
-        parser = argparse.ArgumentParser(description='CNS 플랫폼_TE Ver')
+        parser = argparse.ArgumentParser(description='CNS 플랫폼_Ver0')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
         parser.add_argument('--comport', type=int, default=7010, required=False, help="현재 컴퓨터의 port [default=7001]")
-        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7010, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="CNS 컴퓨터의 ip [default='']")
+        parser.add_argument('--cnsport', type=int, default=7010, required=False, help="CNS 컴퓨터의 port [default=7001]")
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
 
-        with open('EX_pro.txt', 'w') as f:                             # 타기능에서 CNS 정보 확인 용
+        with open('CNS_Info.txt', 'w') as f:                             # 타기능에서 CNS 정보 확인 용
             f.write(f'{self.args.cnsip}\t{self.args.cnsport}')
 
         print(self.args)

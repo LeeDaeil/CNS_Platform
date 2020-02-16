@@ -2,8 +2,8 @@ import TD3.TD3_Fun as TD
 import TD3.TD3_Port as TDP
 from db import db_make
 from multiprocessing import Manager
-from CNS_UDP import *
-from CNS_CFun import *
+from Temp.CNS_UDP import *
+from Temp.CNS_CFun import *
 
 TOP_TITLE = 'Ver1'
 

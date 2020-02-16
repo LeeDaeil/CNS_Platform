@@ -1,7 +1,6 @@
 from Main import generate_mem, body
-from Net_Test import C_LSTM_Test
-from Value_test_Main import body as tese_body
-from CNS_UDP import UDPSocket
+from Temp.Net_Test import C_LSTM_Test
+from Temp.CNS_UDP import UDPSocket
 import unittest
 
 

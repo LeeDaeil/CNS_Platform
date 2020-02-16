@@ -1,9 +1,8 @@
 import multiprocessing
 import time
-import numpy as np
 import CNS_Send_UDP
 import copy
-import CNS_Network
+from Temp import CNS_Network
 
 
 class Power_increase_module(multiprocessing.Process):

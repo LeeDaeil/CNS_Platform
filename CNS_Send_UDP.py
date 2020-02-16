@@ -70,7 +70,7 @@ class CNS_Send_Signal:
 
 if __name__ == '__main__':
     import time
-    test_udp_send = CNS_Send_Signal('192.168.0.55', 7001)
+    test_udp_send = CNS_Send_Signal('192.168.0.100', 7010)
     Test_1 = False  # 일반적인 UDP 테스트
     if Test_1:
         while True:

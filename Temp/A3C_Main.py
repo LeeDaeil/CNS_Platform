@@ -1,9 +1,8 @@
-import A3C_Fun as A3
-import A3C_Port as AP
+from Temp import A3C_Fun as A3, A3C_Port as AP
 from db import db_make
 from multiprocessing import Manager
-from CNS_UDP import *
-from CNS_CFun import *
+from Temp.CNS_UDP import *
+from Temp.CNS_CFun import *
 
 TOP_TITLE = 'Ver1'
 

@@ -1,5 +1,4 @@
 import multiprocessing
-import time
 
 
 class A3C_Process_Module(multiprocessing.Process):
@@ -49,7 +48,7 @@ class A3C_Process_Module(multiprocessing.Process):
         # ===================================================
 
     def run(self):
-        from A3C_Network import A3C
+        from Temp.A3C_Network import A3C
         import tensorflow as tf
         from keras.backend.tensorflow_backend import set_session
         # 텐서보드에 데이터를 저장하기 위한 변수 선언

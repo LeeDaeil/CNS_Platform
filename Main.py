@@ -1,15 +1,13 @@
 from db import db_make
 from multiprocessing import Manager
-from CNS_UDP import *
-from CNS_Fun import *
-from CNS_Power import Power_increase_module as PI_module
-from CNS_AB_DIG import Abnormal_dig_module as AB_DIG_module
-from CNS_GFun import *
-from CNS_CFun import *
-from CNS_Interface import *
+from Temp.CNS_UDP import *
+from Temp.CNS_Fun import *
+from Temp.CNS_AB_DIG import Abnormal_dig_module as AB_DIG_module
+from Temp.CNS_CFun import *
+from Temp.CNS_Interface import *
 import argparse
 
-import LIGHT
+from Temp import LIGHT
 
 
 class body:

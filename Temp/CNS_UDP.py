@@ -2,10 +2,9 @@ import multiprocessing
 import socket
 from struct import unpack
 from copy import deepcopy
-from time import sleep
 import time
 import pandas as pd
-import LIGHT
+from Temp import LIGHT
 
 
 class UDPSocket(multiprocessing.Process):

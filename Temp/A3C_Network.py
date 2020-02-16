@@ -4,7 +4,6 @@ import keras.backend as K
 import threading
 from threading import Lock
 from keras.models import Model
-from keras.utils import to_categorical
 from keras.layers import Dense, Input, Conv1D, MaxPooling1D, Flatten, CuDNNLSTM
 from keras.optimizers import RMSprop
 from time import sleep
@@ -216,7 +215,8 @@ class Actor(Agent):
 #====================================================================================================================#
 episode = 0
 lock = Lock()
-import A3C_Port as AP
+from Temp import A3C_Port as AP
+
 
 class worker:
     def training_thread(self, A3C_agent, max_episode, shared_mem, action_dim, learning_interval, summary_writer, nub_agent):
