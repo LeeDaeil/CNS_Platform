@@ -5,8 +5,10 @@ from CNS_Run_Freeze import RUN_FREEZE
 from CNS_TEST_module import EX_module
 import argparse
 
+
 class body:
     def __init__(self):
+        import AUTO_UI_TO_PY
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
         parser = argparse.ArgumentParser(description='CNS 플랫폼_Ver0')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")

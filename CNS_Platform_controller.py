@@ -6,6 +6,7 @@ import pandas as pd
 from PySide2.QtWidgets import QApplication, QWidget
 
 from Interface import CNS_Platform_controller_interface as CNS_controller
+from CNS_Platform_mainwindow import CNS_mw
 from CNS_Send_UDP import CNS_Send_Signal
 
 
@@ -38,6 +39,7 @@ class MyForm(QWidget):
         self.ui.Initial.clicked.connect(self.go_init)
         self.ui.Go_db.clicked.connect(self.go_save)
         self.ui.Apply_Sp.clicked.connect(self.go_speed)
+        self.ui.Show_main_win.clicked.connect(self.show_main_window)
         # ----
         self.show()
 
@@ -92,6 +94,5 @@ class MyForm(QWidget):
             print('CNS 배속 변경 시 Freeze에서 변경 가능함.')
             pass
 
-
-
-
+    def show_main_window(self):
+        self.cns_main_win = CNS_mw()

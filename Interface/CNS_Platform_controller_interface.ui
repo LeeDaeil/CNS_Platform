@@ -297,7 +297,7 @@
     <string>Save_DB</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="Show_main_win">
    <property name="geometry">
     <rect>
      <x>20</x>
