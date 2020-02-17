@@ -48,7 +48,7 @@ class CNS_mw(QWidget):
         timer = QtCore.QTimer(self)
         for _ in update_module:
             timer.timeout.connect(_)
-        timer.start(2000)
+        timer.start(600)
         self.show()
 
     # ======================= 새롭게 열리는 윈도우 들 ====================
