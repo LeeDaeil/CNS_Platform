@@ -1,10 +1,12 @@
 from multiprocessing import Manager
 from db import db_make
-from CNS_Platform_controller import interface_function
-from CNS_Run_Freeze import RUN_FREEZE
-from CNS_TEST_module import EX_module
+from collections import deque
 import argparse
 
+from CNS_Platform_controller import interface_function
+from CNS_Run_Freeze import RUN_FREEZE
+from CNS_All_module import All_Function_module
+import CNS_Platform_PARA as PARA
 
 class body:
     def __init__(self):
@@ -26,7 +28,7 @@ class body:
         # ---------------------------------------------------------------------------------------- #
         pro_list = [RUN_FREEZE(self.shared_mem, IP=self.args.comip, Port=self.args.comport),    # [1]
                     interface_function(self.shared_mem),                                        # [2]
-                    EX_module(self.shared_mem)                                                  # [3]
+                    All_Function_module(self.shared_mem)                                        # [3]
                     ]
         self.process_list = pro_list
 
@@ -37,7 +39,16 @@ class body:
 
 class generate_mem:
     def make_clean_mem(self):
-        memory_dict = {'Clean': True, 'Loop': False, 'Run': False}
+        memory_dict = {'Clean': True, 'Loop': False, 'Run': False,
+                       'Auto': False,           # Auto : autonomous[True], manual[False]
+                       'Rq_man': False,         # Auto : 운전원 개입 요청 [True], 자율 운전 중 [False]
+                       # Operation Strategy His
+                       'OPStrategy': PARA.Normal,      # Normal, Abnormal, Em
+                       'OpStrategy_detail': '',     #
+                       'OPStrategy_his': deque(maxlen=2),
+                       # Event Diagnosis His
+                       'Event_DIG_His': {'X': deque(maxlen=20), 'Y': deque(maxlen=20)}
+                       }
         print('Clean 메모리 생성 완료')
         return memory_dict
 

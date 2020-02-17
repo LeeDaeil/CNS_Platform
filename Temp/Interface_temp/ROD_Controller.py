@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
-from Interface.Trend_window import Ui_Dialog as Rod_UI
-from PyQt5.QtWidgets import QDialog, QApplication, QWidget
-from PyQt5 import QtCore, QtGui, QtWidgets
+from Temp.Interface_temp.Trend_window import Ui_Dialog as Rod_UI
+from PyQt5.QtWidgets import QDialog
+from PyQt5 import QtCore
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-import sys
 import CNS_Send_UDP
 
 class sub_tren_window(QDialog):

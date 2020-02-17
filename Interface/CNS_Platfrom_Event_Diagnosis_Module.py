@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'A_Event Diagnosis Module.ui'
+# Form implementation generated from reading ui file './/Interface\CNS_Platfrom_Event_Diagnosis_Module.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
@@ -494,4 +496,3 @@ class Ui_Dialog(object):
         self.ab5902.setText(_translate("Dialog", "Ab_59-02"))
         self.ab2301.setText(_translate("Dialog", "Ab_23-01"))
         self.ab5901.setText(_translate("Dialog", "Ab_59-01"))
-

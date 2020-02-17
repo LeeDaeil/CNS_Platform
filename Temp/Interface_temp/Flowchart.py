@@ -3,10 +3,10 @@
 # 또한 전체 프레임의 좌표 또한 고려해야 할 것
 
 import sys
-from PySide2.QtWidgets import QApplication, QPushButton, QWidget, QFrame
+from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtGui import QPainter, QPen
 from PySide2.QtGui import Qt
-from Interface.Button import btn_frame
+from Temp.Interface_temp.Button import btn_frame
 
 class make_flowchart(QWidget):
     def __init__(self, mem, parent=None):

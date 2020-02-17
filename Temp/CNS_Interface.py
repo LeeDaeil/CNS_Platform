@@ -4,28 +4,23 @@ import pandas as pd
 from sklearn import svm
 from sklearn.preprocessing import MinMaxScaler
 
-import PySide2
 from PySide2.QtWidgets import QDialog, QApplication, QMessageBox, QWidget
 from PySide2 import QtCore, QtWidgets
 from PySide2.QtGui import QFont
-from PySide2.QtCore import QCoreApplication
-from PySide2.QtGui import Qt
 
 # ------------------------------------------------------
-from Interface.study_9_rev3 import Ui_Dialog as Main_ui
-from Interface.resource import Study_9_re_rc
+from Temp.Interface_temp.study_9_rev3 import Ui_Dialog as Main_ui
 
 # ------------------------------------------------------
-from Interface.ROD_Controller import sub_tren_window
-from Interface.Event_Diagnosis_Module import sub_event_window
+from Temp.Interface_temp.ROD_Controller import sub_tren_window
+from Temp.Interface_temp.Event_Diagnosis_Module import sub_event_window
 # ------------------------------------------------------
 
-from Interface.current_plant_state import Ui_Dialog as Strategy_ui
-from Interface.popup_ss import Ui_MainForm as SS_ui
+from Temp.Interface_temp.current_plant_state import Ui_Dialog as Strategy_ui
+from Temp.Interface_temp.popup_ss import Ui_MainForm as SS_ui
 
-import Interface.Flowchart as mf
-import Interface.Flowchart_normal as mf_normal
-import Interface.Flowchart_abnormal as mf_abnormal
+import Temp.Interface_temp.Flowchart_normal as mf_normal
+import Temp.Interface_temp.Flowchart_abnormal as mf_abnormal
 
 
 class interface_function(multiprocessing.Process):
@@ -43,74 +38,66 @@ class interface_function(multiprocessing.Process):
 class MyForm(QDialog):
     def __init__(self, mem):
         super().__init__()
+        if True:
+            self.scaler = MinMaxScaler()
+            self.model_svm = self.Make_P_T_SVM()
+            print('SVM 시작 완료')
 
-        self.scaler = MinMaxScaler()
-        self.model_svm = self.Make_P_T_SVM()
-        print('SVM 시작 완료')
+            self.ui = Main_ui()
+            self.ui.setupUi(self)
+            if True: # 메인 메모리와 연결된 부분
+                self.mem = mem[0]
+                self.Auto_mem = mem[-2]
+                self.strategy_selection_mem = mem[1]
 
-        self.ui = Main_ui()
-        self.ui.setupUi(self)
-        if True: # 메인 메모리와 연결된 부분
-            self.mem = mem[0]
-            self.Auto_mem = mem[-2]
-            self.strategy_selection_mem = mem[1]
+            self.color_setting()
 
-        self.color_setting()
+            # self.draw_power_gp()
+            # self.draw_turbin_gp()
 
-        # self.draw_power_gp()
-        # self.draw_turbin_gp()
-
-        self.btn_event_diagnosis_module = QtWidgets.QPushButton(self)
-        self.btn_event_diagnosis_module.setGeometry(QtCore.QRect(905,10,100,23))
-        self.btn_event_diagnosis_module.setText("Event Diagnosis")
+            self.btn_event_diagnosis_module = QtWidgets.QPushButton(self)
+            self.btn_event_diagnosis_module.setGeometry(QtCore.QRect(905,10,100,23))
+            self.btn_event_diagnosis_module.setText("Event Diagnosis")
 
 
-        # self.blick_switch = True
-        self.CSF_test_mode = True
-        if self.CSF_test_mode:
-            self.CSF_upcont = 0
+            # self.blick_switch = True
+            self.CSF_test_mode = True
+            if self.CSF_test_mode:
+                self.CSF_upcont = 0
 
-        self.Alarm_test_mode = True
-        if self.Alarm_test_mode:
-            self.Alarm_upcont = 0
+            self.Alarm_test_mode = True
+            if self.Alarm_test_mode:
+                self.Alarm_upcont = 0
 
-# ======================================================================================================================
-# 전략 설정 기능 트리거
-        self.st_triger = {
-            'ab_on/off': False,
-            'em_on/off': False,
-            'no_on/off': False
-        }
-# ======================================================================================================================
+            # 전략 설정 기능 트리거
+            self.st_triger = {
+                'ab_on/off': False,
+                'em_on/off': False,
+                'no_on/off': False
+            }
 
-        # x msec마다 업데이트
-        update_module = [self.update_comp, self.update_CSF, self.update_display, self.update_alarm, self.update_timmer,
-                         self.run_TSMS, self.run_AUTO]
-        timer = QtCore.QTimer(self)
-        for _ in update_module:
-            timer.timeout.connect(_)
-        timer.start(500)
-        self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
-        self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
-        self.ui.Open_Strategy.clicked.connect(self.call_strategy_window)
+            # x msec마다 업데이트
+            update_module = [self.update_comp, self.update_CSF, self.update_display, self.update_alarm, self.update_timmer,
+                             self.run_TSMS, self.run_AUTO]
+            timer = QtCore.QTimer(self)
+            for _ in update_module:
+                timer.timeout.connect(_)
+            timer.start(500)
+            self.ui.Open_GP_Window.clicked.connect(self.call_trend_window)
+            # Autonomous controller ==========================================
+            self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
+            self.ui.pushButton_5.clicked.connect(self.Auto_Alarm_Click_Auto)
+            # TSMS
+            self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
+
+            self.ui.listWidget.itemClicked.connect(self.call_popup_ss)
+            self.ui.Open_Strategy.clicked.connect(self.call_strategy_window)
         self.btn_event_diagnosis_module.clicked.connect(self.call_event_window)
 
-        ## 버튼 연결 - 비정상 진단 모듈
-
-        # Autonomous controller ==========================================
-        self.ui.pushButton_4.clicked.connect(self.Auto_Alarm_Click_Man)
-        self.ui.pushButton_5.clicked.connect(self.Auto_Alarm_Click_Auto)
-        # ================================================================
-
-# ======================================================================================================================
-# connecting popup function of strategy selection
-
-        self.ui.listWidget.itemClicked.connect(self.call_popup_ss)
-
+        # connecting popup function of strategy selection
         self.show()
 
     # ======================= Trend Popup===============================
-    # 제어봉 조작 패널
     def call_trend_window(self):
         self.trend_window = sub_tren_window(self.mem, self.Auto_mem, self.strategy_selection_mem)
 
@@ -1134,7 +1121,6 @@ class MyForm(QDialog):
         self.operation_state()
         self.history_ss()
 
-
     def Auto_Alarm_dis(self):
         if self.Auto_mem['Auto_state']:     # True
             self.ui.pushButton_2.setStyleSheet(self.back_color['gray']) # man dis
@@ -1563,55 +1549,4 @@ class popup_ss(QWidget):
             self.main_ui.Fou_label.setText('Autonomous Control By RL')
         else:
             pass
-
-#     =======================================================================================
-#     리스트 위젯의 텍스트 별로 접근하는 방법
-#
-#     def __init__(self, item, mem):
-#         self.trig_mem = mem
-#
-#         QWidget.__init__(self)
-#         self.init_widget()
-#         self.flowchart(item, self.trig_mem)
-#         self.show()
-#
-#     def init_widget(self):
-#         self.main_ui = SS_ui()
-#         self.main_ui.setupUi(self)
-#
-#         self.font = QFont("Calibri", 15, QFont.Bold)
-#         self.main_ui.Sec_label.setFont(self.font)
-#         self.main_ui.Sec_label_2.setFont(self.font)
-#         self.main_ui.Fou_label.setFont(self.font)
-#
-#         # self.main_ui.btn_close.clicked.connect(QCoreApplication.instance().quit)
-#
-#         # self.setWindowTitle('Strategy selection')
-#         # self.setGeometry(100, 100, 640, 480)
-#         # self.frame1 = QtWidgets.QFrame(self)
-#         # self.frame1.setGeometry(QtCore.QRect(0, 0, 600, 400))
-#         # self.frame1.setStyleSheet("background-color: rgb(255, 30, 10);")
-#
-#     def flowchart(self, item, mem):
-#         operation_state = item.text().split('\t')[1]
-#         strategy_name = item.text().split('\t')[3]
-#
-#         if operation_state == 'Abnormal Operation':
-#             if strategy_name == 'Auto by LSTM':
-#
-#                 mf_abnormal.make_flowchart(mem, self.main_ui.SA_widget)
-#                 self.main_ui.Sec_label.setText('Abnormal Operation')
-#                 self.main_ui.Sec_label_2.setText('RCS Leak')
-#                 self.main_ui.Fou_label.setText('Auto Control by LSTM')
-#                 # mf.make_flowchart(self.frame1)
-#             else:
-#                 pass
-# ======================================================================================================================
-
-
-
-
-
-
-
 

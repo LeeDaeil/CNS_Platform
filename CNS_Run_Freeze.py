@@ -46,7 +46,7 @@ class RUN_FREEZE(multiprocessing.Process):
         self.mem[key] = self.CNS_data[key]
 
     def update_local_mem(self, key):
-        self.CNS_data[key]['L'].append(self.CNS_data[key]['V'])
+        # self.CNS_data[key]['L'].append(self.CNS_data[key]['V'])
         self.CNS_data[key]['D'].append(self.CNS_data[key]['V'])
 
     def run(self):
@@ -71,8 +71,8 @@ class RUN_FREEZE(multiprocessing.Process):
                             break
 
                 # CNS 초기화 선언시 모든 메모리 초기화
-                if self.CNS_data['KFZRUN']['V'] == 1:
-                    [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
+                if self.CNS_data['KFZRUN']['V'] == 6:
+                    # [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
                     [self.CNS_data[_]['D'].clear() for _ in self.CNS_data.keys()]
 
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트

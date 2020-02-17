@@ -9,6 +9,8 @@ from Interface import CNS_Platform_controller_interface as CNS_controller
 from CNS_Platform_mainwindow import CNS_mw
 from CNS_Send_UDP import CNS_Send_Signal
 
+from copy import deepcopy
+
 
 class interface_function(multiprocessing.Process):
     def __init__(self, mem):
@@ -24,6 +26,7 @@ class MyForm(QWidget):
     def __init__(self, mem):
         super().__init__()
         self.mem = mem[0]   # main mem connection
+        self.copy_mem_structure = deepcopy(self.mem)
         self.trig_mem = mem[-1]  # main mem connection
 
         print('Test UI 호출')
@@ -95,4 +98,4 @@ class MyForm(QWidget):
             pass
 
     def show_main_window(self):
-        self.cns_main_win = CNS_mw()
+        self.cns_main_win = CNS_mw(mem=self.mem, trig_mem=self.trig_mem)
