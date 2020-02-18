@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file './/Interface\CNS_Platform_mainwindow.ui',
 # licensing of './/Interface\CNS_Platform_mainwindow.ui' applies.
 #
-# Created: Tue Feb 18 14:52:20 2020
+# Created: Tue Feb 18 20:31:01 2020
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -3415,6 +3415,9 @@ class Ui_Dialog(object):
         self.Event_DIG = QtWidgets.QPushButton(Dialog)
         self.Event_DIG.setGeometry(QtCore.QRect(930, 10, 75, 23))
         self.Event_DIG.setObjectName("Event_DIG")
+        self.PZR_GP = QtWidgets.QPushButton(Dialog)
+        self.PZR_GP.setGeometry(QtCore.QRect(850, 10, 75, 23))
+        self.PZR_GP.setObjectName("PZR_GP")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -3734,5 +3737,6 @@ class Ui_Dialog(object):
         self.Manual_op.setText(QtWidgets.QApplication.translate("Dialog", "Manual Operation", None, -1))
         self.Auto_op.setText(QtWidgets.QApplication.translate("Dialog", "Autonomous Operation", None, -1))
         self.Event_DIG.setText(QtWidgets.QApplication.translate("Dialog", "Event DIG", None, -1))
+        self.PZR_GP.setText(QtWidgets.QApplication.translate("Dialog", "PZR_GP", None, -1))
 
 import CNS_resource_rc

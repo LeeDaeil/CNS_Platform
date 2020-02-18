@@ -2,7 +2,7 @@
 
 class MainNet:
     def __init__(self):
-        self.AB_DIG_AI, self.AB_CONT_AI, self.ROD_actor, self.ROD_critic = self.build_model()
+        self.AB_DIG_AI, self.AB_CONT_AI, self.ROD_actor, self.ROD_critic, self.PZR_actor, self.PZR_critic = self.build_model()
         self.load_model()
 
     def build_model(self):
@@ -43,11 +43,24 @@ class MainNet:
 
         ROD_actor = Model(inputs=ROD_input, outputs=ROD_act_prob)
         ROD_critic = Model(inputs=ROD_input, outputs=ROD_cri_val)
-
-        print(ROD_actor.summary())
-        print(ROD_critic.summary())
         # ------------------------------------------------------------------------
-        return AB_DIG_AI, AB_CONT_AI, ROD_actor, ROD_critic
+        PZR_state = Input(batch_shape=(None, 5, 7))
+        PZR_shared = Conv1D(filters=10, kernel_size=5, strides=1, padding='same')(PZR_state)
+        PZR_shared = MaxPooling1D(pool_size=3)(PZR_shared)
+        PZR_shared = LSTM(12)(PZR_shared)
+        PZR_shared = Dense(24)(PZR_shared)
+
+        PZR_actor_hidden = Dense(24, activation='relu', kernel_initializer='glorot_uniform')(PZR_shared)
+        PZR_action_prob = Dense(9, activation='softmax', kernel_initializer='glorot_uniform')(PZR_actor_hidden)
+
+        PZR_value_hidden = Dense(12, activation='relu', kernel_initializer='he_uniform')(PZR_shared)
+        PZR_state_value = Dense(1, activation='linear', kernel_initializer='he_uniform')(PZR_value_hidden)
+
+        PZR_actor = Model(inputs=PZR_state, outputs=PZR_action_prob)
+        PZR_critic = Model(inputs=PZR_state, outputs=PZR_state_value)
+
+        # ------------------------------------------------------------------------
+        return AB_DIG_AI, AB_CONT_AI, ROD_actor, ROD_critic, PZR_actor, PZR_critic
 
     # def predict_cont_action(self, input_window):
     #     predict_result = self.AB_CONT_AI.predict([[input_window]])
@@ -58,3 +71,5 @@ class MainNet:
         self.AB_CONT_AI.load_weights("ab_control_model.h5")
         self.ROD_actor.load_weights("ROD_A3C_actor.h5")
         self.ROD_critic.load_weights("ROD_A3C_cric.h5")
+        self.PZR_actor.load_weights("PZR_A3C_actor.h5")
+        self.PZR_critic.load_weights("PZR_A3C_cric.h5")

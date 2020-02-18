@@ -4,6 +4,7 @@ from PySide2 import QtCore, QtWidgets
 import pickle
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_rod_controller import rod_controller_interface
+from CNS_Platform_pzr_controller import pzr_controller_interface
 from CNS_Platform_Strategy import Strategy_interface
 from CNS_Platform_EventDig import Event_dig_model
 import CNS_Platform_PARA as PARA
@@ -39,6 +40,8 @@ class CNS_mw(QWidget):
         self.ui.Event_DIG.clicked.connect(self.call_event_window)
         # 제어봉 인터페이스 모듈
         self.ui.Open_GP_Window.clicked.connect(self.call_rod_controller)
+        # PZR 인터페이스 모듈
+        self.ui.PZR_GP.clicked.connect(self.call_pzr_controller)
         # 전략설정 인터페이스 모듈 - 리스트 누르면 인터페이스 호출됨.
         self.ui.listWidget.itemClicked.connect(self.call_strategy_inter)
         # ======================= 타이머 동작 ================================
@@ -57,6 +60,9 @@ class CNS_mw(QWidget):
 
     def call_rod_controller(self):
         self.rod_controller_module = rod_controller_interface(self.mem, self.trig_mem)
+
+    def call_pzr_controller(self):
+        self.pzr_controller_module = pzr_controller_interface(self.mem, self.trig_mem)
 
     def call_strategy_inter(self):
         self.call_st = Strategy_interface(trig_mem=self.trig_mem)
@@ -1051,19 +1057,20 @@ class CNS_mw(QWidget):
         if self.mem['KCNTOMS']['V'] < 4:
             # 초기 혹시 발생한 내역을 삭제함.
             self.ui.Auto_list.clear()
-        if self.mem['KLAMPO9']['V'] == 1: self.Auto_DIS_add_list_signal('Reactor trip')
-        if self.mem['KLAMPO6']['V'] == 1: self.Auto_DIS_add_list_signal('SI valve open')
-        if self.mem['KLAMPO4']['V'] == 1: self.Auto_DIS_add_list_signal('Containment ISO')
-        if self.mem['KLAMPO2']['V'] == 1: self.Auto_DIS_add_list_signal('Feedwater ISO')
-        if self.mem['KLAMPO3']['V'] == 1: self.Auto_DIS_add_list_signal('Main steam line ISO')
-        if self.mem['KLAMPO134']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 1 start')
-        if self.mem['KLAMPO135']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 2 start')
-        if self.mem['KLAMPO136']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 3 start')
-        if self.mem['KLAMPO70']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 2 start')
-        if self.mem['KLAMPO69']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 3 start')
-        if self.mem['KLAMPO124']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 1 stop')
-        if self.mem['KLAMPO125']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 2 stop')
-        if self.mem['KLAMPO126']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 3 stop')
+        if self.trig_mem['ST_OPStratey'] == PARA.Emergency:
+            if self.mem['KLAMPO9']['V'] == 1: self.Auto_DIS_add_list_signal('Reactor trip')
+            if self.mem['KLAMPO6']['V'] == 1: self.Auto_DIS_add_list_signal('SI valve open')
+            if self.mem['KLAMPO4']['V'] == 1: self.Auto_DIS_add_list_signal('Containment ISO')
+            if self.mem['KLAMPO2']['V'] == 1: self.Auto_DIS_add_list_signal('Feedwater ISO')
+            if self.mem['KLAMPO3']['V'] == 1: self.Auto_DIS_add_list_signal('Main steam line ISO')
+            if self.mem['KLAMPO134']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 1 start')
+            if self.mem['KLAMPO135']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 2 start')
+            if self.mem['KLAMPO136']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 3 start')
+            if self.mem['KLAMPO70']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 2 start')
+            if self.mem['KLAMPO69']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 3 start')
+            if self.mem['KLAMPO124']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 1 stop')
+            if self.mem['KLAMPO125']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 2 stop')
+            if self.mem['KLAMPO126']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 3 stop')
 
     def Auto_DIS_Click_Man(self):
         self.trig_mem['Auto'] = False

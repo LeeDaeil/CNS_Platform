@@ -44,12 +44,16 @@ class generate_mem:
                        'Rq_man': False,         # Auto : 운전원 개입 요청 [True], 자율 운전 중 [False]
                        # Operation Strategy His
                        'OPStrategy': PARA.Normal,      # Normal, Abnormal, Em
+                       'ST_OPStratey': PARA.ST_OP,
                        'OpStrategy_detail': '',     #
                        'OPStrategy_his': deque(maxlen=2),
                        # Event Diagnosis His
                        'Event_DIG_His': {'X': deque(maxlen=20), 'Y': deque(maxlen=20)},
                        # Rod His
-                       'Rod_His': {'X': [], 'Y': []}
+                       'Rod_His': {'X': [], 'Y': []},
+                       # PZR His - 가압기 기포 생성 모듈
+                       'PZR_His': {'X': deque(maxlen=50), 'Y_pre': deque(maxlen=50), 'Y_temp': deque(maxlen=50),
+                                   'Y_lv': deque(maxlen=50), 'Y_val': deque(maxlen=50), 'Y_het': deque(maxlen=50)}
                        }
         print('Clean 메모리 생성 완료')
         return memory_dict

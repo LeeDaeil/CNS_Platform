@@ -8,7 +8,7 @@ print(get_cns_interface_py)
 # Make ui -> Py
 # pyside2-uic test.ui > test.py
 for file_name in get_cns_interface_py:
-    if 'rod' in file_name or 'Event' in file_name:
+    if 'rod' in file_name or 'Event' in file_name or 'PZR' in file_name:
         target_file_name = file_name.split('.')[1]
         # pyrcc4 -o resources.py resources.qrc
         print(f'pyuic5 ./{target_file_name}.ui -o ./{target_file_name}.py')

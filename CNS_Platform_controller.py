@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QApplication, QWidget
 from Interface import CNS_Platform_controller_interface as CNS_controller
 from CNS_Platform_mainwindow import CNS_mw
 from CNS_Send_UDP import CNS_Send_Signal
+import CNS_Platform_PARA as PARA
 
 from copy import deepcopy
 
@@ -75,7 +76,24 @@ class MyForm(QWidget):
 
     def go_init(self):
         initial_nub = int(self.ui.Initial_list.currentIndex()) + 1
-        print(f'초기화 {initial_nub} 요청')
+
+        if initial_nub == 17:
+            self.trig_mem['ST_OPStratey'] = PARA.ST_OP
+        elif initial_nub == 13:
+            self.trig_mem['ST_OPStratey'] = PARA.PZR_OP
+
+            print('CNS 10 배속 변경')
+            self.ui.Se_SP.setText('10')
+
+            self.CNS_udp._send_control_signal(['TDELTA'], [0.2 * int(self.ui.Se_SP.text())])
+            self.trig_mem['Speed'] = int(self.ui.Se_SP.text())
+            self.ui.Cu_SP.setText(self.ui.Se_SP.text())
+
+        else:
+            self.trig_mem['ST_OPStratey'] = PARA.ST_OP  ### 디폴트
+
+        Mode = self.trig_mem['ST_OPStratey']
+        print(f'초기화 {initial_nub} 요청 + {Mode}')
         self.CNS_udp._send_control_signal(['KFZRUN', 'KSWO277'], [5, initial_nub])
 
     def go_save(self):
