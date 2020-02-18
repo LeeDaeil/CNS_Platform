@@ -3,6 +3,8 @@ import time
 import CNS_Send_UDP
 import copy
 from Temp import CNS_Network
+Rod_net = CNS_Network.MainNet(net_type='LSTM', input_pa=6, output_pa=3, time_leg=10)
+Rod_net.load_model()
 
 
 class Power_increase_module(multiprocessing.Process):

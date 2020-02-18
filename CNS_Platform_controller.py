@@ -92,6 +92,7 @@ class MyForm(QWidget):
         if not self.trig_mem['Loop']:
             print('CNS 배속 변경')
             self.CNS_udp._send_control_signal(['TDELTA'], [0.2 * int(self.ui.Se_SP.text())])
+            self.trig_mem['Speed'] = int(self.ui.Se_SP.text())
             self.ui.Cu_SP.setText(self.ui.Se_SP.text())
         else:
             print('CNS 배속 변경 시 Freeze에서 변경 가능함.')

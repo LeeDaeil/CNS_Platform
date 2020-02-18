@@ -1,5 +1,4 @@
 import pickle
-from collections import deque
 
 
 class Abnormal_dig_module:

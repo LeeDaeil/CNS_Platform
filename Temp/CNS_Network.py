@@ -51,7 +51,8 @@ class MainNet:
 
         actor._make_predict_function()
         critic._make_predict_function()
-
+        print(actor.summary())
+        print(critic.summary())
         return actor, critic
 
     def predict_action(self, input_window):

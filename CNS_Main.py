@@ -39,7 +39,7 @@ class body:
 
 class generate_mem:
     def make_clean_mem(self):
-        memory_dict = {'Clean': True, 'Loop': False, 'Run': False,
+        memory_dict = {'Clean': True, 'Loop': False, 'Run': False, 'Speed' : 1,
                        'Auto': False,           # Auto : autonomous[True], manual[False]
                        'Rq_man': False,         # Auto : 운전원 개입 요청 [True], 자율 운전 중 [False]
                        # Operation Strategy His
@@ -47,7 +47,9 @@ class generate_mem:
                        'OpStrategy_detail': '',     #
                        'OPStrategy_his': deque(maxlen=2),
                        # Event Diagnosis His
-                       'Event_DIG_His': {'X': deque(maxlen=20), 'Y': deque(maxlen=20)}
+                       'Event_DIG_His': {'X': deque(maxlen=20), 'Y': deque(maxlen=20)},
+                       # Rod His
+                       'Rod_His': {'X': [], 'Y': []}
                        }
         print('Clean 메모리 생성 완료')
         return memory_dict

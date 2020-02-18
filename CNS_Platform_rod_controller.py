@@ -119,14 +119,12 @@ class rod_controller_interface(QDialog):
             self.rod_ax.grid()
             self.rod_canvas.draw()
 
-            # 여기서 알아서 계산해야 할 듯!
-            ##
-            # self.rod_cond_ax.clear()
-            # rod_cond_time = self.auto_mem['Start_up_operation_his']['time']
-            # self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['power'])
-            # self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['up_cond'])
-            # self.rod_cond_ax.plot(rod_cond_time, self.auto_mem['Start_up_operation_his']['low_cond'])
-            # self.rod_cond_ax.grid()
+            # 원자로 출력 및 온도 분포 획득 Module_ROD로 부터
+
+            self.rod_cond_ax.clear()
+
+            self.rod_cond_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y'])
+            self.rod_cond_ax.grid()
 
             self.rod_cond_canv.draw()
         except Exception as e:
