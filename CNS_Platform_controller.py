@@ -75,7 +75,12 @@ class MyForm(QWidget):
             print('Malfunction 입력 실패')
 
     def go_init(self):
+
         initial_nub = int(self.ui.Initial_list.currentIndex()) + 1
+        self.CNS_udp._send_control_signal(['KFZRUN', 'KSWO277'], [5, initial_nub])
+
+        Mode = self.trig_mem['ST_OPStratey']
+        print(f'초기화 {initial_nub} 요청 + {Mode}')
 
         if initial_nub == 17:
             self.trig_mem['ST_OPStratey'] = PARA.ST_OP
@@ -91,10 +96,6 @@ class MyForm(QWidget):
 
         else:
             self.trig_mem['ST_OPStratey'] = PARA.ST_OP  ### 디폴트
-
-        Mode = self.trig_mem['ST_OPStratey']
-        print(f'초기화 {initial_nub} 요청 + {Mode}')
-        self.CNS_udp._send_control_signal(['KFZRUN', 'KSWO277'], [5, initial_nub])
 
     def go_save(self):
         now = time.localtime()
