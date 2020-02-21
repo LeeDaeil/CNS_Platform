@@ -50,7 +50,8 @@ class generate_mem:
                        # Event Diagnosis His
                        'Event_DIG_His': {'X': deque(maxlen=20), 'Y': deque(maxlen=20)},
                        # Rod His
-                       'Rod_His': {'X': [], 'Y': []},
+                       'Rod_His': {'X': [], 'Y_avg': [], 'Y_up_dead': [], 'Y_down_dead': [], 'Y_pow': [],
+                                   'Y_up_op': [], 'Y_down_op': [], 'Y_ax': []},
                        # PZR His - 가압기 기포 생성 모듈
                        'PZR_His': {'X': deque(maxlen=50), 'Y_pre': deque(maxlen=50), 'Y_temp': deque(maxlen=50),
                                    'Y_lv': deque(maxlen=50), 'Y_val': deque(maxlen=50), 'Y_het': deque(maxlen=50)}

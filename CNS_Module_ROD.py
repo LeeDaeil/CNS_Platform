@@ -18,37 +18,85 @@ class rod_controller_module:
         self.stop_val = 0
         self.gap = 0
 
-    def predict_action(self, mem, tirg_mem):
-        # 이전 전략과 비교하여 바뀌는 경우 gap을 재계산 해야함.
-        self.change_st.append(tirg_mem['Auto'])
-        if len(self.change_st) < 2:
-            # 초기 상태의 경우 전략 HIS를 2개 만들어야함.
-            self.change_st.append(tirg_mem['Auto'])
+        # 강화학습 모듈에서 가져옴.
+        self.save_tick = deque([0, 0], maxlen=2)
+        self.save_st = deque([False, False], maxlen=2)
+        # self.gap = 0
+        self.rod_start = False
+        self.hold_tick = 60*30  # 60 tick * 30분
+        self.end_time = 0
 
-        if tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == True:
-            # 현재 Nomal 이고 Auto mode 임.
-            if self.change_st[0] != self.change_st[1]:
-                # self.gap = mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.stop_val
-                self.gap = mem['KCNTOMS']['V'] - self.stop_val
-            # self.tick.append(mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.gap)
-            self.tick.append(mem['KCNTOMS']['V'] - self.gap)
-        elif tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == False:
-            # Auto로 동작하기 이전까지 Tick은 0 또는 이전의 Tick을 가져와야함.
-            if len(self.tick) == 0:
-                self.tick.append(0)
+        # DUMY 용
+        self.length_data = []
+
+    def predict_action(self, mem, tirg_mem):
+        # # 이전 전략과 비교하여 바뀌는 경우 gap을 재계산 해야함.
+        # self.change_st.append(tirg_mem['Auto'])
+        # if len(self.change_st) < 2:
+        #     # 초기 상태의 경우 전략 HIS를 2개 만들어야함.
+        #     self.change_st.append(tirg_mem['Auto'])
+        #
+        # if tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == True:
+        #     # 현재 Nomal 이고 Auto mode 임.
+        #     if self.change_st[0] != self.change_st[1]:
+        #         # self.gap = mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.stop_val
+        #         self.gap = mem['KCNTOMS']['V'] - self.stop_val
+        #     # self.tick.append(mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.gap)
+        #     self.tick.append(mem['KCNTOMS']['V'] - self.gap)
+        # elif tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == False:
+        #     # Auto로 동작하기 이전까지 Tick은 0 또는 이전의 Tick을 가져와야함.
+        #     if len(self.tick) == 0:
+        #         self.tick.append(0)
+        #     else:
+        #         self.stop_val = self.tick[-1]
+        #         self.tick.append(self.tick[-1])
+        # else:
+        #     pass
+
+        self.Time_tick = mem['KCNTOMS']['V']
+        Reactor_power = mem['QPROREL']['V']
+        if Reactor_power > 0.2:  # reactor power 가 20퍼이상이 되면, 출력을 유지하도록 함. tick을 고정
+            # 20퍼 이상인 부분을 감지하였고, 대기 시간 감소 시키면서 계산이 진행됨
+            if self.end_time == 0:
+                # 초기 상태이므로 이때부터 타이머 시작 : 현재 시간 + 홀드 할 시간
+                self.end_time += self.hold_tick + self.Time_tick
+            if self.end_time < self.Time_tick:
+                # 만약 end time 이 1000tick 인데, 현재 1200tick 이면 홀드하는 시간 종료
+                self.rod_start = True
             else:
-                self.stop_val = self.tick[-1]
-                self.tick.append(self.tick[-1])
+                # 이 부분은 Time_tick이 더 작아서 아직 홀드하는 상태
+                self.rod_start = False
         else:
-            pass
+            self.rod_start = True  # 20퍼 미만에서 Start!
+
+        # if self.Tavg > 306.5:
+        #     self.rod_start = False
+
+        self.save_st.append(self.rod_start)
+
+        # 중간 홀드하는 로직
+        if self.rod_start:
+            if self.save_st[0] != self.save_st[1]:
+                self.gap = self.Time_tick - self.save_tick[-1]
+            self.save_tick.append(self.Time_tick - self.gap)
+        else: # no start
+            self.save_tick.append(self.save_tick[-1])
+
+        self.tick.append(self.save_tick[-1])
+        self.length_data.append(self.save_tick[-1])
 
         input_data = self.make_input_data(mem=mem)
         if len(mem['KCNTOMS']['D']) >= 10:  # Rod가 동작하지 않는 경우에도 데이터를 계산하기 위해서 사용
-            predict_result = self.network.predict([[input_data]])
-            policy = predict_result[0]
-            action = np.random.choice(np.shape(policy)[0], 1, p=policy)[0]
-            # 계산된 액션은 CNS로 보내짐.
-            self.send_action(mem=mem, trig_mem=tirg_mem, R_A=action)
+            # predict_result = self.network.predict([[input_data]])
+            # policy = predict_result[0]
+            # action = np.random.choice(np.shape(policy)[0], 1, p=policy)[0]
+            pass
+
+        # DUMY
+        action = PARA.HIS_CONT['Act'][len(self.length_data)]
+
+        # 계산된 액션은 CNS로 보내짐.
+        self.send_action(mem=mem, trig_mem=tirg_mem, R_A=action)
 
         return input_data[-1]  # action, proba, 마지막 네트워크 값
 
@@ -117,10 +165,12 @@ class rod_controller_module:
 
                 temp.append([
                     # 네트워크의 Input 에 들어 가는 변수 들
-                    self.Reactor_power, self.up_dead_band / 1000, self.down_dead_band / 1000,
+                    self.Reactor_power, PARA.HIS_CONT['UP_D'][len(self.length_data)] / 1000,
+                                        PARA.HIS_CONT['DOWN_D'][len(self.length_data)] / 1000,
                                         self.get_current_t_ref / 1000, self.Mwe_power / 1000,
-                                        self.up_operation_band / 1000, self.down_operation_band / 1000,
-                                        self.load_set / 100, self.Tavg / 1000,
+                                        PARA.HIS_CONT['UP_O'][len(self.length_data)] / 1000,
+                                        PARA.HIS_CONT['DOWN_O'][len(self.length_data)] / 1000,
+                                        self.load_set / 100, PARA.HIS_CONT['UAVLEGM'][len(self.length_data)]/1000,
                                         self.rod_pos[0] / 1000, self.rod_pos[1] / 1000, self.rod_pos[2] / 1000,
                                         self.rod_pos[3] / 1000,
                 ])
@@ -177,7 +227,8 @@ class rod_controller_module:
             self.send_action_append(['KSWO100'], [0])
         if self.main_feed_valve_1_state == 1 or self.main_feed_valve_2_state == 1 or self.main_feed_valve_3_state == 1:
             self.send_action_append(['KSWO171', 'KSWO165', 'KSWO159'], [0, 0, 0])
-        self.send_action_append(['KSWO78', 'WDEWT'], [1, 1])  # Makeup
+
+        # self.send_action_append(['KSWO78', 'WDEWT'], [1, 1])  # Makeup
 
         # 절차서 구성 순서로 진행
         # 1) 출력이 4% 이상에서 터빈 set point를 맞춘다.
@@ -283,27 +334,66 @@ class rod_controller_module_Back:
         self.stop_val = 0
         self.gap = 0
 
+        # 강화학습 모듈에서 가져옴.
+        self.save_tick = deque([0, 0], maxlen=2)
+        self.save_st = deque([False, False], maxlen=2)
+        # self.gap = 0
+        self.rod_start = False
+        self.hold_tick = 60*30  # 60 tick * 30분
+        self.end_time = 0
+
     def predict_action(self, mem, tirg_mem):
         # 이전 전략과 비교하여 바뀌는 경우 gap을 재계산 해야함.
-        self.change_st.append(tirg_mem['Auto'])
-        if len(self.change_st) < 2:
-            # 초기 상태의 경우 전략 HIS를 2개 만들어야함.
-            self.change_st.append(tirg_mem['Auto'])
+        # self.change_st.append(tirg_mem['Auto'])
+        # if len(self.change_st) < 2:
+        #     # 초기 상태의 경우 전략 HIS를 2개 만들어야함.
+        #     self.change_st.append(tirg_mem['Auto'])
+        #
+        # if tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == True:
+        #     # 현재 Nomal 이고 Auto mode 임.
+        #     if self.change_st[0] != self.change_st[1]:
+        #         self.gap = mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.stop_val
+        #     self.tick.append(mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.gap)
+        # elif tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == False:
+        #     # Auto로 동작하기 이전까지 Tick은 0 또는 이전의 Tick을 가져와야함.
+        #     if len(self.tick) == 0:
+        #         self.tick.append(0)
+        #     else:
+        #         self.stop_val = self.tick[-1]
+        #         self.tick.append(self.tick[-1])
+        # else:
+        #     pass
 
-        if tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == True:
-            # 현재 Nomal 이고 Auto mode 임.
-            if self.change_st[0] != self.change_st[1]:
-                self.gap = mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.stop_val
-            self.tick.append(mem['KCNTOMS']['V'] * tirg_mem['Speed'] - self.gap)
-        elif tirg_mem['OPStrategy'] == PARA.Normal and tirg_mem['Auto'] == False:
-            # Auto로 동작하기 이전까지 Tick은 0 또는 이전의 Tick을 가져와야함.
-            if len(self.tick) == 0:
-                self.tick.append(0)
+        self.Time_tick = mem['KCNTOMS']['V']
+
+        if self.Reactor_power > 0.2:  # reactor power 가 20퍼이상이 되면, 출력을 유지하도록 함. tick을 고정
+            # 20퍼 이상인 부분을 감지하였고, 대기 시간 감소 시키면서 계산이 진행됨
+            if self.end_time == 0:
+                # 초기 상태이므로 이때부터 타이머 시작 : 현재 시간 + 홀드 할 시간
+                self.end_time += self.hold_tick + self.Time_tick
+            if self.end_time < self.Time_tick:
+                # 만약 end time 이 1000tick 인데, 현재 1200tick 이면 홀드하는 시간 종료
+                self.rod_start = True
             else:
-                self.stop_val = self.tick[-1]
-                self.tick.append(self.tick[-1])
+                # 이 부분은 Time_tick이 더 작아서 아직 홀드하는 상태
+                self.rod_start = False
         else:
-            pass
+            self.rod_start = True  # 20퍼 미만에서 Start!
+
+        # if self.Tavg > 306.5:
+        #     self.rod_start = False
+
+        self.save_st.append(self.rod_start)
+
+        # 중간 홀드하는 로직
+        if self.rod_start:
+            if self.save_st[0] != self.save_st[1]:
+                self.gap = self.Time_tick - self.save_tick[-1]
+            self.save_tick.append(self.Time_tick - self.gap)
+        else: # no start
+            self.save_tick.append(self.save_tick[-1])
+
+        self.tick.append(self.save_tick[-1])
 
         input_data = self.make_input_data(mem=mem)
         if len(mem['KCNTOMS']['D']) >= 10: # Rod가 동작하지 않는 경우에도 데이터를 계산하기 위해서 사용
@@ -321,18 +411,21 @@ class rod_controller_module_Back:
             try:
                 # Tick 은 변경 될 수도 있으므로 내부적으로 저장 및 이에 기반하여 계산함.
                 tick = self.tick[_]
-                Mwe_power = mem['KBCDO22']['D'][_]
-                load_set = mem['KBCDO20']['D'][_]
+
+                # [1]
+                start_2per_temp = 291.97
+                get_current_t_ref = start_2per_temp + tick * 0.00241
+
+                # [2]
+                up_dead_band = get_current_t_ref + 1
+                down_dead_band = get_current_t_ref - 1
+                up_operation_band = get_current_t_ref + 3
+                down_operation_band = get_current_t_ref - 3
+
                 power = mem['QPROREL']['D'][_]
-                base_condition = tick / 30000
-                up_base_condition = (tick * 53) / 1470000
-                low_base_condition = (tick * 3) / 98000
+                avg_temp = mem['UAVLEGM']['D'][_]
 
-                stady_condition = base_condition + 0.02
-
-                distance_up = up_base_condition + 0.04 - power
-                distance_low = power - low_base_condition
-                temp.append([power, distance_up, distance_low, stady_condition, Mwe_power/1000, load_set/100])
+                temp.append([power, avg_temp, up_dead_band, down_dead_band, up_operation_band, down_operation_band])
             except Exception as e:
                 print(self, e)
         return temp

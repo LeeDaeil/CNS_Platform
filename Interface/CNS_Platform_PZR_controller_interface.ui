@@ -84,7 +84,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <string>Heater State (Back-up Heater, Proportional Heater)</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="L_1">
@@ -92,7 +92,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <rect>
      <x>5</x>
      <y>4</y>
-     <width>421</width>
+     <width>191</width>
      <height>25</height>
     </rect>
    </property>
@@ -125,7 +125,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <string>Pressurizer Pressure</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="L_2">
@@ -166,7 +166,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <string>Valve Position (HV142, FV122)</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QWidget" name="layoutWidget_4">
@@ -185,7 +185,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <rect>
      <x>5</x>
      <y>208</y>
-     <width>421</width>
+     <width>191</width>
      <height>25</height>
     </rect>
    </property>
@@ -218,7 +218,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <string>Pressurizer Level</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="L_5">
@@ -226,7 +226,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <rect>
      <x>4</x>
      <y>410</y>
-     <width>421</width>
+     <width>191</width>
      <height>25</height>
     </rect>
    </property>
@@ -259,7 +259,7 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     <string>Pressurizer Temperature</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QWidget" name="layoutWidget_5">
@@ -272,6 +272,129 @@ font: 10pt &quot;HY헤드라인M&quot;;</string>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="PZR_his_temp"/>
+  </widget>
+  <widget class="QLabel" name="D_3">
+   <property name="geometry">
+    <rect>
+     <x>197</x>
+     <y>410</y>
+     <width>230</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>25</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(235, 235, 235);
+font: 10pt &quot;HY헤드라인M&quot;;</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="D_2">
+   <property name="geometry">
+    <rect>
+     <x>197</x>
+     <y>208</y>
+     <width>230</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>25</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(235, 235, 235);
+font: 10pt &quot;HY헤드라인M&quot;;</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLabel" name="D_1">
+   <property name="geometry">
+    <rect>
+     <x>197</x>
+     <y>4</y>
+     <width>230</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>20</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>25</height>
+    </size>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(235, 235, 235);
+font: 10pt &quot;HY헤드라인M&quot;;</string>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::Box</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <property name="lineWidth">
+    <number>2</number>
+   </property>
+   <property name="text">
+    <string>-</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
   </widget>
  </widget>
  <resources/>

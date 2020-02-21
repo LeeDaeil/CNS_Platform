@@ -85,10 +85,21 @@ class rod_controller_interface(QDialog):
 
     def draw_rod_his_gp(self):
         # 위 그래프
-        self.rod_cond = plt.figure()
+        self.rod_cond = plt.figure(figsize=(20, 18), tight_layout = {'pad': 1})
         self.rod_cond_ax = self.rod_cond.add_subplot(111)
         self.rod_cond_canv = FigureCanvasQTAgg(self.rod_cond)
         self.Trend_ui.Rod_his_cond.addWidget(self.rod_cond_canv)
+
+        # 온도 그래프
+        self.rod_temp = plt.figure(figsize=(20, 18), tight_layout = {'pad': 1})
+        self.rod_temp_ax = self.rod_temp.add_subplot(111)
+        self.rod_temp_canv = FigureCanvasQTAgg(self.rod_temp)
+        self.Trend_ui.Rod_his_cond_temp.addWidget(self.rod_temp_canv)
+
+        self.rod_temp_2 = plt.figure(figsize=(20, 18), tight_layout = {'pad': 1})
+        self.rod_temp_ax_2 = self.rod_temp_2.add_subplot(111)
+        self.rod_temp_canv_2 = FigureCanvasQTAgg(self.rod_temp_2)
+        self.Trend_ui.Rod_his_cond_temp_2.addWidget(self.rod_temp_canv_2)
 
         # 아래 제어신호
         self.rod_fig = plt.figure()
@@ -99,18 +110,19 @@ class rod_controller_interface(QDialog):
     def update_rod_his_gp(self):
         try:
             self.rod_ax.clear()
+            self.rod_ax.set_title('Rod Control Signal')
             temp = []
             cns_time = []
             for _ in range(len(self.mem['KSWO33']['D'])):
                 if self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 0:
                     temp.append(0)
-                    cns_time.append(self.mem['KCNTOMS']['D'][_] / 5)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_])
                 elif self.mem['KSWO33']['D'][_] == 1 and self.mem['KSWO32']['D'][_] == 0:
                     temp.append(1)
-                    cns_time.append(self.mem['KCNTOMS']['D'][_] / 5)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_])
                 elif self.mem['KSWO33']['D'][_] == 0 and self.mem['KSWO32']['D'][_] == 1:
                     temp.append(-1)
-                    cns_time.append(self.mem['KCNTOMS']['D'][_] / 5)
+                    cns_time.append(self.mem['KCNTOMS']['D'][_])
             self.rod_ax.plot(cns_time, temp)
             self.rod_ax.set_ylim(-1.2, 1.2)
             # self.rod_ax.set_xlim(0, 50)
@@ -122,10 +134,31 @@ class rod_controller_interface(QDialog):
             # 원자로 출력 및 온도 분포 획득 Module_ROD로 부터
 
             self.rod_cond_ax.clear()
-
-            self.rod_cond_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y'])
+            self.rod_cond_ax.set_title('Reactor Power')
+            self.rod_cond_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_pow'])
             self.rod_cond_ax.grid()
 
             self.rod_cond_canv.draw()
+
+            # 온도 그래프
+            # 'Rod_His': {'X': [], 'Y_avg': [], 'Y_up_dead': [], 'Y_down_dead': [],
+            #             'Y_up_op': [], 'Y_down_op': [], 'Y_ax': []},
+            self.rod_temp_ax.clear()
+            self.rod_temp_ax.set_title('Average/Reference Temperature')
+            self.rod_temp_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_avg'], color='black')
+            self.rod_temp_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_up_dead'], color='gray')
+            self.rod_temp_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_down_dead'], color='gray')
+            self.rod_temp_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_up_op'], color='red')
+            self.rod_temp_ax.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_down_op'], color='red')
+            self.rod_temp_ax.grid()
+            self.rod_temp_canv.draw()
+
+            self.rod_temp_ax_2.clear()
+            self.rod_temp_ax_2.set_title('Axis-offset')
+            self.rod_temp_ax_2.plot(self.trig_mem['Rod_His']['X'], self.trig_mem['Rod_His']['Y_ax'], color='black')
+            self.rod_temp_ax_2.grid()
+            self.rod_temp_canv_2.draw()
+
+
         except Exception as e:
             print(self, e)

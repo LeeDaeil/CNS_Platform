@@ -61,12 +61,19 @@ class All_Function_module(multiprocessing.Process):
                 if self.temp_trig_mem['ST_OPStratey'] == PARA.ST_OP:
                     print('ROD_CONT 모듈->', end=' ')
                     if len(self.temp_mem['KCNTOMS']['D']) >= 1:
-                        self.temp_trig_mem['Rod_His']['X'].append(self.temp_mem['KCNTOMS']['V'])  # x 값 업데이트
+                        self.temp_trig_mem['Rod_His']['X'].append(self.temp_mem['KCNTOMS']['V']*self.temp_trig_mem['Speed']/5)  # x 값 업데이트
                         # 10개 보다 작으면 ROD_CONT는 제어하지 않음. 그리고 Man mode 면 계산 대기함.
                         fin_input = self.ROD_CONT.predict_action(self.temp_mem, self.temp_trig_mem)
                         # fin_input 데이터 저장
-                        self.temp_trig_mem['Rod_His']['Y'].append([fin_input[1], fin_input[2],
-                                                                   fin_input[5], fin_input[6], fin_input[8]])
+                        # 'Rod_His': {'X': [], 'Y_avg': [], 'Y_up_dead': [], 'Y_down_dead': [],
+                        #             'Y_up_op': [], 'Y_down_op': [], 'Y_ax': []},
+                        self.temp_trig_mem['Rod_His']['Y_pow'].append([fin_input[0]*100])
+                        self.temp_trig_mem['Rod_His']['Y_avg'].append([fin_input[8]*1000])
+                        self.temp_trig_mem['Rod_His']['Y_up_dead'].append([fin_input[1]*1000])
+                        self.temp_trig_mem['Rod_His']['Y_down_dead'].append([fin_input[2]*1000])
+                        self.temp_trig_mem['Rod_His']['Y_up_op'].append([fin_input[5]*1000])
+                        self.temp_trig_mem['Rod_His']['Y_down_op'].append([fin_input[6]*1000])
+                        self.temp_trig_mem['Rod_His']['Y_ax'].append([self.temp_mem['CAXOFF']['V']])
                     print('<-ROD_CONT 모듈', end='#')
 
                 # 4. PZR_CONT의 제어 ============================================================
@@ -74,7 +81,7 @@ class All_Function_module(multiprocessing.Process):
                     print('PZR_CONT 모듈->', end=' ')
                     if len(self.temp_mem['KCNTOMS']['D']) >= 1:
                         pass
-                        self.temp_trig_mem['PZR_His']['X'].append(self.temp_mem['KCNTOMS']['V'])  # x 값 업데이트
+                        self.temp_trig_mem['PZR_His']['X'].append(self.temp_mem['KCNTOMS']['V']*self.temp_trig_mem['Speed']/5)  # x 값 업데이트
                         # # 10개 보다 작으면 PZR_CONT는 제어하지 않음. 그리고 Man mode 면 계산 대기함.
                         fin_input = self.PZR_CONT.predict_action(self.temp_mem, self.temp_trig_mem)
                         # fin_input 데이터 저장

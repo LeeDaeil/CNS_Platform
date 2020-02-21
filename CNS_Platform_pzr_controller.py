@@ -34,6 +34,12 @@ class pzr_controller_interface(QDialog):
         self.show()
 
     def update_window(self):
+        try:
+            self.Trend_ui.D_1.setText('%3.2f kg/cm^2' % self.mem['ZINST58']['V'])
+            self.Trend_ui.D_2.setText('{} %'.format(self.mem['ZINST63']['V']))
+            self.Trend_ui.D_3.setText('%3.2f' % (self.mem['UPRZ']['V']) + ' ℃')
+        except Exception as e:
+            print(self, e)
         pass
 
     def draw_pzr_his_gp(self):
@@ -73,23 +79,37 @@ class pzr_controller_interface(QDialog):
             [_.clear() for _ in self.clean_gp_list]
 
             self.pzr_press_ax.plot(self.trig_mem['PZR_His']['X'], self.trig_mem['PZR_His']['Y_pre'])
-            self.pzr_press_ax.legend(['PZR Pressure', 'High limit', 'Low limit'], fontsize=7, loc=1)
+            self.pzr_press_ax.legend(['PZR Pressure', 'High limit', 'Low limit'], fontsize=7, loc=2)
+            self.pzr_press_ax.set_yticks([20, 25, 30])
+            self.pzr_press_ax.set_yticklabels(['20\nkg/cm^2', '25\nkg/cm^2', '30\nkg/cm^2'], fontsize=7)
             self.pzr_press_ax.grid()
 
             self.pzr_level_ax.plot(self.trig_mem['PZR_His']['X'], self.trig_mem['PZR_His']['Y_lv'])
-            self.pzr_level_ax.legend(['Pressurizer Level'], fontsize=7, loc=1)
+            self.pzr_level_ax.legend(['Pressurizer Level'], fontsize=7, loc=2)
+            self.pzr_level_ax.set_yticks([0, 100])
+            self.pzr_level_ax.set_yticklabels(['0%', '100%'], fontsize=7)
+            self.pzr_level_ax.set_ylim(-5, 105)
             self.pzr_level_ax.grid()
 
             self.pzr_temp_ax.plot(self.trig_mem['PZR_His']['X'], self.trig_mem['PZR_His']['Y_temp'])
-            self.pzr_temp_ax.legend(['Pressurizer Temperature'], fontsize=7, loc=1)
+            self.pzr_temp_ax.legend(['Pressurizer Temperature'], fontsize=7, loc=2)
+            self.pzr_temp_ax.set_yticks([60, 80, 100, 120, 140, 160, 180, 200])
+            self.pzr_temp_ax.set_yticklabels(['60℃', '80℃', '100℃', '120℃', '140℃', '160℃', '180℃', '200℃'], fontsize=7)
+            self.pzr_temp_ax.set_ylim(50, 210)
             self.pzr_temp_ax.grid()
 
             self.pzr_valve_ax.plot(self.trig_mem['PZR_His']['X'], self.trig_mem['PZR_His']['Y_val'])
-            self.pzr_valve_ax.legend(['FV-122', 'HV-142'], fontsize=7, loc=1)
+            self.pzr_valve_ax.legend(['FV-122', 'HV-142'], fontsize=7, loc=2)
+            self.pzr_valve_ax.set_yticks([0, 1])
+            self.pzr_valve_ax.set_yticklabels(['0%', '100%'], fontsize=7)
+            self.pzr_valve_ax.set_ylim(-0.2, 1.2)
             self.pzr_valve_ax.grid()
 
             self.pzr_valve_2_ax.plot(self.trig_mem['PZR_His']['X'], self.trig_mem['PZR_His']['Y_het'])
-            self.pzr_valve_2_ax.legend(['Backup', 'Proportional'], fontsize=7, loc=1)
+            self.pzr_valve_2_ax.legend(['Backup', 'Proportional'], fontsize=7, loc=2)
+            self.pzr_valve_2_ax.set_yticks([0, 1])
+            self.pzr_valve_2_ax.set_yticklabels(['Off', 'On'], fontsize=7)
+            self.pzr_valve_2_ax.set_ylim(-0.2, 1.2)
             self.pzr_valve_2_ax.grid()
             [_.draw() for _ in self.draw_gp_list]
 

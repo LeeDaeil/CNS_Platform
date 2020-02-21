@@ -126,7 +126,7 @@ class CNS_mw(QWidget):
         pass
 
     def update_timmer(self):
-        Time_val = self.mem['KCNTOMS']['V'] // 5
+        Time_val = self.mem['KCNTOMS']['V']*self.trig_mem['Speed'] // 5
         t_sec = Time_val % 60   # x sec
         t_min = Time_val // 60  # x min
         t_hour = t_min // 60
