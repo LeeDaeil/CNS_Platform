@@ -2,18 +2,20 @@ from multiprocessing import Manager
 from Module_Tester.EX_db import db_make
 from Module_Tester.EX_interface import *
 from Module_Tester.EX_RUN_Module import *
+from Module_Tester.EX_RUN_Module_FAST import *
 from Module_Tester.EX_Module import *
 import argparse
 
+FAST = True
 
 class body:
     def __init__(self):
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
         parser = argparse.ArgumentParser(description='CNS 플랫폼_TE Ver')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--comport', type=int, default=7010, required=False, help="현재 컴퓨터의 port [default=7001]")
-        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7010, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--comport', type=int, default=7101, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsip', type=str, default='192.168.0.93', required=False, help="현재 컴퓨터의 ip [default='']")
+        parser.add_argument('--cnsport', type=int, default=7101, required=False, help="현재 컴퓨터의 port [default=7001]")
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
 
@@ -23,10 +25,17 @@ class body:
         print(self.args)
         self.shared_mem = generate_mem().make_mem_structure()
         # ---------------------------------------------------------------------------------------- #
-        pro_list = [RUN_FREEZE(self.shared_mem, IP=self.args.comip, Port=self.args.comport),    # [1]
-                    interface_function(self.shared_mem),                                        # [2]
-                    EX_module(self.shared_mem)                                                  # [3]
-                    ]
+        if FAST:
+            pro_list = [RUN_FREEZE_FAST(self.shared_mem, IP=self.args.comip, Port=self.args.comport),  # [1]
+                        interface_function(self.shared_mem),  # [2]
+                        EX_module(self.shared_mem)  # [3]
+                        ]
+        else:
+            pro_list = [RUN_FREEZE(self.shared_mem, IP=self.args.comip, Port=self.args.comport),    # [1]
+                        interface_function(self.shared_mem),                                        # [2]
+                        EX_module(self.shared_mem)                                                  # [3]
+                        ]
+
         self.process_list = pro_list
 
     def start(self):
@@ -48,6 +57,7 @@ class generate_mem:
     def make_mem_structure(self):
         print('=' * 25 + '메모리 생성 시작' + '=' * 25)
         memory_list = [Manager().dict(self.make_main_mem_structure(max_len_deque=10)),    # [0]
+                       Manager().list(),                                                  # [1]
                        Manager().dict(self.make_clean_mem()),                             # [-1]
                        ]
         print('=' * 25 + '메모리 생성 완료' + '=' * 25)

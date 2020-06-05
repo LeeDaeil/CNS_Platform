@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'TE_interface.ui',
-# licensing of 'TE_interface.ui' applies.
+# Form implementation generated from reading ui file './/Test_Interface\TE_interface.ui',
+# licensing of './/Test_Interface\TE_interface.ui' applies.
 #
-# Created: Fri Sep  6 12:49:51 2019
-#      by: pyside2-uic  running on PySide2 5.13.0
+# Created: Fri Jun  5 17:36:00 2020
+#      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(269, 301)
+        Form.resize(530, 300)
         self.Run = QtWidgets.QPushButton(Form)
         self.Run.setGeometry(QtCore.QRect(10, 10, 120, 23))
         self.Run.setObjectName("Run")
@@ -83,6 +83,12 @@ class Ui_Form(object):
         self.Go_db = QtWidgets.QPushButton(Form)
         self.Go_db.setGeometry(QtCore.QRect(20, 270, 231, 23))
         self.Go_db.setObjectName("Go_db")
+        self.His_input_list = QtWidgets.QListWidget(Form)
+        self.His_input_list.setGeometry(QtCore.QRect(270, 10, 251, 251))
+        self.His_input_list.setObjectName("His_input_list")
+        self.His_input_bar = QtWidgets.QLineEdit(Form)
+        self.His_input_bar.setGeometry(QtCore.QRect(270, 270, 251, 20))
+        self.His_input_bar.setObjectName("His_input_bar")
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)

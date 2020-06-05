@@ -4,11 +4,10 @@ from struct import unpack
 
 from copy import *
 from time import sleep
-import time
-from CNS_Send_UDP import CNS_Send_Signal
+from Module_Tester.EX_CNS_Send_UDP import *
 
 
-class RUN_FREEZE(multiprocessing.Process):
+class RUN_FREEZE_FAST(multiprocessing.Process):
     def __init__(self, mem, IP, Port):
         multiprocessing.Process.__init__(self)
         self.address = (IP, Port)
@@ -19,10 +18,15 @@ class RUN_FREEZE(multiprocessing.Process):
 
         self.CNS_data = deepcopy(self.mem)
 
+        # SIZE BUFFER
+        self.size_buffer_mem = 1008
+        # SEND TICK
+        self.want_tick = 5
+
     # --------------------------------------------------------------------------------
     def call_cns_udp_sender(self):
         # CNS 정보 읽기
-        with open('CNS_Info.txt', 'r') as f:
+        with open('EX_pro.txt', 'r') as f:
             self.cns_ip, self.cns_port = f.read().split('\t')   # [cns ip],[cns port]
         self.CNS_udp = CNS_Send_Signal(self.cns_ip, int(self.cns_port))
 
@@ -47,7 +51,7 @@ class RUN_FREEZE(multiprocessing.Process):
         self.mem[key] = self.CNS_data[key]
 
     def update_local_mem(self, key):
-        # self.CNS_data[key]['L'].append(self.CNS_data[key]['V'])
+        self.CNS_data[key]['L'].append(self.CNS_data[key]['V'])
         self.CNS_data[key]['D'].append(self.CNS_data[key]['V'])
 
     def run(self):
@@ -57,16 +61,14 @@ class RUN_FREEZE(multiprocessing.Process):
 
         while True:
             try:
-                data, client = udpSocket.recvfrom(44388)
+                data, client = udpSocket.recvfrom(self.size_buffer_mem)
                 pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
 
                 # Run 버튼 누르면 CNS 동작하는 모듈
                 if self.trig_mem['Loop'] and self.trig_mem['Run'] is False:
-                    # self.CNS_udp._send_control_signal(['KFZRUN'], [3])
-                    self.CNS_udp._send_control_signal(['KFZRUN'], [105])
-                    print(time.strftime('%c', time.localtime(time.time())))
+                    self.CNS_udp._send_control_signal(['KFZRUN'], [self.want_tick+100]) # 400 - 100 -> 300 tick 20 sec
                     while True:
-                        data, client = udpSocket.recvfrom(44388)
+                        data, client = udpSocket.recvfrom(self.size_buffer_mem)
                         pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
                         if self.CNS_data['KFZRUN']['V'] == 4 or self.CNS_data['KFZRUN']['V'] == 10:
                             [self.update_local_mem(key) for key in self.CNS_data.keys()]
@@ -74,8 +76,8 @@ class RUN_FREEZE(multiprocessing.Process):
                             break
 
                 # CNS 초기화 선언시 모든 메모리 초기화
-                if self.CNS_data['KFZRUN']['V'] == 6:
-                    # [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
+                if self.CNS_data['KFZRUN']['V'] == 1:
+                    [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
                     [self.CNS_data[_]['D'].clear() for _ in self.CNS_data.keys()]
 
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트

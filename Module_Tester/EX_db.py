@@ -2233,5 +2233,7 @@ class db_make:
             'Accident_4': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_5': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
 
+            # Test control 변수
+
         }
         return mem_dict

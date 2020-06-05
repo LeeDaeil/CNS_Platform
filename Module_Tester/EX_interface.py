@@ -22,21 +22,27 @@ class interface_function(multiprocessing.Process):
 class MyForm(QWidget):
     def __init__(self, mem):
         super().__init__()
-        self.mem = mem[0]   # main mem connection
-        self.trig_mem = mem[-1]  # main mem connection
 
         print('Test UI 호출')
         self.ui = TE_interface.Ui_Form()
         self.ui.setupUi(self)
-        # ---- 초기함수 호출
-        self.call_cns_udp_sender()
-        # ---- 버튼 명령
-        self.ui.Run.clicked.connect(self.run_cns)
-        self.ui.Freeze.clicked.connect(self.freeze_cns)
-        self.ui.Go_mal.clicked.connect(self.go_mal)
-        self.ui.Initial.clicked.connect(self.go_init)
-        self.ui.Go_db.clicked.connect(self.go_save)
-        # ----
+
+        if mem == None: # TEST Stay
+            pass
+        else:
+            self.mem = mem[0]  # main mem connection
+            self.Act_list = mem[1]
+            self.trig_mem = mem[-1]  # main mem connection
+            # ---- 초기함수 호출
+            self.call_cns_udp_sender()
+            # ---- 버튼 명령
+            self.ui.Run.clicked.connect(self.run_cns)
+            self.ui.Freeze.clicked.connect(self.freeze_cns)
+            self.ui.Go_mal.clicked.connect(self.go_mal)
+            self.ui.Initial.clicked.connect(self.go_init)
+            self.ui.Go_db.clicked.connect(self.go_save)
+            self.ui.His_input_bar.returnPressed.connect(self.add_item)
+            # ----
         self.show()
 
     def call_cns_udp_sender(self):
@@ -79,5 +85,13 @@ class MyForm(QWidget):
         temp.to_csv(f'{s}.csv')
         print('DB save')
 
+    def add_item(self):
+        self.Act_list.append(int(self.ui.His_input_bar.text()))
+        self.ui.His_input_list.insertItems(0, self.ui.His_input_bar.text())
 
 
+if __name__ == '__main__':
+    # test for interface
+    app = QApplication(sys.argv)
+    w = MyForm(None)
+    sys.exit(app.exec_())

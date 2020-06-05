@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>269</width>
-    <height>301</height>
+    <width>530</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -295,6 +295,26 @@
    </property>
    <property name="text">
     <string>Save_DB</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="His_input_list">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>10</y>
+     <width>251</width>
+     <height>251</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="His_input_bar">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>270</y>
+     <width>251</width>
+     <height>20</height>
+    </rect>
    </property>
   </widget>
  </widget>

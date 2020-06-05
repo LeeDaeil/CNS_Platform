@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file './/Interface\CNS_Platform_mainwindow.ui',
 # licensing of './/Interface\CNS_Platform_mainwindow.ui' applies.
 #
-# Created: Fri Feb 21 11:44:02 2020
+# Created: Fri Mar 13 17:33:47 2020
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
