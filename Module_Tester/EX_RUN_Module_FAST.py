@@ -19,9 +19,9 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
         self.CNS_data = deepcopy(self.mem)
 
         # SIZE BUFFER
-        self.size_buffer_mem = 1008
+        self.size_buffer_mem = 44408
         # SEND TICK
-        self.want_tick = 5
+        self.want_tick = 50
 
     # --------------------------------------------------------------------------------
     def call_cns_udp_sender(self):

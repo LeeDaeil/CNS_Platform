@@ -30,6 +30,14 @@ class EX_module(multiprocessing.Process):
         Down_LOAD = self.mem['KSWO224']['V']
         UP_LOAD = self.mem['KSWO225']['V']
 
+        if Mismatch > 0:
+            if 840 < Load_setpoint:
+                self.send_action_append(['KSWO224', 'KSWO225'], [1, 0]) # down
+        else:
+            self.send_action_append(['KSWO224', 'KSWO225'], [0, 0])  # stay
+
+        print(Mismatch, Load_setpoint)
+
         if R_A == 0:
             self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
         elif R_A == 1:
