@@ -80,7 +80,6 @@ ApplicationWindow {
             RowLayout {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignHCenter
 
-
                 Button {
                     id: red
                     text: "Red"

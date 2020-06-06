@@ -21,29 +21,59 @@ class EX_module(multiprocessing.Process):
             self.val.append(va[_])
 
     def send_action(self, R_A):
+        R_A=0
         # 전송될 변수와 값 저장하는 리스트
         self.para = []
         self.val = []
 
-        Load_setpoint = self.mem['KBCDO20']['V']
+        Load_setpoint = self.mem['KBCDO22']['V']
+        # Load_setpoint = self.mem['KBCDO20']['V']
         Mismatch = self.mem['ZINST15']['V']
         Down_LOAD = self.mem['KSWO224']['V']
         UP_LOAD = self.mem['KSWO225']['V']
 
+        # if Mismatch > 0:
+        #     if 840 < Load_setpoint:
+        #         self.send_action_append(['KSWO224', 'KSWO225'], [1, 0]) # down
+        # else:
+        #     self.send_action_append(['KSWO224', 'KSWO225'], [0, 0])  # stay
+        #
+        self.send_action_append(['KSWO228', 'KSWO29'], [1, 1])  # Man
         if Mismatch > 0:
-            if 840 < Load_setpoint:
-                self.send_action_append(['KSWO224', 'KSWO225'], [1, 0]) # down
+            if self.mem['KCNTOMS']['V'] < 2000:
+                if 840 < Load_setpoint:
+                    print('B')
+                    self.send_action_append(['KSWO229', 'KSWO230'], [1, 0]) # down
+            if self.mem['KCNTOMS']['V'] > 4000:
+                if Load_setpoint < 900:
+                    print('A')
+                    self.send_action_append(['KSWO229', 'KSWO230'], [0, 1]) # Up
         else:
-            self.send_action_append(['KSWO224', 'KSWO225'], [0, 0])  # stay
+            self.send_action_append(['KSWO229', 'KSWO223'], [0, 0])  # stay
 
-        print(Mismatch, Load_setpoint)
-
-        if R_A == 0:
-            self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
-        elif R_A == 1:
-            self.send_action_append(['KSWO33', 'KSWO32'], [1, 0])  # Out
-        elif R_A == 2:
+        if Mismatch < 0:
             self.send_action_append(['KSWO33', 'KSWO32'], [0, 1])  # In
+        elif Mismatch >= 0.1:
+            self.send_action_append(['KSWO33', 'KSWO32'], [1, 0])  # Out
+        else:
+            self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
+
+        print(self.mem['KCNTOMS']['V'], Mismatch, Load_setpoint)
+
+        # if R_A == 0:
+        #     self.send_action_append(['KSWO33', 'KSWO32'], [0, 0])  # Stay
+        # elif R_A == 1:
+        #     self.send_action_append(['KSWO33', 'KSWO32'], [1, 0])  # Out
+        # elif R_A == 2:
+        #     self.send_action_append(['KSWO33', 'KSWO32'], [0, 1])  # In
+        #
+        # elif R_A == 3:
+        #     self.send_action_append(['KSWO97', 'KSWO77'], [1, 1])  # Pump On - Make-up
+        # elif R_A == 4:
+        #     self.send_action_append(['KSWO97', 'KSWO76'], [0, 1])  # Pump off - Auto
+        # elif R_A == 5:
+        #     self.send_action_append(['KSWO97', 'KSWO75'], [1, 1])  # Pump off - Boric
+
 
         self.CNS_udp._send_control_signal(self.para, self.val)
 
@@ -53,13 +83,14 @@ class EX_module(multiprocessing.Process):
             if self.trig_mem['Loop'] and self.trig_mem['Run']:
                 print('계산중....', end='\t')
 
-                while get_nub_act_list == len(self.Act_list):
-                    print('대기...')
-                    sleep(1)
+                # while get_nub_act_list == len(self.Act_list):
+                #     print('대기...')
+                #     sleep(1)
 
-                self.send_action(R_A=self.Act_list[-1])
+                # self.send_action(R_A=self.Act_list[-1])
+                self.send_action(R_A=0)
 
-                get_nub_act_list = len(self.Act_list)
+                # get_nub_act_list = len(self.Act_list)
                 print('계산 종료! ....', end='\t')
                 print(self, self.mem['KCNTOMS'], self.Act_list, self.trig_mem['Loop'], self.trig_mem['Run'])
                 self.trig_mem['Run'] = False
