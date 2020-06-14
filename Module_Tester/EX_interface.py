@@ -76,9 +76,13 @@ class MyForm(QWidget):
         self.CNS_udp._send_control_signal(['KFZRUN', 'KSWO277'], [5, initial_nub])
 
     def go_save(self):
-        now = time.localtime()
-        s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
-                                               now.tm_sec)
+        if self.ui.Mal_list.count() > 0:
+            s = self.ui.Mal_list.item(self.ui.Mal_list.count()-1).text()
+            print(s)
+        else:
+            now = time.localtime()
+            s = "%02d-%02d_%02d_%02d_%02d_%02d" % (now.tm_mon, now.tm_mday, now.tm_hour, now.tm_min, now.tm_min,
+                                                   now.tm_sec)
         temp = pd.DataFrame()
         for keys in self.mem.keys():
             temp[keys] = self.mem[keys]['L']
