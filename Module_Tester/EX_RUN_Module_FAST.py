@@ -19,7 +19,7 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
         self.CNS_data = deepcopy(self.mem)
 
         # SIZE BUFFER
-        self.size_buffer_mem = 44408
+        self.size_buffer_mem = 46008
         # SEND TICK
         self.want_tick = 5
 
@@ -43,7 +43,7 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
             pid = pid.decode().rstrip('\x00')  # remove '\x00'
             if pid != '':
                 self.CNS_data[pid]['V'] = val
-                self.CNS_data[pid]['type']= sig
+                self.CNS_data[pid]['type'] = sig
                 # pid_list.append(pid)
         return pid_list
 
@@ -76,9 +76,10 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
                             break
 
                 # CNS 초기화 선언시 모든 메모리 초기화
-                if self.CNS_data['KFZRUN']['V'] == 1:
+                if self.CNS_data['KFZRUN']['V'] == 6:
                     [self.CNS_data[_]['L'].clear() for _ in self.CNS_data.keys()]
                     [self.CNS_data[_]['D'].clear() for _ in self.CNS_data.keys()]
+                    print("CNS 메모리 초기화 완료")
 
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
             except Exception as f:

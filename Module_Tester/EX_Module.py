@@ -2,6 +2,7 @@ import multiprocessing
 from time import sleep
 from Module_Tester.EX_CNS_Send_UDP import CNS_Send_Signal
 
+TEST_FOR_LOAD = False
 
 class EX_module(multiprocessing.Process):
     def __init__(self, mem):
@@ -86,11 +87,13 @@ class EX_module(multiprocessing.Process):
                 # while get_nub_act_list == len(self.Act_list):
                 #     print('대기...')
                 #     sleep(1)
+                if TEST_FOR_LOAD:
+                    # self.send_action(R_A=self.Act_list[-1])
+                    # self.send_action(R_A=0)
 
-                # self.send_action(R_A=self.Act_list[-1])
-                # self.send_action(R_A=0)
+                    # get_nub_act_list = len(self.Act_list)
+                    pass
 
-                # get_nub_act_list = len(self.Act_list)
                 print('계산 종료! ....', end='\t')
                 print(self, self.mem['KCNTOMS'], self.Act_list, self.trig_mem['Loop'], self.trig_mem['Run'])
                 self.trig_mem['Run'] = False
