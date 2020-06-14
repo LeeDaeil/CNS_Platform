@@ -88,7 +88,7 @@ class EX_module(multiprocessing.Process):
                 #     sleep(1)
 
                 # self.send_action(R_A=self.Act_list[-1])
-                self.send_action(R_A=0)
+                # self.send_action(R_A=0)
 
                 # get_nub_act_list = len(self.Act_list)
                 print('계산 종료! ....', end='\t')
