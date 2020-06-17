@@ -4,6 +4,7 @@ from collections import deque
 import argparse
 
 from CNS_Platform_controller import interface_function
+# from Module_Tester.EX_interface import interface_function
 from CNS_Run_Freeze import RUN_FREEZE
 from CNS_All_module import All_Function_module
 import CNS_Platform_PARA as PARA
@@ -14,9 +15,9 @@ class body:
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
         parser = argparse.ArgumentParser(description='CNS 플랫폼_Ver0')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--comport', type=int, default=7010, required=False, help="현재 컴퓨터의 port [default=7001]")
-        parser.add_argument('--cnsip', type=str, default='192.168.0.100', required=False, help="CNS 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7010, required=False, help="CNS 컴퓨터의 port [default=7001]")
+        parser.add_argument('--comport', type=int, default=7101, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsip', type=str, default='192.168.0.93', required=False, help="CNS 컴퓨터의 ip [default='']")
+        parser.add_argument('--cnsport', type=int, default=7101, required=False, help="CNS 컴퓨터의 port [default=7001]")
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
 

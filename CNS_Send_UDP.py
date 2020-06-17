@@ -70,7 +70,7 @@ class CNS_Send_Signal:
 
 if __name__ == '__main__':
     import time
-    test_udp_send = CNS_Send_Signal('192.168.0.100', 7010)
+    test_udp_send = CNS_Send_Signal('192.168.0.93', 7101)
     Test_1 = False  # 일반적인 UDP 테스트
     if Test_1:
         while True:
@@ -101,4 +101,20 @@ if __name__ == '__main__':
             time.sleep(2)
             print('CNS 동작 후 정지')
             test_udp_send._send_control_signal(['KFZRUN'], [3])
+            time.sleep(2)
+    Test_3 = True # CNS의 Malfunction 원격 조작을 위한 로직
+    if Test_3:
+        while True:
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [105])
+            time.sleep(2)
+            print('CNS Malfunction 입력')
+            test_udp_send._send_control_signal(['KFZRUN', 'KSWO280', 'KSWO279', 'KSWO278'],
+                                               [10, 12, 100100, 5])  # 10은 멜펑션
+            time.sleep(2)
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [105])
+            time.sleep(2)
+            print('CNS 동작 후 정지')
+            test_udp_send._send_control_signal(['KFZRUN'], [105])
             time.sleep(2)

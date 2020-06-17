@@ -29,8 +29,8 @@ class CNS_mw(QWidget):
         if self.Alarm_test_mode:
             self.Alarm_upcont = 0
         # ======================= SVM 모듈 로드 ==============================
-        with open('./SVM_MODEL/SVM_MODEL.bin', 'rb') as f:
-            self.model_svm, self.scaler = pickle.load(f)
+        # with open('./SVM_MODEL/SVM_MODEL.bin', 'rb') as f:
+        #     self.model_svm, self.scaler = pickle.load(f)
         # ======================= 클릭 버튼 연결 =============================
         self.ui.Auto_op.clicked.connect(self.Auto_DIS_Click_Auto)
         self.ui.Manual_op.clicked.connect(self.Auto_DIS_Click_Man)
