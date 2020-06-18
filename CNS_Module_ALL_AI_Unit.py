@@ -3,7 +3,7 @@
 class MainNet:
     def __init__(self):
         self.AB_DIG_AI, self.AB_CONT_AI, self.ROD_actor, self.ROD_critic, self.PZR_actor, self.PZR_critic = self.build_model()
-        self.load_model()
+        # self.load_model()
 
     def build_model(self):
         # from keras.models import tf.keras.Model

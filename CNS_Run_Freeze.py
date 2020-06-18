@@ -22,7 +22,7 @@ class RUN_FREEZE(multiprocessing.Process):
         # SIZE BUFFER
         self.size_buffer_mem = 46008
         # SEND TICK
-        self.want_tick = 5
+        self.want_tick = self.trig_mem['CNS_SPEED']
 
     # --------------------------------------------------------------------------------
     def call_cns_udp_sender(self):
@@ -62,6 +62,10 @@ class RUN_FREEZE(multiprocessing.Process):
 
         while True:
             try:
+                # CNS 속도 관련
+                self.want_tick = self.trig_mem['CNS_SPEED']
+
+                #
                 data, client = udpSocket.recvfrom(self.size_buffer_mem)
                 pid_list = self.update_mem(data[8:])  # 주소값을 가지는 8바이트를 제외한 나머지 부분
 

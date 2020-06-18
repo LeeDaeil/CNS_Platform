@@ -40,7 +40,7 @@ class body:
 
 class generate_mem:
     def make_clean_mem(self):
-        memory_dict = {'Clean': True, 'Loop': False, 'Run': False, 'Speed' : 1,
+        memory_dict = {'Clean': True, 'Loop': False, 'Run': False, 'Speed': 1,
                        'Auto': False,           # Auto : autonomous[True], manual[False]
                        'Rq_man': False,         # Auto : 운전원 개입 요청 [True], 자율 운전 중 [False]
                        # Operation Strategy His
@@ -55,7 +55,9 @@ class generate_mem:
                                    'Y_up_op': [], 'Y_down_op': [], 'Y_ax': []},
                        # PZR His - 가압기 기포 생성 모듈
                        'PZR_His': {'X': deque(maxlen=50), 'Y_pre': deque(maxlen=50), 'Y_temp': deque(maxlen=50),
-                                   'Y_lv': deque(maxlen=50), 'Y_val': deque(maxlen=50), 'Y_het': deque(maxlen=50)}
+                                   'Y_lv': deque(maxlen=50), 'Y_val': deque(maxlen=50), 'Y_het': deque(maxlen=50)},
+                       # CNS 건너띄기
+                       'CNS_SPEED': 5,
                        }
         print('Clean 메모리 생성 완료')
         return memory_dict

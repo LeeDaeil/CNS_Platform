@@ -45,6 +45,8 @@ class MyForm(QWidget):
         self.ui.Apply_Sp.clicked.connect(self.go_speed)
         self.ui.Show_main_win.clicked.connect(self.show_main_window)
         # ----
+        self.ui.Cu_SP.setText(str(self.trig_mem['CNS_SPEED']))
+        # ----
         self.show()
 
     def call_cns_udp_sender(self):
@@ -110,9 +112,10 @@ class MyForm(QWidget):
     def go_speed(self):
         if not self.trig_mem['Loop']:
             print('CNS 배속 변경')
-            self.CNS_udp._send_control_signal(['TDELTA'], [0.2 * int(self.ui.Se_SP.text())])
+            # self.CNS_udp._send_control_signal(['TDELTA'], [0.2 * int(self.ui.Se_SP.text())])
             self.trig_mem['Speed'] = int(self.ui.Se_SP.text())
             self.ui.Cu_SP.setText(self.ui.Se_SP.text())
+            self.trig_mem['CNS_SPEED'] = int(self.ui.Se_SP.text())
         else:
             print('CNS 배속 변경 시 Freeze에서 변경 가능함.')
             pass

@@ -5,6 +5,7 @@ from CNS_Module_ALL_AI_Unit import MainNet
 from CNS_Module_AB_Dig import Abnormal_dig_module as AB_DIG_M
 from CNS_Module_ROD import rod_controller_module as ROD_CONT
 from CNS_Module_PZR import pzr_controller_module as PZR_CONT
+from CNS_Module_SAMPLE_CONTROLLER import controller_module as SAMP_CONT
 
 from time import sleep
 import pickle
@@ -23,7 +24,7 @@ class All_Function_module(multiprocessing.Process):
 
         # self.AI_AGENT = MainNet()
         # self.AB_DIG_M = AB_DIG_M(network=self.AI_AGENT.AB_DIG_AI)   # 비정상 진단 AI 모듈 불러옴
-        # self.ROD_CONT = ROD_CONT(network=self.AI_AGENT.ROD_actor)   # 정상에서 Rod control module
+        # self.ROD_CONT = ROD_CONT(network=None)   # 정상에서 Rod control module
         # self.PZR_CONT = PZR_CONT(network=self.AI_AGENT.PZR_actor)   # 가압기 기포생성 모듈
 
     def run(self):
@@ -76,6 +77,13 @@ class All_Function_module(multiprocessing.Process):
                 #         self.temp_trig_mem['Rod_His']['Y_ax'].append([self.temp_mem['CAXOFF']['V']])
                 #     print('<-ROD_CONT 모듈', end='#')
                 #
+                # 3. ROD_CONT의 제어 ============================================================ VER2
+                if self.temp_trig_mem['ST_OPStratey'] == PARA.ST_OP:
+                    print('ROD_CONT 모듈->', end=' ')
+
+                    print('<-ROD_CONT 모듈', end='#')
+
+
                 # # 4. PZR_CONT의 제어 ============================================================
                 # elif self.temp_trig_mem['ST_OPStratey'] == PARA.PZR_OP:
                 #     print('PZR_CONT 모듈->', end=' ')
