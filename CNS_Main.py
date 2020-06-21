@@ -58,6 +58,8 @@ class generate_mem:
                                    'Y_lv': deque(maxlen=50), 'Y_val': deque(maxlen=50), 'Y_het': deque(maxlen=50)},
                        # CNS 건너띄기
                        'CNS_SPEED': 5,
+                       # 순환 카운터
+                       'TEMP_CONT': 0
                        }
         print('Clean 메모리 생성 완료')
         return memory_dict

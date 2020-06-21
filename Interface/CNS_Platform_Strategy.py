@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file './/Interface\CNS_Platform_Strategy.ui',
 # licensing of './/Interface\CNS_Platform_Strategy.ui' applies.
 #
-# Created: Thu Jun 18 17:52:08 2020
+# Created: Thu Jun 18 21:11:38 2020
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!

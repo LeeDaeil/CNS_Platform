@@ -282,6 +282,21 @@
       <string>17. 2%(real)</string>
      </property>
     </item>
+    <item>
+     <property name="text">
+      <string>18. d</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>19. REAL2%</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>20. 2% to ALL</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <widget class="QPushButton" name="Go_db">

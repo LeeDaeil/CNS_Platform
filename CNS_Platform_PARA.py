@@ -15,3 +15,7 @@ Full_op = 'Full_OP'
 temp = pd.read_csv('CONT_HIS_DUMY.csv')
 HIS_CONT = temp
 #print(HIS_CONT[11])
+
+# 제어봉 ALL OUT
+HIS_ALL_OUT_CONT = pd.read_csv('DUMY_ROD_OUT_OP.csv')
+HIS_ALL__CONT = pd.read_csv('ALL_ROD2.csv')

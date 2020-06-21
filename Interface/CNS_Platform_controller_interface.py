@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file './/Interface\CNS_Platform_controller_interface.ui',
 # licensing of './/Interface\CNS_Platform_controller_interface.ui' applies.
 #
-# Created: Thu Jun 18 17:52:05 2020
+# Created: Thu Jun 18 21:11:35 2020
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -80,6 +80,9 @@ class Ui_Form(object):
         self.Initial_list.addItem("")
         self.Initial_list.addItem("")
         self.Initial_list.addItem("")
+        self.Initial_list.addItem("")
+        self.Initial_list.addItem("")
+        self.Initial_list.addItem("")
         self.Go_db = QtWidgets.QPushButton(Form)
         self.Go_db.setGeometry(QtCore.QRect(20, 320, 231, 23))
         self.Go_db.setObjectName("Go_db")
@@ -134,6 +137,9 @@ class Ui_Form(object):
         self.Initial_list.setItemText(14, QtWidgets.QApplication.translate("Form", "15. Hot shut to Hot standby", None, -1))
         self.Initial_list.setItemText(15, QtWidgets.QApplication.translate("Form", "16. Test 70%", None, -1))
         self.Initial_list.setItemText(16, QtWidgets.QApplication.translate("Form", "17. 2%(real)", None, -1))
+        self.Initial_list.setItemText(17, QtWidgets.QApplication.translate("Form", "18. d", None, -1))
+        self.Initial_list.setItemText(18, QtWidgets.QApplication.translate("Form", "19. REAL2%", None, -1))
+        self.Initial_list.setItemText(19, QtWidgets.QApplication.translate("Form", "20. 2% to ALL", None, -1))
         self.Go_db.setText(QtWidgets.QApplication.translate("Form", "Save_DB", None, -1))
         self.Show_main_win.setText(QtWidgets.QApplication.translate("Form", "Show Interface", None, -1))
         self.label_5.setText(QtWidgets.QApplication.translate("Form", "Speed", None, -1))
