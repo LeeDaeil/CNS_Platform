@@ -52,9 +52,12 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
             # Nor / Ab
             if self.CNS_data['KSWO278']['V'] >= self.CNS_data['KCNTOMS']['V']:
                 self.CNS_data['Normal_0']['V'] = 0
+                self.CNS_data['Accident_nub']['V'] = 0
                 self.CNS_data[f'Accident_{accident_neb}']['V'] = 0
             else:
                 self.CNS_data['Normal_0']['V'] = 1
+                condition_fun = {12: 1, 15: 1, 13: 2, 18: 3, 52: 3, 17: 4} # LOCA, SGTR, MSLB, MFWB
+                self.CNS_data['Accident_nub']['V'] = condition_fun[accident_neb]
                 self.CNS_data[f'Accident_{accident_neb}']['V'] = 1
 
         return pid_list
@@ -95,5 +98,4 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
 
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
             except Exception as f:
-                print("CNS time out")
-                print(f)
+                print(f"CNS time out {f}")

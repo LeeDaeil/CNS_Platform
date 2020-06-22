@@ -2226,6 +2226,7 @@ class db_make:
             # Accident 변수
             'Normal_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Normal_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
+            'Accident_nub': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_0': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_1': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},
             'Accident_2': {'V': 0, 'L': [], 'D': deque(maxlen=max_len_deque), 'type': 0},

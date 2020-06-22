@@ -1,6 +1,7 @@
 import multiprocessing
 import pandas as pd
 import random
+import os
 from time import sleep
 
 from Module_Tester.EX_CNS_Send_UDP import CNS_Send_Signal
@@ -32,12 +33,39 @@ class EX_module(multiprocessing.Process):
 
     def run(self):
         get_nub_act_list = len(self.Act_list)
-        endtime = 100
-        max_case = 6
-        mal_list = [_ for _ in zip([12 for _ in range(max_case)],
-                                   [100000*random.randint(1, 3)
-                                    +10*random.randint(1, 20) for _ in range(max_case)],
-                                   [5+5*random.randint(1, 10) for _ in range(max_case)])]
+        endtime = 600
+        max_case = 60
+        mal_list = []
+        # LOCA
+        mal_list += [_ for _ in zip([12 for _ in range(max_case)],
+                                    [100000*random.randint(1, 3)
+                                     +10*random.randint(1, 20) for _ in range(max_case)],
+                                    [5+5*random.randint(1, 10) for _ in range(max_case)])]
+        # LOCA - PRZ porv stuck open
+        mal_list += [_ for _ in zip([15 for _ in range(max_case)],
+                                    [5 * random.randint(1, 20) for _ in range(max_case)],
+                                    [5 + 5 * random.randint(1, 10) for _ in range(max_case)])]
+        # SGTR
+        mal_list += [_ for _ in zip([13 for _ in range(max_case)],
+                                    [10000 * random.randint(1, 3)
+                                     + 2 * random.randint(5, 20) for _ in range(max_case)],
+                                    [5 + 5 * random.randint(1, 15) for _ in range(max_case)])]
+        # MSLB
+        mal_list += [_ for _ in zip([18 for _ in range(max_case)],
+                                    [10000 * random.randint(1, 3)
+                                     + 100 * random.randint(5, 20) for _ in range(max_case)],
+                                    [5 + 5 * random.randint(1, 15) for _ in range(max_case)])]
+        # MSLB nonisolable
+        mal_list += [_ for _ in zip([52 for _ in range(max_case)],
+                                    [100000 * random.randint(1, 3) + 10000 * random.randint(1, 3)
+                                     + 100 * random.randint(5, 20) for _ in range(max_case)],
+                                    [5 + 5 * random.randint(1, 15) for _ in range(max_case)])]
+        # MFWB
+        mal_list += [_ for _ in zip([17 for _ in range(max_case)],
+                                    [10000 * random.randint(1, 3)
+                                     + 10 * random.randint(5, 20) for _ in range(max_case)],
+                                    [5 + 5 * random.randint(1, 15) for _ in range(max_case)])]
+
         mal_case_cr = 0
         print(mal_list)
 
@@ -73,7 +101,15 @@ class EX_module(multiprocessing.Process):
                 temp = pd.DataFrame()
                 for keys in self.mem.keys():
                     temp[keys] = self.mem[keys]['L']
-                temp.to_csv(f'DB/{s}.csv')
+
+                file_name, find_iter = f'DB/{s}.csv', 0
+                while True:
+                    if os.path.isfile(file_name):
+                        file_name = f'DB/{s}_{find_iter}.csv'
+                        find_iter += 1
+                    else:
+                        break
+                temp.to_csv(file_name)
                 print('DB save')
                 # initial next mal_case
                 mal_case_cr += 1
@@ -82,7 +118,8 @@ class EX_module(multiprocessing.Process):
                 initial_condition = 1
                 print(f'초기화 {initial_condition} 요청')
                 self.CNS_udp._send_control_signal(['KFZRUN', 'KSWO277'], [5, initial_condition])
-                sleep(1)
+                sleep(2)
+
                 # Call malfunction
                 Mal_nub, Mal_type, Mal_time = mal_list[mal_case_cr]
                 print(f'Malfun {Mal_nub}-{Mal_type}-{Mal_time}')
