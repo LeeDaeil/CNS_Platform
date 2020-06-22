@@ -45,6 +45,18 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
                 self.CNS_data[pid]['V'] = val
                 self.CNS_data[pid]['type'] = sig
                 # pid_list.append(pid)
+
+        # Mal function 발생 시간 및 사고 기록
+        if 'Normal_0' in self.CNS_data.keys():
+            accident_neb = self.CNS_data['KSWO280']['V']
+            # Nor / Ab
+            if self.CNS_data['KSWO278']['V'] >= self.CNS_data['KCNTOMS']['V']:
+                self.CNS_data['Normal_0']['V'] = 0
+                self.CNS_data[f'Accident_{accident_neb}']['V'] = 0
+            else:
+                self.CNS_data['Normal_0']['V'] = 1
+                self.CNS_data[f'Accident_{accident_neb}']['V'] = 1
+
         return pid_list
 
     def update_cns_to_mem(self, key):
@@ -84,3 +96,4 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
             except Exception as f:
                 print("CNS time out")
+                print(f)

@@ -35,6 +35,7 @@ ApplicationWindow {
                 onToggled: {
                     leftlabel.font.italic = con.getItalic(italic.text)
                     leftlabel.font.bold = con.getBold(italic.text)
+                    leftlabel.font.pointSize = 20
                     leftlabel.font.underline = con.getUnderline(italic.text)
 
                 }
