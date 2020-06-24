@@ -1,5 +1,6 @@
 import multiprocessing
 import socket
+import sys
 from struct import unpack
 
 from copy import *
@@ -97,5 +98,6 @@ class RUN_FREEZE_FAST(multiprocessing.Process):
                     print("CNS 메모리 초기화 완료")
 
                 [self.update_cns_to_mem(key) for key in self.mem.keys()]  # 메인 메모리 업데이트
-            except Exception as f:
-                print(f"CNS time out {f}")
+            except Exception as e:
+                print(f"CNS time out {e}")
+                print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e).__name__, e)
