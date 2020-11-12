@@ -23,7 +23,7 @@ class All_Function_module(multiprocessing.Process):
         self.temp_mem = copy.deepcopy(self.mem)
         self.temp_trig_mem = copy.deepcopy(self.trig_mem)
 
-        # self.AI_AGENT = MainNet()
+        self.AI_AGENT = MainNet()
         # self.AB_DIG_M = AB_DIG_M(network=self.AI_AGENT.AB_DIG_AI)   # 비정상 진단 AI 모듈 불러옴
         # self.ROD_CONT = ROD_CONT(network=None)   # 정상에서 Rod control module
         # self.PZR_CONT = PZR_CONT(network=self.AI_AGENT.PZR_actor)   # 가압기 기포생성 모듈
