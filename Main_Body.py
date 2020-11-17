@@ -46,8 +46,9 @@ class generate_mem:
                        'Init_Call': False, 'Init_nub': 0,
                        'Mal_Call': False, 'Mal_list': {},
                        'Speed_Call': False, 'Speed': 5,
-                       # 'Auto': False,           # Auto : autonomous[True], manual[False]
-                       # 'Rq_man': False,         # Auto : 운전원 개입 요청 [True], 자율 운전 중 [False]
+                       'Auto_Call': False, 'Auto_re_man': False,
+                       'Operation_Strategy': 'N' # Normal, Abnormal, Em
+
                        # # Operation Strategy His
                        # # 'OPStrategy': PARA.Normal,      # Normal, Abnormal, Em
                        # # 'ST_OPStratey': PARA.ST_OP,

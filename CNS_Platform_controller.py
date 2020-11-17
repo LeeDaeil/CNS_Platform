@@ -2,11 +2,12 @@
 import sys
 import multiprocessing
 from copy import deepcopy
+from time import time
 from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtCore import QTimer
 #
 from Interface import CNS_Platform_controller_interface as CNS_controller
-# from CNS_Platform_mainwindow import CNS_mw
+from CNS_Platform_mainwindow import CNS_mw
 
 
 class InterfaceFun(multiprocessing.Process):
@@ -23,15 +24,20 @@ class InterfaceFun(multiprocessing.Process):
 class MyForm(QWidget):
     def __init__(self, mem):
         super().__init__()
-        self.mem = mem[0]   # main mem connection
-        self.copy_mem_structure = deepcopy(self.mem)
+        # Mother mem
+        self.mem = mem
+        #
+        self.dbmem = mem[0]   # main mem connection
+        self.copy_mem_structure = deepcopy(self.dbmem)
         self.trig_mem = mem[-1]  # main mem connection
         self.copy_trig_mem = deepcopy(self.trig_mem)
-
+        # ---- UI 호출
         print('Controller UI 호출')
         self.ui = CNS_controller.Ui_Form()
         self.ui.setupUi(self)
-        self.ui.Se_SP.setText(self.ui.Cu_SP.text())
+        # ---- UI 초기 세팅
+        self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))
+        self.ui.Se_SP.setText(str(self.copy_trig_mem['Speed']))
         # ---- 초기함수 호출
         # ---- 버튼 명령
         self.ui.Run.clicked.connect(self.run_cns)
@@ -40,11 +46,9 @@ class MyForm(QWidget):
         self.ui.Initial.clicked.connect(self.go_init)
         self.ui.Go_db.clicked.connect(self.go_save)
         self.ui.Apply_Sp.clicked.connect(self.go_speed)
-        # self.ui.Show_main_win.clicked.connect(self.show_main_window)
-        # ----
-        self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))
-        self.ui.Se_SP.setText(str(self.copy_trig_mem['Speed']))
+        self.ui.Show_main_win.clicked.connect(self.show_main_window)
         # ---- Qtimer
+        self.st = time()
         timer = QTimer(self)
         for _ in [self._update_test]:
             timer.timeout.connect(_)
@@ -53,7 +57,9 @@ class MyForm(QWidget):
         self.show()
 
     def _update_test(self):
-        print(self.mem['KCNTOMS'])
+        # print(self.dbmem['KCNTOMS'], f'ControllerUI {time()-self.st}')
+        # self.st = time()
+        pass
 
     def _update_trig_mem(self):
         for key_val in self.copy_trig_mem.keys():
@@ -94,8 +100,12 @@ class MyForm(QWidget):
         # 1. Mal list clear
         self.ui.Mal_list.clear()
         # 2. Mal trig_mem clear
-        self.copy_trig_mem['Mal_list'] = {}     # List Clear
-        self.copy_trig_mem['Speed'] = 5         # Speed 5 set-up
+        self.copy_trig_mem['Mal_list'] = {}             # List Clear
+        self.copy_trig_mem['Speed'] = 5                 # Speed 5 set-up
+        self.copy_trig_mem['Auto_Call'] = False         # Autonomous Off
+        self.copy_trig_mem['Auto_re_man'] = False       # Man require
+
+
         # 3. Controller interface update
         self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))
         self.ui.Se_SP.setText(str(self.copy_trig_mem['Speed']))
@@ -116,5 +126,6 @@ class MyForm(QWidget):
         self.trig_mem['Speed'] = int(self.ui.Se_SP.text())
         self.ui.Cu_SP.setText(str(self.trig_mem['Speed']))
 
-    # def show_main_window(self):
-    #     self.cns_main_win = CNS_mw(mem=self.mem, trig_mem=self.trig_mem)
+    def show_main_window(self):
+        self.cns_main_win = CNS_mw(mem=self.mem)
+

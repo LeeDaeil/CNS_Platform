@@ -253,7 +253,7 @@ class CNS:
 
 
 if __name__ == '__main__':
-    module = CNS('Main', '192.168.0.9', 7101, '192.168.0.10', 7101)
+    module = CNS('Main', '192.168.0.103', 7101, '192.168.0.29', 7101)
     module.init_cns(1)
     print(module.mem['KFZRUN']['Val'], module.mem['KCNTOMS']['Val'])
     module._send_malfunction_signal(12, 100100, 10)

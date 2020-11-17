@@ -36,10 +36,10 @@ class All_Function_module(multiprocessing.Process):
         # self.SAMP_CONT = SAMP_CONT()
 
     def _update_cnsenv_to_sharedmem(self):
-        st = time.time()
+        # st = time.time()
         for key_val in self.cns_env.mem.keys():
             self.mem[key_val] = self.cns_env.mem[key_val]
-        print(time.time()-st)
+        # print(time.time()-st)
 
     def run(self):
         self.cns_env.reset(file_name=f'Log{ToolEtc.get_now_time()}', initial_nub=1)
@@ -56,12 +56,31 @@ class All_Function_module(multiprocessing.Process):
             else:
                 # Mal fun, Run logic -----------------------------------------------------
                 if self.trig_mem['Mal_Call']:
-                    print('Call Mal', self.trig_mem['Mal_list'])
+                    # 1] 마지막 Mal send
+                    last_nub = len(self.trig_mem['Mal_list'])
+                    get_mal_nub = self.trig_mem['Mal_list'][last_nub]['Mal_nub']
+                    get_mal_opt = self.trig_mem['Mal_list'][last_nub]['Mal_opt']
+                    get_mal_time = self.trig_mem['Mal_list'][last_nub]['Mal_time']
+                    self.cns_env._send_malfunction_signal(get_mal_nub, get_mal_opt, get_mal_time)
                     self.trig_mem['Mal_Call'] = False
                 if self.trig_mem['Run']:
+                    # t
+                    # Control... TODO
+                    # t + 1
                     self.cns_env.step(A=0)
+                    self._monitoring()
             # Update mem ------------------------------------------------------------------
             self._update_cnsenv_to_sharedmem()
+
+    def _monitoring(self):
+        # 1. 정상 or 비상 판별
+        if self.cns_env.mem['KLAMPO9']['Val'] == 1:
+            self.trig_mem['Operation_Strategy'] = 'E'
+        else:
+            self.trig_mem['Operation_Strategy'] = 'N'
+
+        # 진단 모듈 아래 넣을 것 TODO
+        pass
 
         # while True:
         #     if self.trig_mem['Loop'] and self.trig_mem['Run']:
