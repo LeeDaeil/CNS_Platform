@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="Sys">
+    <file>Valve_4.png</file>
+    <file>PZR.png</file>
+    <file>Valve_3.png</file>
+    <file>Pump_2_OFF.png</file>
+    <file>Pump_2_ON.png</file>
+    <file>Pump_3_OFF.png</file>
+    <file>Pump_3_ON.png</file>
+    <file>Valve_1_CLOSE.png</file>
+    <file>Valve_1_HALF.png</file>
+    <file>Valve_1_OPEN.png</file>
+    <file>Valve_2_CLOSE.png</file>
+    <file>Valve_2_HALF.png</file>
+    <file>Valve_2_OPEN.png</file>
+    <file>overview.png</file>
+    <file>Pump_1_OFF.png</file>
+    <file>Pump_1_ON.png</file>
+  </qresource>
+</RCC>
