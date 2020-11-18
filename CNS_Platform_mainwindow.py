@@ -65,6 +65,7 @@ class CNS_mw(QWidget):
 
     def _update_test(self):
         # print(self.dbmem['KCNTOMS'], f'MainUI {time() - self.st}')
+        print(self.dbmem['cWFWLN1']['Val'], self.dbmem['WFWLN1']['Val'], f'MainUI {time() - self.st}')
         # self.st = time()
         pass
 

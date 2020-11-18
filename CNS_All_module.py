@@ -1,9 +1,10 @@
 import multiprocessing
+import numpy as np
 import copy
-
-import CNS_Platform_PARA as PARA
+#
 from TOOL.TOOL_etc import ToolEtc
 from ENVCNS import ENVCNS
+# from CNS_AIl_AI_module import MainNet
 # from CNS_Module_ALL_AI_Unit import MainNet
 # from CNS_Module_AB_Dig import Abnormal_dig_module as AB_DIG_M
 # from CNS_Module_ROD import rod_controller_module as ROD_CONT
@@ -17,18 +18,19 @@ class All_Function_module(multiprocessing.Process):
     def __init__(self, mem):
         multiprocessing.Process.__init__(self)
 
-        self.mem = mem[0]  # main mem connection
+        self.mem = mem[0]        # main mem connection
         self.trig_mem = mem[-1]  # main mem connection
 
         # self.copy_mem = copy.deepcopy(self.mem)
         self.copy_trig_mem = copy.deepcopy(self.trig_mem)
 
-        # 1 CNS 환경 생성------------------------------
+        # 1 CNS 환경 생성 ----------------------------------------------------
         # CNS 정보 읽기
         with open('CNS_Info.txt', 'r') as f:
             self.cns_ip, self.cns_port = f.read().split('\t')   # [cns ip],[cns port]
         self.cns_env = ENVCNS(Name='EnvCNS', IP=self.cns_ip, PORT=int(self.cns_port))
 
+        # 2 AI network Load -------------------------------------------------
         # self.AI_AGENT = MainNet()
         # self.AB_DIG_M = AB_DIG_M(network=self.AI_AGENT.AB_DIG_AI)   # 비정상 진단 AI 모듈 불러옴
         # self.ROD_CONT = ROD_CONT(network=None)   # 정상에서 Rod control module
@@ -42,6 +44,11 @@ class All_Function_module(multiprocessing.Process):
         # print(time.time()-st)
 
     def run(self):
+        # AI Model Call
+        from CNS_AIl_AI_module import Mainnet
+        from AI.AI_SV_Module import Signal_Validation
+        SV_net = Signal_Validation(net=Mainnet().net_1)
+
         self.cns_env.reset(file_name=f'Log{ToolEtc.get_now_time()}', initial_nub=1)
         self._update_cnsenv_to_sharedmem()
         while True:
@@ -68,11 +75,11 @@ class All_Function_module(multiprocessing.Process):
                     # Control... TODO
                     # t + 1
                     self.cns_env.step(A=0)
-                    self._monitoring()
+                    self._monitoring(SV_net)
             # Update mem ------------------------------------------------------------------
             self._update_cnsenv_to_sharedmem()
 
-    def _monitoring(self):
+    def _monitoring(self, SV_net):
         # 1. 정상 or 비상 판별
         if self.cns_env.mem['KLAMPO9']['Val'] == 1:
             self.trig_mem['Operation_Strategy'] = 'E'
@@ -80,6 +87,11 @@ class All_Function_module(multiprocessing.Process):
             self.trig_mem['Operation_Strategy'] = 'N'
 
         # 진단 모듈 아래 넣을 것 TODO
+        get_result = SV_net.step(self.cns_env.mem)  # {'cPara': val, ... }
+        # SV의 값을 cns 메모리에 업데이트
+        for key in get_result.keys():
+            self.cns_env.mem[f'c{key}']['Val'] = get_result[key]
+
         pass
 
         # while True:

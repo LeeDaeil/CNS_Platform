@@ -12,6 +12,8 @@ from CNS_All_module import All_Function_module
 import CNS_Platform_PARA as PARA
 
 
+
+
 class body:
     def __init__(self):
         import AUTO_UI_TO_PY
@@ -47,8 +49,7 @@ class generate_mem:
                        'Mal_Call': False, 'Mal_list': {},
                        'Speed_Call': False, 'Speed': 5,
                        'Auto_Call': False, 'Auto_re_man': False,
-                       'Operation_Strategy': 'N' # Normal, Abnormal, Em
-
+                       'Operation_Strategy': 'N', # Normal, Abnormal, Em
                        # # Operation Strategy His
                        # # 'OPStrategy': PARA.Normal,      # Normal, Abnormal, Em
                        # # 'ST_OPStratey': PARA.ST_OP,
