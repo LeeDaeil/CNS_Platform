@@ -6,6 +6,7 @@ from time import time
 from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import QTimer
 from PyQt5 import QtCore
+from collections import deque
 import pickle
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_signalvalidation import CNSSignalValidation
@@ -36,6 +37,7 @@ class CNS_mw(QWidget):
         self._init_color_setting()
         self._init_main_local_mem()
         self._init_add_window()
+        self.st_list = deque(maxlen=2)
         # ---- 버튼 명령
         self.ui.Auto_op.clicked.connect(self._call_auto_dis_click_auto)
         self.ui.Manual_op.clicked.connect(self._call_auto_dis_click_man)
@@ -599,19 +601,19 @@ class CNS_mw(QWidget):
         self._update_main_display_op_strategy_log()
 
     def _update_main_display_op_strategy_log(self):
-        get_len = len(self.copy_trig_mem['Operation_Strategy_list'])
+        get_len = len(self.st_list)
         if get_len >= 2:
-            if self.copy_trig_mem['Operation_Strategy_list'][0] != self.copy_trig_mem['Operation_Strategy_list'][1]:
+            if self.st_list[0] != self.st_list[1]:
                 # 상태 변화시 이전 상태 -> 현재 상태
-                gen_print = '{} -> {}'.format(self.copy_trig_mem['Operation_Strategy_list'][1],
-                                              self.copy_trig_mem['Operation_Strategy_list'][0])
+                gen_print = '{} -> {}'.format(self.st_list[1], self.st_list[0])
                 # 현재 시간 수집
                 get_sec = int(self.dbmem["KCNTOMS"]["Val"] / 5)
                 gen_time = TOOL_etc.ToolEtc.get_calculated_time(get_sec)
                 self.ui.listWidget.addItem(gen_time + gen_print)
 
-        self.copy_trig_mem['Operation_Strategy_list'].append(str(self.copy_trig_mem['Operation_Strategy']))
-        self._update_trig_mem()
+        if self.trig_mem['Operation_Strategy'] == 'E': self.st_list.append('Emergency')
+        if self.trig_mem['Operation_Strategy'] == 'A': self.st_list.append('Abnormal')
+        if self.trig_mem['Operation_Strategy'] == 'N': self.st_list.append('Normal')
         pass
 
     def _update_main_display_autonomous(self):
