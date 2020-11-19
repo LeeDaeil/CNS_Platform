@@ -75,6 +75,10 @@ class All_Function_module(multiprocessing.Process):
                     # Control... TODO
                     # t + 1
                     self.cns_env.step(A=0)
+
+                    if self.cns_env.mem['KCNTOMS']['Val'] > 300:
+                        self.cns_env.mem['UUPPPL']['Val'] = 600
+
                     self._monitoring(SV_net)
             # Update mem ------------------------------------------------------------------
             self._update_cnsenv_to_sharedmem()
