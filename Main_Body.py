@@ -48,7 +48,8 @@ class GenerateMem:
                        'Mal_Call': False, 'Mal_list': {},
                        'Speed_Call': False, 'Speed': 5,
                        'Auto_Call': False, 'Auto_re_man': False,
-                       'Operation_Strategy': 'N', # Normal, Abnormal, Em
+                       'Operation_Strategy': 'N',           # Normal, Abnormal, Em
+                       'Operation_Strategy_list': deque(maxlen=2),
                        # # Operation Strategy His
                        # # 'OPStrategy': PARA.Normal,      # Normal, Abnormal, Em
                        # # 'ST_OPStratey': PARA.ST_OP,

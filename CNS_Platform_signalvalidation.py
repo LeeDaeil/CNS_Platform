@@ -249,6 +249,7 @@ class CNSSignalValidation(QDialog):
     # def changeEvent(self, a0) -> None:
     #     print(self.geometry())
 
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     w = CNSSignalValidation(mem=None)

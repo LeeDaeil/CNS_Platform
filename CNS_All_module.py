@@ -77,7 +77,7 @@ class All_Function_module(multiprocessing.Process):
                     self.cns_env.step(A=0)
 
                     if self.cns_env.mem['KCNTOMS']['Val'] > 300:
-                        self.cns_env.mem['UUPPPL']['Val'] = 600
+                        self.cns_env.mem['UUPPPL']['Val'] = 450
 
                     self._monitoring(SV_net)
             # Update mem ------------------------------------------------------------------

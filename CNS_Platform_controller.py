@@ -109,7 +109,7 @@ class MyForm(QWidget):
         self.copy_trig_mem['Speed'] = 5                 # Speed 5 set-up
         self.copy_trig_mem['Auto_Call'] = False         # Autonomous Off
         self.copy_trig_mem['Auto_re_man'] = False       # Man require
-
+        self.copy_trig_mem['Operation_Strategy_list'].clear()   #
 
         # 3. Controller interface update
         self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))

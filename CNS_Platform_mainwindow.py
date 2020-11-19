@@ -3,8 +3,9 @@
 # from PySide2 import QtCore, QtWidgets
 from copy import deepcopy
 from time import time
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QMessageBox
 from PyQt5.QtCore import QTimer
+from PyQt5 import QtCore
 import pickle
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_signalvalidation import CNSSignalValidation
@@ -182,6 +183,10 @@ class CNS_mw(QWidget):
 
         return 0
 
+    def _update_trig_mem(self):
+        for key_val in self.copy_trig_mem.keys():
+            self.trig_mem[key_val] = self.copy_trig_mem[key_val]
+
     # ======================= Main Display ======================================
     #
     def _update_main_display(self):
@@ -192,6 +197,7 @@ class CNS_mw(QWidget):
         self._update_main_display_csf()
         self._update_main_display_op_strategy()
         self._update_main_display_autonomous()
+        self._update_main_display_autonomous_control()
 
     def _update_main_display_indicator(self):
         self.ui.D_50.setText('{:0.2f}'.format(self.dbmem['UHOLEG1']['Val']))    # Hot leg temp loop 1
@@ -590,6 +596,24 @@ class CNS_mw(QWidget):
         self.ui.Abnormal_dis.setStyleSheet(self.back_color[light[1]])
         self.ui.Emergen_dis.setStyleSheet(self.back_color[light[2]])
 
+        self._update_main_display_op_strategy_log()
+
+    def _update_main_display_op_strategy_log(self):
+        get_len = len(self.copy_trig_mem['Operation_Strategy_list'])
+        if get_len >= 2:
+            if self.copy_trig_mem['Operation_Strategy_list'][0] != self.copy_trig_mem['Operation_Strategy_list'][1]:
+                # 상태 변화시 이전 상태 -> 현재 상태
+                gen_print = '{} -> {}'.format(self.copy_trig_mem['Operation_Strategy_list'][1],
+                                              self.copy_trig_mem['Operation_Strategy_list'][0])
+                # 현재 시간 수집
+                get_sec = int(self.dbmem["KCNTOMS"]["Val"] / 5)
+                gen_time = TOOL_etc.ToolEtc.get_calculated_time(get_sec)
+                self.ui.listWidget.addItem(gen_time + gen_print)
+
+        self.copy_trig_mem['Operation_Strategy_list'].append(str(self.copy_trig_mem['Operation_Strategy']))
+        self._update_trig_mem()
+        pass
+
     def _update_main_display_autonomous(self):
         if self.trig_mem['Auto_Call']:                                      # True - autonomouse
             self.ui.Manual_op.setStyleSheet(self.back_color['gray'])
@@ -603,122 +627,31 @@ class CNS_mw(QWidget):
         else:
             self.ui.Operator_need.setStyleSheet(self.back_color['gray'])
 
-    # # ======================= Autonomous condition DIS =================
-    # def update_Auto_DIS(self):
-    #     # =================== 비상 시 자율 제어 수행 여부 확인 부분 =======
-    #     if self.mem['KCNTOMS']['V'] < 4:
-    #         # 초기 혹시 발생한 내역을 삭제함.
-    #         self.ui.Auto_list.clear()
-    #     if self.trig_mem['ST_OPStratey'] == PARA.Emergency:
-    #         if self.mem['KLAMPO9']['V'] == 1: self.Auto_DIS_add_list_signal('Reactor trip')
-    #         if self.mem['KLAMPO6']['V'] == 1: self.Auto_DIS_add_list_signal('SI valve open')
-    #         if self.mem['KLAMPO4']['V'] == 1: self.Auto_DIS_add_list_signal('Containment ISO')
-    #         if self.mem['KLAMPO2']['V'] == 1: self.Auto_DIS_add_list_signal('Feedwater ISO')
-    #         if self.mem['KLAMPO3']['V'] == 1: self.Auto_DIS_add_list_signal('Main steam line ISO')
-    #         if self.mem['KLAMPO134']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 1 start')
-    #         if self.mem['KLAMPO135']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 2 start')
-    #         if self.mem['KLAMPO136']['V'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 3 start')
-    #         if self.mem['KLAMPO70']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 2 start')
-    #         if self.mem['KLAMPO69']['V'] == 1: self.Auto_DIS_add_list_signal('Charging pump 3 start')
-    #         if self.mem['KLAMPO124']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 1 stop')
-    #         if self.mem['KLAMPO125']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 2 stop')
-    #         if self.mem['KLAMPO126']['V'] == 0: self.Auto_DIS_add_list_signal('RCP 3 stop')
-    #
-    # def Auto_DIS_add_list_signal(self, content):
-    #     if len(self.ui.Auto_list.findItems('{}'.format(content), QtCore.Qt.MatchContains)) == 0:
-    #         self.ui.Auto_list.addItem('{} {}'.format(self.Call_CNS_time[0], content))
-    #
-    # # ======================= Operation Strategy DIS ===================
-    # def update_OPStrategy_DIS(self):
-    #
-    #     # =================== 전략 변경 시 리스트에 추가 ==================
-    #     if len(self.trig_mem['OPStrategy_his']) > 1:    # 비교를 위해서 2개 이상 쌓고 나서 비교 시작
-    #         # 앞과 뒤가 동일한지 여부에 따라서 리스트 추가 or 추가 않함.
-    #         if self.trig_mem['OPStrategy_his'][0] != self.trig_mem['OPStrategy_his'][1]:
-    #             # 갑작스런 비상, 비정상 발생, 또는 비상, 비정상 -> 정상에서 복구
-    #             gen_print = '{} -> {}'.format(self.trig_mem['OPStrategy_his'][1],
-    #                                           self.trig_mem['OPStrategy_his'][0])
-    #             change_time = f'[{self.Call_CNS_time[0]}]'
-    #             self.ui.listWidget.addItem(change_time + gen_print)
-    #         else:
-    #             pass
-    #     else:
-    #         self.trig_mem['OPStrategy_his'].append(self.trig_mem['OPStrategy'])
-    #
-    # # ======================= TSMS DIS =================================
-    # def update_TSMS_DIS(self):
-    #     if self.mem['KCNTOMS']['V'] < 4 or len(self.mem['KCNTOMS']['D']) < 1:
-    #         self.TSMS_State = {}
-    #         self.ui.Performace_Mn.clear()
-    #
-    #     if self.trig_mem['OPStrategy'] == PARA.Emergency:
-    #         self.Monitoring()
-    #
-    # def Calculator_SDM(self):
-    #
-    #     self.init_para = {
-    #         'HFP': 100,  # H
-    #         'ReatorPower': 90,  # T
-    #         'BoronConcentration': 1318,  # T
-    #         'Burnup': 4000,  # T
-    #         'Burnup_BOL': 150,  # H
-    #         'Burnup_EOL': 18850,  # H
-    #         'TotalPowerDefect_BOL': 1780,  # H
-    #         'TotalPowerDefect_EOL': 3500,  # H
-    #         'VoidCondtent': 50,  # H
-    #         'TotalRodWorth': 5790,  # H
-    #         'WorstStuckRodWorth': 1080,  # H
-    #         'InoperableRodNumber': 1,  # T
-    #         'BankWorth_D': 480,  # H
-    #         'BankWorth_C': 1370,  # H
-    #         'BankWorth_B': 1810,  # H
-    #         'BankWorth_A': 760,  # H
-    #         'AbnormalRodName': 'C',  # T
-    #         'AbnormalRodNumber': 1,  # T
-    #         'ShutdownMarginValue': 1770,  # H
-    #     }
-    #
-    #     # 1. BOL, 현출력% -> 0% 하기위한 출력 결손량 계산
-    #     ReactorPower = self.mem['QPROLD']['V'] * 100
-    #     PowerDefect_BOL = self.init_para['TotalPowerDefect_BOL'] * ReactorPower / self.init_para['HFP']
-    #
-    #     # 2. EOL, 현출력% -> 0% 하기위한 출력 결손량 계산
-    #     PowerDefect_EOL = self.init_para['TotalPowerDefect_EOL'] * ReactorPower / self.init_para['HFP']
-    #
-    #     # 3. 현재 연소도, 현출력% -> 0% 하기위한 출력 결손량 계산
-    #     A = self.init_para['Burnup_EOL'] - self.init_para['Burnup_BOL']
-    #     B = PowerDefect_EOL - PowerDefect_BOL
-    #     C = self.init_para['Burnup'] - self.init_para['Burnup_EOL']
-    #
-    #     PowerDefect_Burnup = B * C / A + PowerDefect_BOL
-    #
-    #     # 4. 반응도 결손량을 계산
-    #     PowerDefect_Final = PowerDefect_Burnup + self.init_para['VoidCondtent']
-    #
-    #     # 5. 운전불가능 제어봉 제어능을 계산
-    #     InoperableRodWorth = self.init_para['InoperableRodNumber'] * self.init_para['WorstStuckRodWorth']
-    #
-    #     # 6. 비정상 제어봉 제어능을 계산
-    #     AbnormalRodWorth = self.init_para['BankWorth_{}'.format(
-    #         self.init_para['AbnormalRodName'])] / 8 * self.init_para['AbnormalRodNumber']
-    #
-    #     # 7. 운전 불능, 비정상 제어봉 제어능의 합 계산
-    #     InoperableAbnormal_RodWorth = InoperableRodWorth + AbnormalRodWorth
-    #
-    #     # 8. 현 출력에서의 정지여유도 계산
-    #     ShutdownMargin = self.init_para['TotalRodWorth'] - InoperableAbnormal_RodWorth - PowerDefect_Final
-    #
-    #     return ShutdownMargin
-    #
+    def _update_main_display_autonomous_control(self):
+        if self.dbmem['KCNTOMS']['Val'] < 4:
+            self.ui.Auto_list.clear()
+        else:
+            if self.trig_mem['Operation_Strategy'] == 'E':
+                if self.dbmem['KLAMPO9']['Val'] == 1: self.Auto_DIS_add_list_signal('Reactor trip')
+                if self.dbmem['KLAMPO6']['Val'] == 1: self.Auto_DIS_add_list_signal('SI valve open')
+                if self.dbmem['KLAMPO4']['Val'] == 1: self.Auto_DIS_add_list_signal('Containment ISO')
+                if self.dbmem['KLAMPO2']['Val'] == 1: self.Auto_DIS_add_list_signal('Feedwater ISO')
+                if self.dbmem['KLAMPO3']['Val'] == 1: self.Auto_DIS_add_list_signal('Main steam line ISO')
+                if self.dbmem['KLAMPO134']['Val'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 1 start')
+                if self.dbmem['KLAMPO135']['Val'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 2 start')
+                if self.dbmem['KLAMPO136']['Val'] == 1: self.Auto_DIS_add_list_signal('Aux feed pump 3 start')
+                if self.dbmem['KLAMPO70']['Val'] == 1: self.Auto_DIS_add_list_signal('Charging pump 2 start')
+                if self.dbmem['KLAMPO69']['Val'] == 1: self.Auto_DIS_add_list_signal('Charging pump 3 start')
+                if self.dbmem['KLAMPO124']['Val'] == 0: self.Auto_DIS_add_list_signal('RCP 1 stop')
+                if self.dbmem['KLAMPO125']['Val'] == 0: self.Auto_DIS_add_list_signal('RCP 2 stop')
+                if self.dbmem['KLAMPO126']['Val'] == 0: self.Auto_DIS_add_list_signal('RCP 3 stop')
+
+    def Auto_DIS_add_list_signal(self, content):                                                    # TODO 나중에 수정
+        if len(self.ui.Auto_list.findItems('{}'.format(content), QtCore.Qt.MatchContains)) == 0:
+            get_sec = int(self.dbmem["KCNTOMS"]["Val"] / 5)
+            self.ui.Auto_list.addItem('{} {}'.format(TOOL_etc.ToolEtc.get_calculated_time(get_sec), content))
+
     # def Monitoring(self):
-    #     # LCO 3.4.4
-    #     if [self.mem['KLAMPO124']['V'], self.mem['KLAMPO125']['V'], self.mem['KLAMPO126']['V']].count(0) >= 2:
-    #         if not 'LCO 3.4.4' in self.TSMS_State.keys():
-    #             self.TSMS_State['LCO 3.4.4'] = {'Start_time': self.Call_CNS_time[1],
-    #                                             'End_time': self.Call_CNS_time[1]+24000}
-    #             end_time = self.calculate_time(self.Call_CNS_time[1]+24000)
-    #             self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.4\tDissatisfaction'.format(self.Call_CNS_time[0],
-    #                                                                                      end_time))
     #     # LCO 3.4.1
     #     if not 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
     #         if not'LCO 3.4.1' in self.TSMS_State.keys():
@@ -727,69 +660,10 @@ class CNS_mw(QWidget):
     #             end_time = self.calculate_time(self.Call_CNS_time[1]+7200)
     #             self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.1\tDissatisfaction'.format(self.Call_CNS_time[0],
     #                                                                                       end_time))
-    #     # LCO 3.4.3
-    #     if self.predict_SVM(self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']) != 1:
-    #         if not'LCO 3.4.3' in self.TSMS_State.keys():
-    #             self.TSMS_State['LCO 3.4.3'] = {'Start_time': self.Call_CNS_time[1],
-    #                                             'End_time': self.Call_CNS_time[1]+1800}
-    #             end_time = self.calculate_time(self.Call_CNS_time[1]+1800)
-    #             self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.3\tDissatisfaction'.format(self.Call_CNS_time[0],
-    #                                                                                       end_time))
-    #
-    #     # LCO 3.1.1
-    #     current_SDM = self.Calculator_SDM()
-    #     if current_SDM < 1770:
-    #         if not 'LCO 3.1.1' in self.TSMS_State.keys():
-    #             self.TSMS_State['LCO 3.1.1'] = {'Start_time': self.Call_CNS_time[1],
-    #                                             'End_time': self.Call_CNS_time[1] + 900}
-    #             end_time = self.calculate_time(self.Call_CNS_time[1] + 900)
-    #             self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.1.1\tDissatisfaction'.format(self.Call_CNS_time[0],
-    #                                                                                       end_time))
-    #
-    # def Monitoring_Operation_Mode(self):
-    #     if self.mem['CRETIV']['V'] >= 0:
-    #         if self.mem['ZINST1']['V'] > 5:
-    #             mode = 1
-    #         elif self.mem['ZINST1']['V'] <= 5:
-    #             mode = 2
-    #     elif self.mem['CRETIV']['V'] < 0:
-    #         if self.mem['UCOLEG1']['V'] >= 177:
-    #             mode = 3
-    #         elif 93 < self.mem['UCOLEG1']['V'] < 177:
-    #             mode = 4
-    #         elif self.mem['UCOLEG1']['V'] <= 93:
-    #             mode = 5
-    #     else:
-    #         mode = 6
-    #     return mode
     #
     # def TSMS_LCO_info(self, item):
     #     LCO_name = item.text().split('\t')[1]
-    #     if LCO_name == 'LCO 3.4.4':
-    #         currnet_mode = self.Monitoring_Operation_Mode()
-    #         cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
-    #         cont += '=' * 50 + '\n'
-    #         cont += 'Follow up action : Enter Mode 3\n'
-    #         cont += '=' * 50 + '\n'
-    #         cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
-    #         cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
-    #                                           self.calculate_time(self.Call_CNS_time[1]),
-    #                                           self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
-    #         cont += '=' * 50 + '\n'
-    #         if currnet_mode == 3:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Success\n'
-    #         elif currnet_mode == 1 or currnet_mode == 2:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Ongoing\n'
-    #         cont += '=' * 50 + '\n'
-    #         QMessageBox.information(self, "LCO 정보", cont)
-    #
-    #     elif LCO_name == 'LCO 3.4.1':
+    #     if LCO_name == 'LCO 3.4.1':
     #         currnet_mode = self.Monitoring_Operation_Mode()
     #         cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
     #         cont += '=' * 50 + '\n'
@@ -814,57 +688,3 @@ class CNS_mw(QWidget):
     #                 cont += '현재 운전 상태 : Action Ongoing\n'
     #         cont += '=' * 50 + '\n'
     #         QMessageBox.information(self, "LCO 정보", cont)
-    #
-    #     elif LCO_name == 'LCO 3.4.3':
-    #         currnet_mode = self.Monitoring_Operation_Mode()
-    #         cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
-    #         cont += '=' * 50 + '\n'
-    #         cont += 'Follow up action :\n'
-    #         cont += '  - Enter allowable operation region\n'
-    #         cont += '  - Limit Time : 30 min\n'
-    #         cont += '=' * 50 + '\n'
-    #         cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
-    #         cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
-    #                                           self.calculate_time(self.Call_CNS_time[1]),
-    #                                           self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
-    #         cont += '=' * 50 + '\n'
-    #         if self.predict_SVM(self.mem['UCOLEG1']['V'], self.mem['ZINST65']['V']) != 1:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Ongoing\n'
-    #         else:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Success\n'
-    #         cont += '=' * 50 + '\n'
-    #         QMessageBox.information(self, "LCO 정보", cont)
-    #
-    #     elif LCO_name == 'LCO 3.1.1':
-    #         currnet_mode = self.Monitoring_Operation_Mode()
-    #         cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
-    #         cont += '=' * 50 + '\n'
-    #         cont += 'Follow up action :\n'
-    #         cont += '  - Boron Injectionl\n'
-    #         cont += '=' * 50 + '\n'
-    #         cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
-    #         cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
-    #                                             self.calculate_time(self.Call_CNS_time[1]),
-    #                                             self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
-    #         cont += '=' * 50 + '\n'
-    #         if self.Calculator_SDM() >= 1770:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Ongoing\n'
-    #         else:
-    #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-    #                 cont += '현재 운전 상태 : Action Fail\n'
-    #             else:
-    #                 cont += '현재 운전 상태 : Action Success\n'
-    #         cont += '=' * 50 + '\n'
-    #         QMessageBox.information(self, "LCO 정보", cont)
-    #
-    #     else:
-    #         pass
