@@ -4,6 +4,7 @@ import multiprocessing
 from copy import deepcopy
 from time import time
 from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
 #
 from Interface import CNS_Platform_controller_interface as CNS_controller
@@ -54,7 +55,11 @@ class MyForm(QWidget):
             timer.timeout.connect(_)
         timer.start(600)
         # ----
+        self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.show()
+
+        # Call
+        self.cns_main_win = CNS_mw(mem=self.mem)
 
     def _update_test(self):
         # print(self.dbmem['KCNTOMS'], f'ControllerUI {time()-self.st}')
@@ -117,6 +122,9 @@ class MyForm(QWidget):
         self.trig_mem['Init_nub'] = int(self.ui.Initial_list.currentIndex()) + 1
         self.trig_mem['Init_Call'] = True
 
+        # Main window 초기화
+        self.cns_main_win._init_main_local_mem_clear()
+
     def go_save(self):
         # 실시간 레코딩 중 ...
         pass
@@ -127,5 +135,6 @@ class MyForm(QWidget):
         self.ui.Cu_SP.setText(str(self.trig_mem['Speed']))
 
     def show_main_window(self):
-        self.cns_main_win = CNS_mw(mem=self.mem)
+        # Controller와 동시 실행
+        pass
 

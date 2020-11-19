@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QWidget
 from PyQt5.QtCore import QTimer
 import pickle
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
+from CNS_Platform_signalvalidation import CNSSignalValidation
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
 # from CNS_Platform_rod_controller import rod_controller_interface
 # from CNS_Platform_pzr_controller import pzr_controller_interface
@@ -31,10 +32,13 @@ class CNS_mw(QWidget):
         self.ui.setupUi(self)
         # ---- UI 초기 세팅
         # ---- 초기함수 호출
-        self.init_color_setting()
+        self._init_color_setting()
+        self._init_main_local_mem()
+        self._init_add_window()
         # ---- 버튼 명령
         self.ui.Auto_op.clicked.connect(self._call_auto_dis_click_auto)
         self.ui.Manual_op.clicked.connect(self._call_auto_dis_click_man)
+        self.ui.call_sv_monitoring.clicked.connect(self._call_signal_validation_monitoring)
         # TSMS 리스트 누르면 정보 나옴
         # self.ui.Performace_Mn.itemClicked.connect(self.TSMS_LCO_info)
         # EVENT_DIG 모듈
@@ -57,39 +61,16 @@ class CNS_mw(QWidget):
         # ---- Qtimer
         self.st = time()
         timer = QTimer(self)
-        for _ in [self._update_test, self._update_main_display]:
+        for _ in [self._update_test, self._update_main_local_mem, self._update_main_display]:
             timer.timeout.connect(_)
-        timer.start(600)
+        timer.start(300)
         # ----
         self.show()
 
-    def _update_test(self):
-        # print(self.dbmem['KCNTOMS'], f'MainUI {time() - self.st}')
-        print(self.dbmem['cWFWLN1']['Val'], self.dbmem['WFWLN1']['Val'], f'MainUI {time() - self.st}')
-        # self.st = time()
-        pass
-
+# ======================= _init =================================================
+    # ======================= _init_color========================================
     #
-    #
-    # # ======================= 새롭게 열리는 윈도우 들 ====================
-    # def call_event_window(self):
-    #     self.event_window = Event_dig_model(self.mem, self.trig_mem)
-    #
-    # def call_rod_controller(self):
-    #     self.rod_controller_module = rod_controller_interface(self.mem, self.trig_mem)
-    #
-    # def call_pzr_controller(self):
-    #     self.pzr_controller_module = pzr_controller_interface(self.mem, self.trig_mem)
-    #
-    # def call_strategy_inter(self):
-    #     self.call_st = Strategy_interface(trig_mem=self.trig_mem)
-    #
-    # ======================= Call_ =============================================
-    #
-
-    # ======================= Initial_color======================================
-    #
-    def init_color_setting(self):
+    def _init_color_setting(self):
         self.back_color = {
             'gray': "background-color: rgb(229, 229, 229);",
             'green': "background-color: rgb(0, 170, 0);",
@@ -112,13 +93,94 @@ class CNS_mw(QWidget):
             'V_2_CLOSE': "image: url(:/Sys/Valve_2_CLOSE.png);",
         }
 
-    # ======================= Call_ =============================================
+    def _init_main_local_mem(self):
+        self._want_gp_para = ['cINIT',                                                                  # TODO WANT_PARA
+                              'KCNTOMS',
+                              'cZINST103',    'ZINST103',
+                              'cWFWLN1',      'WFWLN1',
+                              'cWFWLN2',      'WFWLN2',
+                              'cWFWLN3',      'WFWLN3',
+                              'cZINST100',    'ZINST100',
+                              'cZINST101',    'ZINST101',
+                              'cZINST85',     'ZINST85',
+                              'cZINST86',     'ZINST86',
+                              'cZINST87',     'ZINST87',
+                              'cZINST99',     'ZINST99',
+                              'cUCHGUT',      'UCHGUT',
+                              'cUCOLEG1',     'UCOLEG1',
+                              'cUCOLEG2',     'UCOLEG2',
+                              'cUCOLEG3',     'UCOLEG3',
+                              'cUPRZ',        'UPRZ',
+                              'cUUPPPL',      'UUPPPL',
+                              'cWNETLD',      'WNETLD',
+                              'cZINST63',     'ZINST63',
+                              'cZINST65',     'ZINST65',
+                              'cZINST79',     'ZINST79',
+                              'cZINST80',     'ZINST80',
+                              'cZINST81',     'ZINST81',
+                              'cZINST70',     'ZINST70',
+                              'cZINST72',     'ZINST72',
+                              'cZINST73',     'ZINST73',
+                              'cZINST75',     'ZINST75',
+                              ]
+        self._init_local_mem_structure = {para: {} for para in self._want_gp_para}
+        self.local_mem = deepcopy(self._init_local_mem_structure)
+        # local_mem = {'para': {'0': 0, ... }
+
+    def _init_main_local_mem_clear(self):
+        for key in self.local_mem.keys():
+            self.local_mem[key] = {}
+
+    def _init_add_window(self):
+        self.signal_validation_monitoring = None
+
+# ======================= _call =================================================
+    # ======================= _call_click =======================================
     #
     def _call_auto_dis_click_man(self):
         self.trig_mem['Auto_Call'] = False
 
     def _call_auto_dis_click_auto(self):
         self.trig_mem['Auto_Call'] = True
+
+    def _call_signal_validation_monitoring(self):
+        if self.signal_validation_monitoring is None:
+            self.signal_validation_monitoring = CNSSignalValidation(mem=self.local_mem)
+        else:
+            self.signal_validation_monitoring.close()
+            self.signal_validation_monitoring = None
+
+# ======================= _update ===============================================
+    # =================== _update_test ==========================================
+    def _update_test(self):
+        # print(self.dbmem['KCNTOMS'], f'MainUI {time() - self.st}')
+        # print(self.local_mem['KCNTOMS'])
+        # print(self.dbmem['cWFWLN1']['Val'], self.dbmem['WFWLN1']['Val'], f'MainUI {time() - self.st}')
+        # self.st = time()
+        pass
+
+    # =================== _update_mem ===========================================
+    def _update_main_local_mem(self):
+        """
+        그래프 그릴때 필요한 변수들만 따로 저장하는 모듈
+
+        :return: 0
+        """
+        get_current_time = self.dbmem['KCNTOMS']['Val']
+
+        if len(self.local_mem['cINIT']) == 0 and self.dbmem['KCNTOMS']['Val'] == 0:
+            # 초기화 된 경우
+            for key in self.local_mem.keys():
+                self.local_mem[key][get_current_time] = self.dbmem[key]['Val']
+
+        elif len(self.local_mem['cINIT']) >= 1:
+            # 초기화 이후 일반적으로 데이터 취득시
+            for key in self.local_mem.keys():
+                self.local_mem[key][get_current_time] = self.dbmem[key]['Val']
+        else:
+            pass
+
+        return 0
 
     # ======================= Main Display ======================================
     #

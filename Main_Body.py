@@ -1,6 +1,3 @@
-# from AUTO_UI_TO_PY import AutoUiToPy
-# AutoUiToPy._ui_to_py()
-
 from multiprocessing import Manager, shared_memory
 from db import db_make
 from collections import deque
@@ -16,7 +13,9 @@ import CNS_Platform_PARA as PARA
 
 class body:
     def __init__(self):
-        import AUTO_UI_TO_PY
+        # from AUTO_UI_TO_PY import AutoUiToPy
+        # AutoUiToPy._ui_to_py()
+
         # 초기 입력 인자 전달 -------------------------------------------------------------------- #
         parser = argparse.ArgumentParser(description='CNS 플랫폼_Ver0')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
@@ -30,7 +29,7 @@ class body:
             f.write(f'{self.args.cnsip}\t{self.args.cnsport}')
 
         print(self.args)
-        self.shared_mem = generate_mem().make_mem_structure()
+        self.shared_mem = GenerateMem().make_mem_structure()
         # ---------------------------------------------------------------------------------------- #
         pro_list = [InterfaceFun(self.shared_mem),                                                 # [1]
                     All_Function_module(self.shared_mem)                                           # [2]
@@ -42,7 +41,7 @@ class body:
         [_.join() for _ in self.process_list]
 
 
-class generate_mem:
+class GenerateMem:
     def make_clean_mem(self):
         memory_dict = {'Run': False,
                        'Init_Call': False, 'Init_nub': 0,

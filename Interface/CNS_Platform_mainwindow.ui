@@ -8204,6 +8204,19 @@ color: rgb(255, 255, 255);</string>
     <string>PZR_GP</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="call_sv_monitoring">
+   <property name="geometry">
+    <rect>
+     <x>770</x>
+     <y>10</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>SignalVal</string>
+   </property>
+  </widget>
   <zorder>Back_02</zorder>
   <zorder>Back_01</zorder>
   <zorder>gridLayoutWidget_3</zorder>
@@ -8394,6 +8407,7 @@ color: rgb(255, 255, 255);</string>
   <zorder>Auto_op</zorder>
   <zorder>Event_DIG</zorder>
   <zorder>PZR_GP</zorder>
+  <zorder>call_sv_monitoring</zorder>
  </widget>
  <resources>
   <include location="resource/CNS_resource.qrc"/>

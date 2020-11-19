@@ -3419,6 +3419,9 @@ class Ui_Dialog(object):
         self.PZR_GP = QtWidgets.QPushButton(Dialog)
         self.PZR_GP.setGeometry(QtCore.QRect(850, 10, 75, 23))
         self.PZR_GP.setObjectName("PZR_GP")
+        self.call_sv_monitoring = QtWidgets.QPushButton(Dialog)
+        self.call_sv_monitoring.setGeometry(QtCore.QRect(770, 10, 75, 23))
+        self.call_sv_monitoring.setObjectName("call_sv_monitoring")
         self.Back_02.raise_()
         self.Back_01.raise_()
         self.gridLayoutWidget_3.raise_()
@@ -3609,6 +3612,7 @@ class Ui_Dialog(object):
         self.Auto_op.raise_()
         self.Event_DIG.raise_()
         self.PZR_GP.raise_()
+        self.call_sv_monitoring.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -3930,4 +3934,5 @@ class Ui_Dialog(object):
         self.Auto_op.setText(_translate("Dialog", "Autonomous Operation"))
         self.Event_DIG.setText(_translate("Dialog", "Event DIG"))
         self.PZR_GP.setText(_translate("Dialog", "PZR_GP"))
+        self.call_sv_monitoring.setText(_translate("Dialog", "SignalVal"))
 import CNS_resource_rc
