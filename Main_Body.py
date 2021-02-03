@@ -32,7 +32,7 @@ class Body:
         manager.start()
 
         shmem = manager.SHMem(cnsinfo=(self.args.cnsip, self.args.cnsport),
-                              max_len_deque=5,
+                              max_len_deque=20,
                               )
         # Build Process ------------------------------------------------------------------------------------------------
         p_list = []
@@ -64,8 +64,9 @@ class SHMem:
 
                       'Mal_Call': False, 'Mal_list': {},
 
-                      'Speed_Call': False, 'Speed': 1,
+                      'Speed_Call': False, 'Speed': 5,
                       'Auto_Call': False, 'Auto_re_man': False,
+
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
                       'Operation_Strategy_list': deque(maxlen=2)}
         print('Trig 메모리 생성 완료')
@@ -77,8 +78,9 @@ class SHMem:
 
                       'Mal_Call': False, 'Mal_list': {},
 
-                      'Speed_Call': False, 'Speed': 1,
+                      'Speed_Call': False, 'Speed': 5,
                       'Auto_Call': False, 'Auto_re_man': False,
+
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
                       'Operation_Strategy_list': deque(maxlen=2)}
 
@@ -91,6 +93,10 @@ class SHMem:
 
     def change_mal_list(self, nub):
         self.logic['Mal_list'][nub]['Mal_done'] = True
+
+    def change_shmem_db(self, mem):
+        for key_val in mem.keys():
+            self.mem[key_val] = mem[key_val]
 
     def get_speed(self, speed):
         self.logic['Speed_Call'] = True
@@ -114,6 +120,9 @@ class SHMem:
 
     def get_shmem_malinfo(self):
         return self.logic['Mal_Call'], self.logic['Mal_list']
+
+    def get_shmem_db(self):
+        return self.mem
 
 
 if __name__ == '__main__':

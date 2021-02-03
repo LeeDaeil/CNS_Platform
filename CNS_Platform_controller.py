@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
 #
 from Interface import CNS_Platform_controller_interface as CNS_controller
-from CNS_Platform_mainwindow import CNS_mw
+from CNS_Platform_mainwindow import CNSMainWinFunc
 
 
 class InterfaceFun(multiprocessing.Process):
@@ -46,7 +46,8 @@ class MyForm(QWidget):
         self.show()
 
         # Call
-        # self.cns_main_win = CNS_mw(mem=self.mem)
+        self.cns_main_win = CNSMainWinFunc(shmem=self.shmem)
+        self.cns_main_win.show()
 
     def pr_(self, s):
         head_ = 'Main_UI'

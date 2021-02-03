@@ -3,11 +3,12 @@
 # from PySide2 import QtCore, QtWidgets
 from copy import deepcopy
 from time import time
-from PyQt5.QtWidgets import QWidget, QMessageBox
+import sys
+from PyQt5.QtWidgets import QWidget, QMessageBox, QApplication
 from PyQt5.QtCore import QTimer
 from PyQt5 import QtCore
 from collections import deque
-import pickle
+
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_signalvalidation import CNSSignalValidation
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
@@ -16,7 +17,6 @@ from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
 # from CNS_Platform_Strategy import Strategy_interface
 # from CNS_Platform_EventDig import Event_dig_model
 # import CNS_Platform_PARA as PARA
-
 
 class CNS_mw(QWidget):
     def __init__(self, mem):
@@ -140,12 +140,6 @@ class CNS_mw(QWidget):
 # ======================= _call =================================================
     # ======================= _call_click =======================================
     #
-    def _call_auto_dis_click_man(self):
-        self.trig_mem['Auto_Call'] = False
-
-    def _call_auto_dis_click_auto(self):
-        self.trig_mem['Auto_Call'] = True
-
     def _call_signal_validation_monitoring(self):
         if self.signal_validation_monitoring is None:
             self.signal_validation_monitoring = CNSSignalValidation(mem=self.local_mem)
@@ -616,18 +610,7 @@ class CNS_mw(QWidget):
         if self.trig_mem['Operation_Strategy'] == 'N': self.st_list.append('Normal')
         pass
 
-    def _update_main_display_autonomous(self):
-        if self.trig_mem['Auto_Call']:                                      # True - autonomouse
-            self.ui.Manual_op.setStyleSheet(self.back_color['gray'])
-            self.ui.Auto_op.setStyleSheet(self.back_color['red'])
-        else:                                                               # False - Manual
-            self.ui.Manual_op.setStyleSheet(self.back_color['red'])
-            self.ui.Auto_op.setStyleSheet(self.back_color['gray'])
 
-        if self.trig_mem['Auto_re_man']:     # True 사람 필요
-            self.ui.Operator_need.setStyleSheet(self.back_color['red'])
-        else:
-            self.ui.Operator_need.setStyleSheet(self.back_color['gray'])
 
     def _update_main_display_autonomous_control(self):
         if self.dbmem['KCNTOMS']['Val'] < 4:
@@ -690,3 +673,112 @@ class CNS_mw(QWidget):
     #                 cont += '현재 운전 상태 : Action Ongoing\n'
     #         cont += '=' * 50 + '\n'
     #         QMessageBox.information(self, "LCO 정보", cont)
+
+
+class CNSMainWinBasic(QWidget):
+    def __init__(self):
+        super(CNSMainWinBasic, self).__init__()
+        self.pr_('Main_interface UI 호출')
+        self.ui = CNS_Main_window.Ui_Dialog()
+        self.ui.setupUi(self)
+
+        self._init_color_setting()
+
+    def pr_(self, s):
+        head_ = 'CNSMainWin'
+        return print(f'[{head_:10}][{s}]')
+
+    def _init_color_setting(self):
+        self.back_color = {
+            'gray': "background-color: rgb(229, 229, 229);",
+            'green': "background-color: rgb(0, 170, 0);",
+            'yellow': "background-color: rgb(255, 255, 0);",
+            'orange': "background-color: rgb(255, 85, 0);",
+            'red': "background-color: rgb(255, 0, 0);",
+        }
+        self.back_img = {
+            'P_1_ON': "image: url(:/Sys/Pump_1_ON.png);",  # P_1~6
+            'P_1_OFF': "image: url(:/Sys/Pump_1_OFF.png);",  # P_1~6
+            'P_2_ON': "image: url(:/Sys/Pump_2_ON.png);",  # P_7~9
+            'P_2_OFF': "image: url(:/Sys/Pump_2_OFF.png);",  # P_7~9
+            'P_3_ON': "image: url(:/Sys/Pump_3_ON.png);",  # P_7~9
+            'P_3_OFF': "image: url(:/Sys/Pump_3_OFF.png);",  # P_7~9
+            'V_1_OPEN': "image: url(:/Sys/Valve_1_OPEN.png);",
+            'V_1_HALF': "image: url(:/Sys/Valve_1_HALF.png);",
+            'V_1_CLOSE': "image: url(:/Sys/Valve_1_CLOSE.png);",
+            'V_2_OPEN': "image: url(:/Sys/Valve_2_OPEN.png);",
+            'V_2_HALF': "image: url(:/Sys/Valve_2_HALF.png);",
+            'V_2_CLOSE': "image: url(:/Sys/Valve_2_CLOSE.png);",
+        }
+
+
+class CNSMainWinFunc(CNSMainWinBasic):
+    def __init__(self, shmem):
+        super(CNSMainWinFunc, self).__init__()
+        self.shmem = shmem
+        # 초기함수 호출 --------------------------------------------------------------------------------------------------
+        self._init_add_window()
+        # 버튼 명령 -----------------------------------------------------------------------------------------------------
+        self.ui.Auto_op.clicked.connect(self._call_click_dis_click_auto)
+        self.ui.Manual_op.clicked.connect(self._call_click_dis_click_man)
+        self.ui.call_sv_monitoring.clicked.connect(self._call_click_win_signal_validation_monitoring)
+        # Q Timer ------------------------------------------------------------------------------------------------------
+        self.st = time()
+        timer = QTimer(self)
+        for _ in [self._update_dis]:
+            timer.timeout.connect(_)
+        timer.start(300)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # _init
+    def _init_add_window(self):
+        self.signal_validation_monitoring = None
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # _call_click
+    def _call_click_dis_click_man(self):
+        if not self.shmem.get_logic('Auto_re_man'):
+            self.shmem.change_logic_val('Auto_Call', False)
+
+    def _call_click_dis_click_auto(self):
+        if not self.shmem.get_logic('Auto_re_man'):
+            self.shmem.change_logic_val('Auto_Call', True)
+
+    def _call_click_win_signal_validation_monitoring(self):
+        if self.signal_validation_monitoring is None:
+            self.signal_validation_monitoring = CNSSignalValidation(shmem=self.shmem)
+        else:
+            self.signal_validation_monitoring.close()
+            self.signal_validation_monitoring = None
+    # ------------------------------------------------------------------------------------------------------------------
+    # _update_dis
+    def _update_dis(self):
+        self._update_dis_autonomous()
+
+    def _update_dis_autonomous_AutoCall(self, logit=False):
+        if logit:
+            self.ui.Manual_op.setStyleSheet(self.back_color['gray'])
+            self.ui.Auto_op.setStyleSheet(self.back_color['red'])
+        else:
+            self.ui.Manual_op.setStyleSheet(self.back_color['red'])
+            self.ui.Auto_op.setStyleSheet(self.back_color['gray'])
+
+    def _update_dis_autonomous(self):
+        if self.shmem.get_logic('Auto_re_man'):                                # True 사람 필요
+            self.shmem.change_logic_val('Auto_Call', False)
+            self.ui.Operator_need.setStyleSheet(self.back_color['red'])
+            self.ui.Manual_op.setStyleSheet(self.back_color['red'])
+            self.ui.Auto_op.setStyleSheet(self.back_color['gray'])
+        else:
+            self.ui.Operator_need.setStyleSheet(self.back_color['gray'])
+            self._update_dis_autonomous_AutoCall(self.shmem.get_logic('Auto_Call'))
+
+
+
+
+if __name__ == '__main__':
+    # Gui Test
+    app = QApplication(sys.argv)
+    w = CNSMainWinBasic()
+    w.show()
+    sys.exit(app.exec_())

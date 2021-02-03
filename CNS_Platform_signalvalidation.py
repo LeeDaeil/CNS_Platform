@@ -37,12 +37,12 @@ class DisPushButton(QPushButton):
 
 
 class CNSSignalValidation(QDialog):
-    def __init__(self, mem=None):
+    def __init__(self, shmem=None):
         super().__init__()
         # ===============================================================
         # 메모리 호출 부분 없으면 Test
-        if mem != None:
-            self.mem = mem
+        if shmem != None:
+            self.shmem = shmem
         else:
             print('TEST_interface')
         # ===============================================================
@@ -51,7 +51,6 @@ class CNSSignalValidation(QDialog):
         # ===============================================================
         self._init_want_see_para()
         self._init_add_button()
-        self._init_gp_canv()
         # ===============================================================
         timer = QtCore.QTimer(self)
         for _ in [self._update_window]:
@@ -60,7 +59,7 @@ class CNSSignalValidation(QDialog):
 
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
 
-        self.setGeometry(875, 496, 938, 517)
+        self.setGeometry(875, 496, 938, 117)
 
         self.show()
 
@@ -141,8 +140,6 @@ class CNSSignalValidation(QDialog):
             self._para_info[self._want_para[i]['para']]['min_'] = self.min_[i]
             self._para_info[self._want_para[i]['para']]['label'] = self._want_para[i]['label']
 
-        self._want_see_gp_para = self._want_para[0]['para']
-
     def _init_add_button(self):
         nub = 0
         for i in range(100):
@@ -172,82 +169,22 @@ class CNSSignalValidation(QDialog):
                     break
         pass
 
-    def _init_gp_canv(self):
-        self.canv_left = plt.figure(tight_layout={'pad': 1})
-        self.canv_left_ax = self.canv_left.add_subplot(111)
-        self.canv_left_canv = FigureCanvasQTAgg(self.canv_left)
-
-        self.canv_left_vl = QtWidgets.QVBoxLayout(self.Trend_ui._area_graph_para)
-        self.canv_left_vl.setContentsMargins(0, 0, 0, 0)
-        self.canv_left_vl.addWidget(self.canv_left_canv)
-
-        self.canv_right = plt.figure(tight_layout={'pad': 1})
-        self.canv_right_ax = self.canv_right.add_subplot(111)
-        self.canv_right_canv = FigureCanvasQTAgg(self.canv_right)
-
-        self.canv_right_vl = QtWidgets.QVBoxLayout(self.Trend_ui._area_graph_thre)
-        self.canv_right_vl.setContentsMargins(0, 0, 0, 0)
-        self.canv_right_vl.addWidget(self.canv_right_canv)
-
-        self.draw_ax_list = [self.canv_left_ax, self.canv_right_ax]
-        self.draw_gp_list = [self.canv_left_canv, self.canv_right_canv]
-        pass
-
 # ======================= _call =================================================
     def _call_print(self, para, label, thre):
         self._want_see_gp_para = para
 
 # ======================= _update ===============================================
     def _update_window(self):
-        get_last_nub = len(self.mem['cINIT']) - 1
+        mem = self.shmem.get_shmem_db()
+        get_last_nub = len(mem['cINIT']) - 1
+        print(get_last_nub)
         if get_last_nub != -1:
             # 인디케이터 업데이트
             for child in self.Trend_ui._area_para.children():
                 if child.isWidgetType():    # True 는 버튼
-                    child.update_label(orgin_val=self.mem[child.para][get_last_nub * 5],                # TODO 시간 바뀌면 죽음...
-                                       predcit_val=self.mem[child.cpara][get_last_nub * 5])
-            # 그래프 업데이트
-            self._update_window_gp()
-        pass
-
-    def _update_window_gp(self):
-        [_.clear() for _ in self.draw_ax_list]
-        # -------------------------------------------------------------------------
-
-        get_para = self.mem[self._want_see_gp_para]                 # {'0': .., '1': ..}
-        get_cpara = self.mem[f"c{self._want_see_gp_para}"]          # {'0': .., '1': ..}
-        get_para = [get_para[i*5] for i in range(len(get_para))]                             # TODO 시간 바뀌면 죽음...
-        get_cpara = [get_cpara[i*5] for i in range(len(get_cpara))]
-
-
-        self.canv_left_ax.set_title({self._para_info[self._want_see_gp_para]['label']})
-        self.canv_left_ax.plot(get_para[1:], label=f"Original Val")
-        self.canv_left_ax.plot(get_cpara[1:], label=f"Prediction Val")
-        self.canv_left_ax.set_ylim(self._para_info[self._want_see_gp_para]['db_min'] * 1.10,
-                                   self._para_info[self._want_see_gp_para]['db_max'] * 1.10)
-
-
-        get_para_trans = [get_para_ * self._para_info[self._want_see_gp_para]['scaled_'] +
-                          self._para_info[self._want_see_gp_para]['min_'] for get_para_ in get_para]
-        get_cpara_trans = [get_cpara_ * self._para_info[self._want_see_gp_para]['scaled_'] +
-                           self._para_info[self._want_see_gp_para]['min_'] for get_cpara_ in get_cpara]
-
-        dev = [(c-p) ** 2 for c, p in zip(get_cpara_trans, get_para_trans)]
-        thr = [self._para_info[self._want_see_gp_para]['Thre'] for _ in dev]
-
-        self.canv_right_ax.set_title({self._para_info[self._want_see_gp_para]['label']})
-        self.canv_right_ax.plot(dev[1:], label=f"Reconstruction Error")
-        self.canv_right_ax.plot(thr[1:], label=f"Threshold")
-
-        # -------------------------------------------------------------------------
-        [_.grid() for _ in self.draw_ax_list]
-        [_.legend(loc='upper right', fontsize=9) for _ in self.draw_ax_list]
-        # -------------------------------------------------------------------------
-        [_.draw() for _ in self.draw_gp_list]
-        pass
-
-    # def changeEvent(self, a0) -> None:
-    #     print(self.geometry())
+                    if len(mem[child.para]['List']) > 1:
+                        child.update_label(orgin_val=mem[child.para]['List'][-1],                # TODO 시간 바뀌면 죽음...
+                                           predcit_val=mem[child.cpara]['List'][-1])
 
 
 if __name__ == '__main__':
