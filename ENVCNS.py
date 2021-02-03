@@ -59,7 +59,7 @@ class ENVCNS(CNS):
         # ----------------------------------------------------------
         return AMod
 
-    def reset(self, file_name, initial_nub=1):
+    def reset(self, file_name, initial_nub=1, mal=False, mal_case=1, mal_opt=0, mal_time=5):
         # 1] CNS 상태 초기화 및 초기화된 정보 메모리에 업데이트
         super(ENVCNS, self).reset(initial_nub=initial_nub, mal=False, mal_case=1, mal_opt=0, mal_time=5, file_name=file_name)
         # 2] 업데이트된 'Val'를 'List'에 추가 및 ENVLogging 초기화

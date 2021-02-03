@@ -12,71 +12,59 @@ from CNS_Platform_mainwindow import CNS_mw
 
 
 class InterfaceFun(multiprocessing.Process):
-    def __init__(self, mem):
+    def __init__(self, shmem):
         multiprocessing.Process.__init__(self)
-        self.mem = mem
+        self.shmem = shmem
 
     def run(self):
         app = QApplication(sys.argv)
-        w = MyForm(self.mem)
+        w = MyForm(self.shmem)
         sys.exit(app.exec_())
 
 
 class MyForm(QWidget):
-    def __init__(self, mem):
-        super().__init__()
-        # Mother mem
-        self.mem = mem
-        #
-        self.dbmem = mem[0]   # main mem connection
-        self.copy_mem_structure = deepcopy(self.dbmem)
-        self.trig_mem = mem[-1]  # main mem connection
-        self.copy_trig_mem = deepcopy(self.trig_mem)
+    def __init__(self, shmem):
+        super(MyForm, self).__init__()
+        # shmem
+        self.shmem = shmem
         # ---- UI 호출
-        print('Controller UI 호출')
+        self.pr_('[SHMem:{self.shmem}][Controller UI 호출]')
         self.ui = CNS_controller.Ui_Form()
         self.ui.setupUi(self)
         # ---- UI 초기 세팅
-        self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))
-        self.ui.Se_SP.setText(str(self.copy_trig_mem['Speed']))
+        self.ui.Cu_SP.setText(str(self.shmem.get_logic('Speed')))
+        self.ui.Se_SP.setText(str(self.shmem.get_logic('Speed')))
         # ---- 초기함수 호출
         # ---- 버튼 명령
         self.ui.Run.clicked.connect(self.run_cns)
         self.ui.Freeze.clicked.connect(self.freeze_cns)
         self.ui.Go_mal.clicked.connect(self.go_mal)
         self.ui.Initial.clicked.connect(self.go_init)
-        self.ui.Go_db.clicked.connect(self.go_save)
         self.ui.Apply_Sp.clicked.connect(self.go_speed)
-        self.ui.Show_main_win.clicked.connect(self.show_main_window)
-        # ---- Qtimer
-        self.st = time()
-        timer = QTimer(self)
-        for _ in [self._update_test]:
-            timer.timeout.connect(_)
-        timer.start(600)
-        # ----
+
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.show()
 
         # Call
-        self.cns_main_win = CNS_mw(mem=self.mem)
+        # self.cns_main_win = CNS_mw(mem=self.mem)
 
-    def _update_test(self):
-        # print(self.dbmem['KCNTOMS'], f'ControllerUI {time()-self.st}')
-        # self.st = time()
-        pass
-
-    def _update_trig_mem(self):
-        for key_val in self.copy_trig_mem.keys():
-            self.trig_mem[key_val] = self.copy_trig_mem[key_val]
+    def pr_(self, s):
+        head_ = 'Main_UI'
+        return print(f'[{head_:10}][{s}]')
 
     def run_cns(self):
-        print('CNS 시작')
-        self.trig_mem['Run'] = True
+        if self.shmem.get_logic('Initial_condition'):
+            self.pr_('CNS 시작')
+            self.shmem.change_logic_val('Run', True)
+        else:
+            self.pr_('먼저 초기 조건을 선언')
 
     def freeze_cns(self):
-        print('CNS 일시정지')
-        self.trig_mem['Run'] = False
+        if self.shmem.get_logic('Initial_condition'):
+            self.pr_('CNS 일시정지')
+            self.shmem.change_logic_val('Run', False)
+        else:
+            self.pr_('먼저 초기 조건을 선언')
 
     def go_mal(self):
         if self.ui.Mal_nub.text() != '' and self.ui.Mal_type.text() != '' and self.ui.Mal_time.text() != '':
@@ -86,53 +74,38 @@ class MyForm(QWidget):
                                                        self.ui.Mal_time.text()))
             # 2. 입력된 내용 Trig mem에 저장
             Mal_index = self.ui.Mal_list.count()
-            self.copy_trig_mem['Mal_list'][Mal_index] = {'Mal_nub': int(self.ui.Mal_nub.text()),
-                                                         'Mal_opt': int(self.ui.Mal_type.text()),
-                                                         'Mal_time': int(self.ui.Mal_time.text()) * 5}
-            self.copy_trig_mem['Mal_Call'] = True
-            # 3. 입력된 내용 Trig mem update
-            self._update_trig_mem()
-            # 4. 입력하는 레이블 Clear
+            Mal_dict = {'Mal_nub': int(self.ui.Mal_nub.text()),
+                        'Mal_opt': int(self.ui.Mal_type.text()),
+                        'Mal_time': int(self.ui.Mal_time.text()) * 5,
+                        'Mal_done': False}
+            self.shmem.change_mal_val(mal_index=Mal_index, mal_dict=Mal_dict)
+            # 3. 입력하는 레이블 Clear
             self.ui.Mal_nub.clear()
             self.ui.Mal_type.clear()
             self.ui.Mal_time.clear()
-            print('Malfunction 입력 완료')
+            self.pr_('Malfunction 입력 완료')
         else:
-            print('Malfunction 입력 실패')
+            self.pr_('Malfunction 입력 실패')
 
     def go_init(self):
-        print('CNS 초기 조건')
+        self.pr_('CNS 초기 조건 선언')
         # 1. Mal list clear
         self.ui.Mal_list.clear()
         # 2. Mal trig_mem clear
-        self.copy_trig_mem['Mal_list'] = {}             # List Clear
-        self.copy_trig_mem['Speed'] = 5                 # Speed 5 set-up
-        self.copy_trig_mem['Auto_Call'] = False         # Autonomous Off
-        self.copy_trig_mem['Auto_re_man'] = False       # Man require
-        self.copy_trig_mem['Operation_Strategy_list'].clear()   #
-
+        self.shmem.call_init(int(self.ui.Initial_list.currentIndex()) + 1)
         # 3. Controller interface update
-        self.ui.Cu_SP.setText(str(self.copy_trig_mem['Speed']))
-        self.ui.Se_SP.setText(str(self.copy_trig_mem['Speed']))
-
-        # 입력된 내용 Trig mem update
-        self._update_trig_mem()
-
-        # 초기화 요청
-        self.trig_mem['Init_nub'] = int(self.ui.Initial_list.currentIndex()) + 1
-        self.trig_mem['Init_Call'] = True
-
+        self.ui.Cu_SP.setText(str(self.shmem.get_logic('Speed')))
+        self.ui.Se_SP.setText(str(self.shmem.get_logic('Speed')))
         # Main window 초기화
-        self.cns_main_win._init_main_local_mem_clear()
 
     def go_save(self):
         # 실시간 레코딩 중 ...
+        self.pr_('없는 기능')
         pass
 
     def go_speed(self):
-        self.trig_mem['Speed_Call'] = True
-        self.trig_mem['Speed'] = int(self.ui.Se_SP.text())
-        self.ui.Cu_SP.setText(str(self.trig_mem['Speed']))
+        self.pr_('CNS 속도 조절')
+        self.ui.Cu_SP.setText(self.shmem.get_speed(int(self.ui.Se_SP.text())))
 
     def show_main_window(self):
         # Controller와 동시 실행
