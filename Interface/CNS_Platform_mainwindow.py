@@ -3422,6 +3422,9 @@ class Ui_Dialog(object):
         self.call_sv_monitoring = QtWidgets.QPushButton(Dialog)
         self.call_sv_monitoring.setGeometry(QtCore.QRect(770, 10, 75, 23))
         self.call_sv_monitoring.setObjectName("call_sv_monitoring")
+        self.call_em_monitoring = QtWidgets.QPushButton(Dialog)
+        self.call_em_monitoring.setGeometry(QtCore.QRect(690, 10, 75, 23))
+        self.call_em_monitoring.setObjectName("call_em_monitoring")
         self.Back_02.raise_()
         self.Back_01.raise_()
         self.gridLayoutWidget_3.raise_()
@@ -3613,6 +3616,7 @@ class Ui_Dialog(object):
         self.Event_DIG.raise_()
         self.PZR_GP.raise_()
         self.call_sv_monitoring.raise_()
+        self.call_em_monitoring.raise_()
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -3935,4 +3939,5 @@ class Ui_Dialog(object):
         self.Event_DIG.setText(_translate("Dialog", "Event DIG"))
         self.PZR_GP.setText(_translate("Dialog", "PZR_GP"))
         self.call_sv_monitoring.setText(_translate("Dialog", "SignalVal"))
+        self.call_em_monitoring.setText(_translate("Dialog", "Emergency"))
 import CNS_resource_rc

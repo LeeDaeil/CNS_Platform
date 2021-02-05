@@ -37,14 +37,8 @@ class DisPushButton(QPushButton):
 
 
 class CNSSignalValidation(QDialog):
-    def __init__(self, shmem=None):
+    def __init__(self):
         super().__init__()
-        # ===============================================================
-        # 메모리 호출 부분 없으면 Test
-        if shmem != None:
-            self.shmem = shmem
-        else:
-            print('TEST_interface')
         # ===============================================================
         self.Trend_ui = Ui_Form()
         self.Trend_ui.setupUi(self)
@@ -52,15 +46,9 @@ class CNSSignalValidation(QDialog):
         self._init_want_see_para()
         self._init_add_button()
         # ===============================================================
-        timer = QtCore.QTimer(self)
-        for _ in [self._update_window]:
-            timer.timeout.connect(_)
-        timer.start(600)
 
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
-
         self.setGeometry(875, 496, 938, 117)
-
         self.show()
 
 # ======================= _init =================================================
@@ -174,10 +162,10 @@ class CNSSignalValidation(QDialog):
         self._want_see_gp_para = para
 
 # ======================= _update ===============================================
-    def _update_window(self):
-        mem = self.shmem.get_shmem_db()
+    def update(self, mem):
+        super(CNSSignalValidation, self).update()
+
         get_last_nub = len(mem['cINIT']) - 1
-        print(get_last_nub)
         if get_last_nub != -1:
             # 인디케이터 업데이트
             for child in self.Trend_ui._area_para.children():

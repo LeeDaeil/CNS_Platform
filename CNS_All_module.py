@@ -45,7 +45,11 @@ class All_Function_module(multiprocessing.Process):
         if self.shmem.get_logic('Init_Call'):
             self.pr_('Initial Start...')
             self.cns_env.reset(file_name='cns_log', initial_nub=self.shmem.get_logic('Init_nub'))
+            self._update_cnsenv_to_sharedmem()
+            self.cns_env.step(A=0)
+            self._update_cnsenv_to_sharedmem()
             self.shmem.change_logic_val('Init_Call', False)
+            self.shmem.change_logic_val('UpdateUI', True)
             self.pr_('Initial End!')
 
     def check_mal(self):
@@ -64,7 +68,7 @@ class All_Function_module(multiprocessing.Process):
 
     def check_speed(self):
         if self.shmem.get_logic('Speed_Call'):
-            self.cns_env.want_tick = self.shmem.get_logic['Speed']
+            self.cns_env.want_tick = self.shmem.get_logic('Speed')
             self.shmem.change_logic_val('Speed_Call', False)
 
     def run(self):
@@ -74,38 +78,47 @@ class All_Function_module(multiprocessing.Process):
 
         while True:
             if self.shmem.get_logic('Run'):
-                self.pr_(f'{self.shmem.get_shmem_val("KCNTOMS")}')
-                self.pr_(self.shmem.get_logic_info())
-
+                # One Step CNS -----------------------------------------------------------------------------------------
                 self.cns_env.step(A=0)
 
+                # State Monitoring Part --------------------------------------------------------------------------------
+                self._monitoring_state()
+
+                # Signal validation Part -------------------------------------------------------------------------------
                 if self.cns_env.mem['KCNTOMS']['Val'] > 300:
                     self.cns_env.mem['UUPPPL']['Val'] = 450
+                self._monitoring_signal(SV_net)
 
-                self._monitoring(SV_net)
+                # Rod Control Part -------------------------------------------------------------------------------------
 
+
+                # Update All mem ---------------------------------------------------------------------------------------
                 self._update_cnsenv_to_sharedmem()
-
+                self.shmem.change_logic_val('UpdateUI', True)
+                # ------------------------------------------------------------------------------------------------------
                 # self.shmem.change_logic_val('Auto_re_man', True)
                 # self.shmem.change_logic_val('Auto_re_man', False)
-
             else:
                 self.check_init()
                 self.check_mal()
                 self.check_speed()
 
-    def _monitoring(self, SV_net):
+    def _monitoring_state(self):
         # 1. 정상 or 비상 판별
         if self.cns_env.mem['KLAMPO9']['Val'] == 1:
             self.shmem.change_logic_val('Operation_Strategy', 'E')
         else:
             self.shmem.change_logic_val('Operation_Strategy', 'N')
 
+    def _monitoring_signal(self, SV_net):
         # 진단 모듈 아래 넣을 것 TODO
         get_result = SV_net.step(self.cns_env.mem)  # {'cPara': val, ... }
         # SV의 값을 cns 메모리에 업데이트
         for key in get_result.keys():
             self.cns_env.mem[f'c{key}']['Val'] = get_result[key]
+
+    def _rod_control(self):
+        pass
 
         # while True:
         #     if self.trig_mem['Loop'] and self.trig_mem['Run']:

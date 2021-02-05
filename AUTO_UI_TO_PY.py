@@ -26,3 +26,7 @@ class AutoUiToPy:
         # print(f'pyside2-rcc ./Interface/resource/CNS_resource.qrc > ./CNS_resource_rc.py')
         # os.system(f'pyside2-rcc ./Interface/resource/CNS_resource.qrc > ./CNS_resource_rc.py')
         os.system(f'Pyrcc5 ./Interface/resource/CNS_resource.qrc -o CNS_resource_rc.py')
+
+
+if __name__ == '__main__':
+    AutoUiToPy._ui_to_py()
