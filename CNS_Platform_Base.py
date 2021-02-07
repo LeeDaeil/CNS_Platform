@@ -27,8 +27,9 @@ class BoardUI_Base(QWidget):
         self.setGeometry(pos_info['x'], pos_info['y'], pos_info['h'], pos_info['w'])
         # 요소 선언 -----------------------------------------------------------------------------------------------------
         # 1] Main Frame
-        self.main_layout = QHBoxLayout()
+        self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout.setSpacing(0)
         self.setLayout(self.main_layout)
         # --------------------------------------------------------------------------------------------------------------
 

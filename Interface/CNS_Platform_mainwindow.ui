@@ -8034,7 +8034,7 @@ color: rgb(255, 255, 255);</string>
     </item>
    </layout>
   </widget>
-  <widget class="QPushButton" name="Open_GP_Window">
+  <widget class="QPushButton" name="call_rc_monitoring">
    <property name="geometry">
     <rect>
      <x>1090</x>
@@ -8047,7 +8047,7 @@ color: rgb(255, 255, 255);</string>
     <string notr="true"/>
    </property>
    <property name="text">
-    <string>TrendGP</string>
+    <string>RodGP</string>
    </property>
   </widget>
   <widget class="QPushButton" name="Open_Strategy">
@@ -8412,7 +8412,7 @@ color: rgb(255, 255, 255);</string>
   <zorder>D_53</zorder>
   <zorder>horizontalLayoutWidget</zorder>
   <zorder>verticalLayoutWidget</zorder>
-  <zorder>Open_GP_Window</zorder>
+  <zorder>call_rc_monitoring</zorder>
   <zorder>Open_Strategy</zorder>
   <zorder>Red_box_</zorder>
   <zorder>Operator_need</zorder>

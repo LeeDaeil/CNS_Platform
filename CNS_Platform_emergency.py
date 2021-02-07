@@ -111,7 +111,6 @@ class BoardUI(BoardUI_Base):
         # --------------------------------------------------------------------------------------------------------------
         # 절대값 처리
 
-        # ax.set_yticklabels([int(_) for _ in abs(ax.get_yticks())])
         ax.yaxis.set_major_formatter(major_formatter)
         ax.set_xlabel('Temperature')
         ax.set_ylabel('Time [Tick]')

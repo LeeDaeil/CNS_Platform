@@ -13,7 +13,7 @@ from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_signalvalidation import CNSSignalValidation
 from CNS_Platform_emergency import EMBoardUI
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
-# from CNS_Platform_rod_controller import rod_controller_interface
+from CNS_Platform_rod_controller import RCBoardUI
 # from CNS_Platform_pzr_controller import pzr_controller_interface
 # from CNS_Platform_Strategy import Strategy_interface
 # from CNS_Platform_EventDig import Event_dig_model
@@ -71,8 +71,11 @@ class CNSMainWinFunc(CNSMainWinBasic):
         self.ui.Manual_op.clicked.connect(self._call_click_dis_click_man)
         if self.local_logic['Run_sv']:
             self.ui.call_sv_monitoring.clicked.connect(self._call_click_win_signal_validation_monitoring)
+        if self.local_logic['Run_rc']:
+            self.ui.call_rc_monitoring.clicked.connect(self._call_click_win_power_increase_monitoring)
         if self.local_logic['Run_ec']:
             self.ui.call_em_monitoring.clicked.connect(self._call_click_win_emergency_monitoring)
+
         # Q Timer ------------------------------------------------------------------------------------------------------
         self.st = time()
         timer = QTimer(self)
@@ -84,6 +87,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
     # _init
     def _init_add_window(self):
         self.signal_validation_monitoring = None
+        self.power_increase_monitoring = None
         self.em_monitoring = None
 
     # ------------------------------------------------------------------------------------------------------------------
@@ -102,6 +106,13 @@ class CNSMainWinFunc(CNSMainWinBasic):
         else:
             self.signal_validation_monitoring.close()
             self.signal_validation_monitoring = None
+
+    def _call_click_win_power_increase_monitoring(self):
+        if self.power_increase_monitoring is None:
+            self.power_increase_monitoring = RCBoardUI()
+        else:
+            self.power_increase_monitoring.close()
+            self.power_increase_monitoring = None
 
     def _call_click_win_emergency_monitoring(self):
         if self.em_monitoring is None:
@@ -136,6 +147,9 @@ class CNSMainWinFunc(CNSMainWinBasic):
     def _update_sub_win(self):
         if self.signal_validation_monitoring is not None:
             self.signal_validation_monitoring.update(self.local_mem)
+
+        if self.power_increase_monitoring is not None:
+            self.power_increase_monitoring.update(self.local_save_mem, self.local_mem)
 
         if self.em_monitoring is not None:
             self.em_monitoring.update(self.local_save_mem)

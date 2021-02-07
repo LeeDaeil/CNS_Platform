@@ -91,7 +91,6 @@ class All_Function_module(multiprocessing.Process):
 
                 # Rod Control Part -------------------------------------------------------------------------------------
 
-
                 # Update All mem ---------------------------------------------------------------------------------------
                 self._update_cnsenv_to_sharedmem()
                 self.shmem.change_logic_val('UpdateUI', True)

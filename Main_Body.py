@@ -55,7 +55,7 @@ class SHMem:
         self.cnsip, self.cnsport = cnsinfo
         # 0] 기능 동작 로직
         self.SV = False
-        self.RC = False # Rod Controller
+        self.RC = True  # Rod Controller
         self.EC = True  # Emergency Controller
 
         # 1] CNS 변수용 shmem
@@ -82,6 +82,8 @@ class SHMem:
         self.save_mem = {
             'KCNTOMS': [],      'UAVLEG2': [],      'ZINST65': [],
             'cCOOLRATE': [],
+
+
         }
 
     def call_init(self, init_nub):

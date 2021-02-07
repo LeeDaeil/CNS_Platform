@@ -13,7 +13,6 @@ class MainNet:
         import os
         os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
-
         # ------------------------------------------------------------------------
         state = tf.keras.Input(batch_shape=(None, 10, 136))
         shared = tf.keras.layers.LSTM(256)(state)
