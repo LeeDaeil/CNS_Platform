@@ -54,9 +54,10 @@ class SHMem:
     def __init__(self, cnsinfo, max_len_deque):
         self.cnsip, self.cnsport = cnsinfo
         # 0] 기능 동작 로직
-        self.SV = False
-        self.RC = True  # Rod Controller
-        self.EC = True  # Emergency Controller
+        self.SV = True
+        self.RC = True      # Rod Controller
+        self.EC = True      # Emergency Controller
+        self.ABD = True     # Abnormal Diagnosis
 
         # 1] CNS 변수용 shmem
         self.mem = db_make().make_mem_structure(max_len_deque)
@@ -64,6 +65,7 @@ class SHMem:
         # 2] Trig 변수용 shmem
         self.logic = {'Run': False, 'UpdateUI': False,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
+                      'Run_abd': self.ABD,
 
                       'Initial_condition': False,
                       'Init_Call': False, 'Init_nub': 1,
@@ -76,7 +78,11 @@ class SHMem:
                       'Rod_Control_Call': True,
 
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
-                      'Operation_Strategy_list': deque(maxlen=2)}
+                      'Operation_Strategy_list': deque(maxlen=2),
+
+                      'AB_DIG': [],
+
+                      }
         print('Trig 메모리 생성 완료')
         # 3] 변수 그래픽 표기용
         self.save_mem = {
@@ -87,6 +93,7 @@ class SHMem:
     def call_init(self, init_nub):
         self.logic = {'Run': False, 'UpdateUI': False,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
+                      'Run_abd': self.ABD,
 
                       'Initial_condition': True,
                       'Init_Call': True, 'Init_nub': init_nub,
@@ -99,7 +106,10 @@ class SHMem:
                       'Rod_Control_Call': False,
 
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
-                      'Operation_Strategy_list': deque(maxlen=2)}
+                      'Operation_Strategy_list': deque(maxlen=2),
+
+                      'AB_DIG': [],
+                      }
 
         for key in self.save_mem:
             self.save_mem[key].clear()

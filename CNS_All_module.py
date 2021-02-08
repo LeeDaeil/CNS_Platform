@@ -82,10 +82,16 @@ class All_Function_module(multiprocessing.Process):
                                 output_shape=4, discrete_mode=False)
             self.AIEM.agent_load_model('./AI/AI_EM_SAC_Actor')
 
-        if local_logic['Run_sv']:
+        if local_logic['Run_sv'] or local_logic['Run_abd']:
             from CNS_AIl_AI_module import Mainnet
-            from AI.AI_SV_Module import Signal_Validation
-            SV_net = Signal_Validation(net=Mainnet().net_1)
+            main_net__ = Mainnet()
+
+            if local_logic['Run_sv']:
+                from AI.AI_SV_Module import Signal_Validation
+                SV_net = Signal_Validation(net=main_net__.net_1)
+            if local_logic['Run_abd']:
+                from AI.AI_AB_Module import Abnormal_dig_module
+                AB_d_net = Abnormal_dig_module(network=main_net__.AB_DIG_Net)
 
         if local_logic['Run_rc']:
             pass
@@ -110,6 +116,11 @@ class All_Function_module(multiprocessing.Process):
                 # State Monitoring Part --------------------------------------------------------------------------------
                 self._monitoring_state()
 
+                # Abnormal Net
+                if local_logic['Run_abd']:
+                    result = AB_d_net.predict_action(self.cns_env.mem)
+                    self.shmem.change_logic_val('AB_DIG', result)
+
                 # Signal validation Part -------------------------------------------------------------------------------
                 if local_logic['Run_sv']:
                     if self.cns_env.mem['KCNTOMS']['Val'] > 300:
@@ -125,7 +136,7 @@ class All_Function_module(multiprocessing.Process):
                 # Update All mem ---------------------------------------------------------------------------------------
                 self._update_cnsenv_to_sharedmem()
                 self.shmem.change_logic_val('UpdateUI', True)
-                if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS'] > 50000:
+                if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000:
                     """
                     50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
                     """

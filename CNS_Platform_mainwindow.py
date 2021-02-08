@@ -12,6 +12,7 @@ from collections import deque
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
 from CNS_Platform_signalvalidation import CNSSignalValidation
 from CNS_Platform_emergency import EMBoardUI
+from CNS_Platform_abnormal import ABBoardUI
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
 from CNS_Platform_rod_controller import RCBoardUI
 # from CNS_Platform_pzr_controller import pzr_controller_interface
@@ -75,6 +76,8 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self.ui.call_rc_monitoring.clicked.connect(self._call_click_win_power_increase_monitoring)
         if self.local_logic['Run_ec']:
             self.ui.call_em_monitoring.clicked.connect(self._call_click_win_emergency_monitoring)
+        if self.local_logic['Run_abd']:
+            self.ui.Event_DIG.clicked.connect(self._call_click_win_abnormal_monitoring)
 
         # Q Timer ------------------------------------------------------------------------------------------------------
         self.st = time()
@@ -89,6 +92,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
         self.signal_validation_monitoring = None
         self.power_increase_monitoring = None
         self.em_monitoring = None
+        self.ab_monitoring = None
 
     # ------------------------------------------------------------------------------------------------------------------
     # _call_click
@@ -121,6 +125,13 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self.em_monitoring.close()
             self.em_monitoring = None
 
+    def _call_click_win_abnormal_monitoring(self):
+        if self.ab_monitoring is None:
+            self.ab_monitoring = ABBoardUI()
+        else:
+            self.ab_monitoring.close()
+            self.ab_monitoring = None
+
     # ------------------------------------------------------------------------------------------------------------------
     # _update_dis
 
@@ -152,6 +163,9 @@ class CNSMainWinFunc(CNSMainWinBasic):
 
         if self.em_monitoring is not None:
             self.em_monitoring.update(self.local_save_mem)
+
+        if self.ab_monitoring is not None:
+            self.ab_monitoring.update(self.local_logic)
 
     def _update_dis_time(self):
         get_sec = int(self.local_mem["KCNTOMS"]["Val"] / 5)

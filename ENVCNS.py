@@ -174,7 +174,7 @@ class ENVCNS(CNS):
     def _send_control_save(self, zipParaVal):
         super(ENVCNS, self)._send_control_save(para=zipParaVal[0], val=zipParaVal[1])
 
-    def _send_act_EM_Moduel(self, A):
+    def _send_act_EM_Module(self, A):
         def a_log_f(s=''):
             pass
         ActOrderBook = {
@@ -243,7 +243,7 @@ class ENVCNS(CNS):
         }
 
         AMod = A
-        print(self.CMem.CTIME)
+        print('[EM_Module]', self.CMem.CTIME)
         if self.CMem.Trip == 1:
             # 1.1] 원자로 Trip 이후 자동 제어 액션
             # 1.1.1] RCP 97 압력 이하에서 자동 정지
@@ -437,7 +437,12 @@ class ENVCNS(CNS):
             pass
         elif isinstance(A, dict):   # A = { ... } 각 AI 모듈에 정보가 들어있는 경우
             if A['EM'] is not None:
-                self._send_act_EM_Moduel(A['EM'])
+                if self.CMem.CoolingRateSW == 0:
+                    if self.CMem.CTIME % 100 == 0:
+                        self._send_act_EM_Module(A['EM'])
+                else:
+                    if self.CMem.CTIME % 200 == 0:
+                        self._send_act_EM_Module(A['EM'])
         else:
             print('Error')
         # Done Act
@@ -455,7 +460,7 @@ class ENVCNS(CNS):
 
         if self.CMem.CoolingRateSW == 0:
             # 강화학습 이전 시 100 tick
-            self.want_tick = int(100)
+            self.want_tick = int(5)
         else:
             # Cooling 계산 시작 및 강화학습 진입 시 100 tick
             self.want_tick = int(200)
