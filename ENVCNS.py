@@ -371,6 +371,10 @@ class ENVCNS(CNS):
                         elif 0.3 <= AMod[1]:
                             # Increase
                             aux123 = 1
+
+                        if self.CMem.SG1Wid > 80:
+                            aux123 = -1
+
                         pos1 = self.CMem.Aux1Flow + 0.04 * aux123
                         pos2 = self.CMem.Aux2Flow + 0.04 * aux123
                         pos3 = self.CMem.Aux3Flow + 0.04 * aux123

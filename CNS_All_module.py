@@ -125,6 +125,11 @@ class All_Function_module(multiprocessing.Process):
                 # Update All mem ---------------------------------------------------------------------------------------
                 self._update_cnsenv_to_sharedmem()
                 self.shmem.change_logic_val('UpdateUI', True)
+                if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS'] > 50000:
+                    """
+                    50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
+                    """
+                    self.shmem.change_logic_val('Run', False)
                 # ------------------------------------------------------------------------------------------------------
                 # self.shmem.change_logic_val('Auto_re_man', True)
                 # self.shmem.change_logic_val('Auto_re_man', False)

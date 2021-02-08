@@ -82,8 +82,6 @@ class SHMem:
         self.save_mem = {
             'KCNTOMS': [],      'UAVLEG2': [],      'ZINST65': [],
             'cCOOLRATE': [],
-
-
         }
 
     def call_init(self, init_nub):
