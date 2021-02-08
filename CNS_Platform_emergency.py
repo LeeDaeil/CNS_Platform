@@ -38,8 +38,8 @@ class BoardUI(BoardUI_Base):
                       ZINST65 = [160, 150, 140, 130],
                       ):
         KCNTOMS_len = len(KCNTOMS)
-        max_len = max_ if max_ > KCNTOMS_len else KCNTOMS_len
-
+        # max_len = max_ if max_ > KCNTOMS_len else KCNTOMS_len
+        max_len = max_
         inv_KCNTOMS = [- val for val in KCNTOMS]
 
         Temp = []
@@ -129,15 +129,17 @@ class EMBoardUI(BoardUI):
         if len(mem['KCNTOMS']) > 2:
 
             _ = [ax.clear() for ax in self.axs]
+            try:
+                self.update_3d_fig(self.axs[0],
+                                   KCNTOMS=mem['KCNTOMS'],
+                                   CoolingRateSW=mem['cCOOLRATE'],
+                                   UAVLEG2=mem['UAVLEG2'],
+                                   ZINST65=mem['ZINST65']
+                                   )
 
-            self.update_3d_fig(self.axs[0],
-                               KCNTOMS=mem['KCNTOMS'],
-                               CoolingRateSW=mem['cCOOLRATE'],
-                               UAVLEG2=mem['UAVLEG2'],
-                               ZINST65=mem['ZINST65']
-                               )
-
-            self.fig.canvas.draw()
+                self.fig.canvas.draw()
+            except Exception as e:
+                print(e)
 
 
 if __name__ == '__main__':

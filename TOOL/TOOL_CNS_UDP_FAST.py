@@ -34,6 +34,10 @@ class CNS:
         self.SaveControlPara = []
         self.SaveControlVal = []
 
+    def _make_mem_initial(self):
+        for pid_ in self.mem.keys():
+            self.mem[pid_]['Val'] = 0
+
     def _make_mem_structure(self, max_len):
         # 초기 shared_mem의 구조를 선언한다.
         idx = 0
@@ -64,8 +68,7 @@ class CNS:
             pid, val, sig, idx = unpack(para, data[i:20 + i])
             pid = pid.decode().rstrip('\x00')  # remove '\x00'
             if pid != '':
-                if pid in self.mem.keys():  # #걸려서 걸러진 변수 생략
-                    self.mem[pid]['Val'] = val
+                self.mem[pid]['Val'] = val
 
     def _append_val_to_list(self):
         [self.mem[pid]['List'].append(self.mem[pid]['Val']) for pid in self.mem.keys()]
@@ -183,7 +186,6 @@ class CNS:
                 # 4가 되는 경우: 이전의 에피소드가 끝나고 4인 상태인데
                 self._send_control_signal(['KFZRUN'], [5])
                 pass
-            # sleep(1)
 
     def run_freeze_CNS(self):
         old_cont = self.mem['KCNTOMS']['Val'] + self.want_tick
@@ -229,7 +231,8 @@ class CNS:
         self.init_line()
 
         # mem reset
-        self.mem = self._make_mem_structure(max_len=self.max_len)
+        # self.mem = self._make_mem_structure(max_len=self.max_len)
+        self._make_mem_initial()
 
         self.mem['cINIT']['Val'] = initial_nub
         self.mem['cMAL']['Val'] = 1 if mal is True else 0

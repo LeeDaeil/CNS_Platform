@@ -81,7 +81,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
         timer = QTimer(self)
         for _ in [self._update_dis]:
             timer.timeout.connect(_)
-        timer.start(300)
+        timer.start(1000)
 
     # ------------------------------------------------------------------------------------------------------------------
     # _init
@@ -141,7 +141,6 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self._update_dis_indicator()
 
             self._update_dis_autonomous_control()
-
             self.shmem.change_logic_val('UpdateUI', False)
 
     def _update_sub_win(self):

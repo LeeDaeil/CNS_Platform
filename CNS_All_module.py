@@ -10,7 +10,7 @@ from ENVCNS import ENVCNS
 # from CNS_Module_ROD import rod_controller_module as ROD_CONT
 # from CNS_Module_PZR import pzr_controller_module as PZR_CONT
 # from CNS_Module_SAMPLE_CONTROLLER import controller_module as SAMP_CONT
-
+from AI.AI_EM_SAC import AIEMSAC
 import time
 
 
@@ -32,6 +32,10 @@ class All_Function_module(multiprocessing.Process):
         # self.PZR_CONT = PZR_CONT(network=self.AI_AGENT.PZR_actor)   # 가압기 기포생성 모듈
         # self.SAMP_CONT = SAMP_CONT()
 
+        # 2 AI Network
+        self.AIEM = None
+        self.AIRC = None
+
     def pr_(self, s):
         head_ = 'AllFuncM'
         return print(f'[{head_:10}][{s}]')
@@ -45,8 +49,6 @@ class All_Function_module(multiprocessing.Process):
         if self.shmem.get_logic('Init_Call'):
             self.pr_('Initial Start...')
             self.cns_env.reset(file_name='cns_log', initial_nub=self.shmem.get_logic('Init_nub'))
-            self._update_cnsenv_to_sharedmem()
-            self.cns_env.step(A=0)
             self._update_cnsenv_to_sharedmem()
             self.shmem.change_logic_val('Init_Call', False)
             self.shmem.change_logic_val('UpdateUI', True)
@@ -72,24 +74,53 @@ class All_Function_module(multiprocessing.Process):
             self.shmem.change_logic_val('Speed_Call', False)
 
     def run(self):
-        from CNS_AIl_AI_module import Mainnet
-        from AI.AI_SV_Module import Signal_Validation
-        SV_net = Signal_Validation(net=Mainnet().net_1)
+        # ==============================================================================================================
+        # - 공유 메모리에서 logic 부분을 취득 후 사용되는 AI 네트워크 정보 취득
+        local_logic = self.shmem.get_logic_info()
+        if local_logic['Run_ec']:
+            self.AIEM = AIEMSAC(input_shape=len(self.cns_env.input_info_EM),
+                                output_shape=4, discrete_mode=False)
+            self.AIEM.agent_load_model('./AI/AI_EM_SAC_Actor')
+
+        if local_logic['Run_sv']:
+            from CNS_AIl_AI_module import Mainnet
+            from AI.AI_SV_Module import Signal_Validation
+            SV_net = Signal_Validation(net=Mainnet().net_1)
+
+        if local_logic['Run_rc']:
+            pass
 
         while True:
-            if self.shmem.get_logic('Run'):
-                # One Step CNS -----------------------------------------------------------------------------------------
-                self.cns_env.step(A=0)
+            local_logic = self.shmem.get_logic_info()
+            if local_logic['Run']:
+                # Make action from AI ----------------------------------------------------------------------------------
+                # - 동작이 허가된 AI 모듈이 cns_env 에서 상태를 취득하여 액션을 계산함.
+                # TODO 향후 cns_env에서 노멀라이제이션까지 모두 처리 할 것.
+                # 1] 비상 냉각 및 감압 자율 운전 모듈
+                if local_logic['Run_ec']:
+                    next_s, next_s_list = self.cns_env.get_state(self.cns_env.input_info_EM)
+                    EM_action = self.AIEM.agent_select_action(next_s, evaluate=True)
+                else:
+                    EM_action = None
+
+                # Rod Control Part -------------------------------------------------------------------------------------
+                if local_logic['Run_rc']:
+                    pass
 
                 # State Monitoring Part --------------------------------------------------------------------------------
                 self._monitoring_state()
 
                 # Signal validation Part -------------------------------------------------------------------------------
-                if self.cns_env.mem['KCNTOMS']['Val'] > 300:
-                    self.cns_env.mem['UUPPPL']['Val'] = 450
-                self._monitoring_signal(SV_net)
+                if local_logic['Run_sv']:
+                    if self.cns_env.mem['KCNTOMS']['Val'] > 300:
+                        self.cns_env.mem['UUPPPL']['Val'] = 450
+                    self._monitoring_signal(SV_net)
 
-                # Rod Control Part -------------------------------------------------------------------------------------
+                # One Step CNS -----------------------------------------------------------------------------------------
+                Action_dict = {
+                    'EM': EM_action
+                }
+                self.cns_env.step(Action_dict)
 
                 # Update All mem ---------------------------------------------------------------------------------------
                 self._update_cnsenv_to_sharedmem()
