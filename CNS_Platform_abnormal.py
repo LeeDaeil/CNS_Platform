@@ -8,6 +8,7 @@ import numpy as np
 
 from CNS_Platform_Base import BoardUI_Base
 
+
 class AbIndicator(QWidget):
     def __init__(self, text='', prob=0.1, sw=False):
         super(AbIndicator, self).__init__()

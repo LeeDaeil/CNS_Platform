@@ -10,7 +10,7 @@ from PyQt5 import QtCore
 from collections import deque
 
 from Interface import CNS_Platform_mainwindow as CNS_Main_window
-from CNS_Platform_signalvalidation import CNSSignalValidation
+from CNS_Platform_signalvalidation import SVBoardUI
 from CNS_Platform_emergency import EMBoardUI
 from CNS_Platform_abnormal import ABBoardUI
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
@@ -106,7 +106,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
 
     def _call_click_win_signal_validation_monitoring(self):
         if self.signal_validation_monitoring is None:
-            self.signal_validation_monitoring = CNSSignalValidation()
+            self.signal_validation_monitoring = SVBoardUI()
         else:
             self.signal_validation_monitoring.close()
             self.signal_validation_monitoring = None
@@ -156,7 +156,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
 
     def _update_sub_win(self):
         if self.signal_validation_monitoring is not None:
-            self.signal_validation_monitoring.update(self.local_mem)
+            self.signal_validation_monitoring.update(self.local_logic)
 
         if self.power_increase_monitoring is not None:
             self.power_increase_monitoring.update(self.local_save_mem, self.local_mem)

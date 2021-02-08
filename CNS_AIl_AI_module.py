@@ -3,7 +3,7 @@ import numpy as np
 
 class Mainnet:
     def __init__(self):
-        self.net_1, self.AB_DIG_Net = self.make_net()
+        self.EM_SV_net, self.AB_DIG_Net = self.make_net()
 
     def make_net(self):
         import tensorflow as tf

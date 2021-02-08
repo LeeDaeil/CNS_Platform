@@ -88,7 +88,7 @@ class All_Function_module(multiprocessing.Process):
 
             if local_logic['Run_sv']:
                 from AI.AI_SV_Module import Signal_Validation
-                SV_net = Signal_Validation(net=main_net__.net_1)
+                SV_net = Signal_Validation(network=main_net__.EM_SV_net)
             if local_logic['Run_abd']:
                 from AI.AI_AB_Module import Abnormal_dig_module
                 AB_d_net = Abnormal_dig_module(network=main_net__.AB_DIG_Net)
@@ -123,9 +123,8 @@ class All_Function_module(multiprocessing.Process):
 
                 # Signal validation Part -------------------------------------------------------------------------------
                 if local_logic['Run_sv']:
-                    if self.cns_env.mem['KCNTOMS']['Val'] > 300:
-                        self.cns_env.mem['UUPPPL']['Val'] = 450
-                    self._monitoring_signal(SV_net)
+                    result = SV_net.predict_action(self.cns_env.mem)
+                    self.shmem.change_logic_val('SV_RES', result)
 
                 # One Step CNS -----------------------------------------------------------------------------------------
                 Action_dict = {
@@ -155,13 +154,6 @@ class All_Function_module(multiprocessing.Process):
             self.shmem.change_logic_val('Operation_Strategy', 'E')
         else:
             self.shmem.change_logic_val('Operation_Strategy', 'N')
-
-    def _monitoring_signal(self, SV_net):
-        # 진단 모듈 아래 넣을 것 TODO
-        get_result = SV_net.step(self.cns_env.mem)  # {'cPara': val, ... }
-        # SV의 값을 cns 메모리에 업데이트
-        for key in get_result.keys():
-            self.cns_env.mem[f'c{key}']['Val'] = get_result[key]
 
     def _rod_control(self):
         pass

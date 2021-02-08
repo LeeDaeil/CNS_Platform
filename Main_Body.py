@@ -81,6 +81,7 @@ class SHMem:
                       'Operation_Strategy_list': deque(maxlen=2),
 
                       'AB_DIG': [],
+                      'SV_RES': [],
 
                       }
         print('Trig 메모리 생성 완료')
@@ -109,6 +110,7 @@ class SHMem:
                       'Operation_Strategy_list': deque(maxlen=2),
 
                       'AB_DIG': [],
+                      'SV_RES': [],
                       }
 
         for key in self.save_mem:

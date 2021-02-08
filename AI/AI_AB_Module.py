@@ -19,7 +19,6 @@ class Abnormal_dig_module:
         # (10, 136) 나오므로 -> (1,10,136) 로 변환 해야함.
 
         input_array = np.array([self.stack_db])
-        print(input_array.shape)
 
         if input_array.shape[1] == 10:
             predict_result = self.network.predict(input_array)
@@ -28,7 +27,7 @@ class Abnormal_dig_module:
             return [0 for _ in range(21)]
 
     def make_input_data(self, mem):
-        tick = mem['KCNTOMS']['Val']
+        # tick = mem['KCNTOMS']['Val']
         input_para = [
             mem['BFV122']['Val'], mem['BFV478']['Val'], mem['BFV479']['Val'],
             mem['BFV488']['Val'], mem['BFV489']['Val'], mem['BFV498']['Val'],
