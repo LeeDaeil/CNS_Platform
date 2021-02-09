@@ -177,6 +177,7 @@ class ENVCNS(CNS):
     def _send_act_EM_Module(self, A):
         def a_log_f(s=''):
             pass
+
         ActOrderBook = {
             'StopAllRCP': (['KSWO132', 'KSWO133', 'KSWO134'], [0, 0, 0]),
             'StopRCP1': (['KSWO132'], [0]),
@@ -441,7 +442,7 @@ class ENVCNS(CNS):
                     if self.CMem.CTIME % 100 == 0:
                         self._send_act_EM_Module(A['EM'])
                 else:
-                    if self.CMem.CTIME % 200 == 0:
+                    if self.CMem.CTIME % 100 == 0:
                         self._send_act_EM_Module(A['EM'])
         else:
             print('Error')
@@ -459,11 +460,15 @@ class ENVCNS(CNS):
         AMod = self.send_act(A)
 
         if self.CMem.CoolingRateSW == 0:
-            # 강화학습 이전 시 100 tick
-            self.want_tick = int(5)
+            if self.CMem.CTIME >= 800:
+                # 강화학습 이전 시 5 tick
+                self.want_tick = int(100)
+            else:
+                self.want_tick = int(5)
         else:
             # Cooling 계산 시작 및 강화학습 진입 시 100 tick
             self.want_tick = int(200)
+        print(self.want_tick, self.CMem.CTIME)
 
         # New Data (time t+1) -------------------------------------
         super(ENVCNS, self).step() # 전체 CNS mem run-Freeze 하고 mem 업데이트

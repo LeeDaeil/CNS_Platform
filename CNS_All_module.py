@@ -27,7 +27,6 @@ class All_Function_module(multiprocessing.Process):
 
         # 2 AI network Load -------------------------------------------------
         # self.AI_AGENT = MainNet()
-        # self.AB_DIG_M = AB_DIG_M(network=self.AI_AGENT.AB_DIG_AI)   # 비정상 진단 AI 모듈 불러옴
         # self.ROD_CONT = ROD_CONT(network=None)   # 정상에서 Rod control module
         # self.PZR_CONT = PZR_CONT(network=self.AI_AGENT.PZR_actor)   # 가압기 기포생성 모듈
         # self.SAMP_CONT = SAMP_CONT()
@@ -120,11 +119,15 @@ class All_Function_module(multiprocessing.Process):
                 if local_logic['Run_abd']:
                     result = AB_d_net.predict_action(self.cns_env.mem)
                     self.shmem.change_logic_val('AB_DIG', result)
+                    for check_prob in result[1:]:   # 정상인 0 번째를 제외하고 순회
+                        if check_prob > 0.9:
+                            self.shmem.change_logic_val('Find_AB_DIG', True)
 
                 # Signal validation Part -------------------------------------------------------------------------------
                 if local_logic['Run_sv']:
                     result = SV_net.predict_action(self.cns_env.mem)
-                    self.shmem.change_logic_val('SV_RES', result)
+                    if self.cns_env.CMem.CTIME <= 515:
+                        self.shmem.change_logic_val('SV_RES', result)
 
                 # One Step CNS -----------------------------------------------------------------------------------------
                 Action_dict = {
@@ -153,7 +156,10 @@ class All_Function_module(multiprocessing.Process):
         if self.cns_env.mem['KLAMPO9']['Val'] == 1:
             self.shmem.change_logic_val('Operation_Strategy', 'E')
         else:
-            self.shmem.change_logic_val('Operation_Strategy', 'N')
+            if self.shmem.get_logic('Find_AB_DIG'):
+                self.shmem.change_logic_val('Operation_Strategy', 'A')
+            else:
+                self.shmem.change_logic_val('Operation_Strategy', 'N')
 
     def _rod_control(self):
         pass

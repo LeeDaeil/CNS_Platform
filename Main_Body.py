@@ -80,9 +80,10 @@ class SHMem:
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
                       'Operation_Strategy_list': deque(maxlen=2),
 
-                      'AB_DIG': [],
+                      'AB_DIG': [], 'Find_AB_DIG': False,
                       'SV_RES': [],
 
+                      'LCO_Dict': {},
                       }
         print('Trig 메모리 생성 완료')
         # 3] 변수 그래픽 표기용
@@ -109,8 +110,10 @@ class SHMem:
                       'Operation_Strategy': 'N',  # Normal, Abnormal, Em
                       'Operation_Strategy_list': deque(maxlen=2),
 
-                      'AB_DIG': [],
+                      'AB_DIG': [], 'Find_AB_DIG': False,
                       'SV_RES': [],
+
+                      'LCO_Dict': {},
                       }
 
         for key in self.save_mem:
@@ -118,6 +121,9 @@ class SHMem:
 
     def append_strategy_list(self, st):
         self.logic['Operation_Strategy_list'].append(st)
+
+    def append_lco_dict(self, lco_name, Start_time, End_time):
+        self.logic['LCO_Dict'][lco_name] = {'St': Start_time, 'Et': End_time}
 
     def change_mal_val(self, mal_index, mal_dict):
         self.logic['Mal_list'][mal_index] = mal_dict

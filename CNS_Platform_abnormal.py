@@ -13,7 +13,7 @@ class AbIndicator(QWidget):
     def __init__(self, text='', prob=0.1, sw=False):
         super(AbIndicator, self).__init__()
         self.setFixedHeight(30)
-        self.setFixedWidth(250)
+        self.setFixedWidth(300)
 
         # Main window
         self.main_layout = QHBoxLayout()
@@ -27,8 +27,8 @@ class AbIndicator(QWidget):
         self.label_1.setAlignment(Qt.AlignCenter)
         self.label_1.setStyleSheet('font: 9pt "HY헤드라인M"; background-color: rgb(255, 255, 255);')
 
-        self.label_2 = QLabel(text=f"{prob * 100:3.2f} [%]")
-        self.label_2.setFixedWidth(100)
+        self.label_2 = QLabel(text=f"{prob * 100:3.1f}[%]")
+        self.label_2.setFixedWidth(70)
         self.label_2.setFrameShape(QFrame.Box)
         self.label_2.setLineWidth(1)
         self.label_2.setAlignment(Qt.AlignCenter)
@@ -73,69 +73,49 @@ class AbIndicator(QWidget):
         self.prob = prob
         self.label_2.setText(f"{prob * 100:3.2f} [%]")
 
+
 class BoardUI(BoardUI_Base):
     def __init__(self):
         super(BoardUI, self).__init__(title='Autonomous Abnormal Event',
                                       WindowId='AB')
         # 요소 선언 -----------------------------------------------------------------------------------------------------
-        self.Ab1 = AbIndicator('Normal', 1)
-        self.Ab2 = AbIndicator('Ab21-01', 0, True)
-        self.Ab3 = AbIndicator('Ab21-02', 0, True)
-        self.Ab4 = AbIndicator('Ab20-01', 0, True)
-        self.Ab5 = AbIndicator('Ab20-04', 0, True)
-        self.Ab6 = AbIndicator('Ab15-07', 0, True)
-        self.Ab7 = AbIndicator('Ab15-08', 0, True)
+        self.Ab_List = []
+        self.Ab_dict_label = ['Normal',
+                              'Ab21-01\n가압기 압력 채널 고장 (고)',
+                              'Ab21-02\n가압기 압력 채널 고장 (저)',
+                              'Ab20-01\n가압기 수위 채널 고장 (고)',
+                              'Ab20-04\n가압기 수위 채널 고장 (저)',
+                              'Ab15-07\n증기발생기 수위 채널 고장 (고)',
+                              'Ab15-08\n증기발생기 수위 채널 고장 (저)',
+                              'Ab63-04\n제어봉 낙하',
+                              'Ab63-02\n제어봉의 계속적인 삽입',
+                              'Ab63-03\n제어봉의 계속적인 인출',
+                              'Ab21-12\n가압기 PORV 고장 (열림)',
+                              'Ab19-02\n가압기 안전 밸브 고장 (열림)',
+                              'Ab21-11\n가압기 살수 밸브 고장 (열림)',
+                              'Ab23-03\n1차측 RCS 누설 (Leak)',
+                              'Ab80-02\n주급수 펌프 2/3 대 정지',
+                              'Ab60-02\n재생열 교환기 전단 파열',
+                              'Ab59-02\n충전수 유량조절밸브 전단 누설 (Leak)',
+                              'Ab23-01\n1차측 CVCS 계통 누설 (Leak)',
+                              'Ab23-06\n증기발생기 전열관 누설 (Leak)',
+                              'Ab59-01\n충전수 유량조절밸브 후단 누설 (Leak)',
+                              'Ab64-03\n주증기관 밸브 고장 (닫힘)',
+                              ]
+        # Ab indicator 생성
+        for label_ in self.Ab_dict_label:
+            if label_ == 'Normal':
+                self.Ab_List.append(AbIndicator(label_, 1, False))
+            else:
+                self.Ab_List.append(AbIndicator(label_, 0, True))
+        # Ab indicators Layout 에 등록
+        for i, Abindicator_ in enumerate(self.Ab_List):
+            if i % 7 == 0:
+                r_lay = QHBoxLayout()
+                self.main_layout.addLayout(r_lay)
 
-        self.Ab8 = AbIndicator('Ab63-04', 0, True)
-        self.Ab9 = AbIndicator('Ab63-02', 0, True)
-        self.Ab10 = AbIndicator('Ab63-03', 0, True)
-        self.Ab11 = AbIndicator('Ab21-12', 0, True)
-        self.Ab12 = AbIndicator('Ab19-02', 0, True)
-        self.Ab13 = AbIndicator('Ab21-11', 0, True)
-        self.Ab14 = AbIndicator('Ab23-03', 0, True)
+            r_lay.addWidget(Abindicator_)
 
-        self.Ab15 = AbIndicator('Ab80-02', 0, True)
-        self.Ab16 = AbIndicator('Ab60-02', 0, True)
-        self.Ab17 = AbIndicator('Ab59-02', 0, True)
-        self.Ab18 = AbIndicator('Ab23-01', 0, True)
-        self.Ab19 = AbIndicator('Ab23-06', 0, True)
-        self.Ab20 = AbIndicator('Ab59-01', 0, True)
-        self.Ab21 = AbIndicator('Ab64-03', 0, True)
-
-        self.r1_lay = QHBoxLayout()
-        self.r1_lay.addWidget(self.Ab1)
-        self.r1_lay.addWidget(self.Ab2)
-        self.r1_lay.addWidget(self.Ab3)
-        self.r1_lay.addWidget(self.Ab4)
-        self.r1_lay.addWidget(self.Ab5)
-        self.r1_lay.addWidget(self.Ab6)
-        self.r1_lay.addWidget(self.Ab7)
-
-        self.r2_lay = QHBoxLayout()
-        self.r2_lay.addWidget(self.Ab8)
-        self.r2_lay.addWidget(self.Ab9)
-        self.r2_lay.addWidget(self.Ab10)
-        self.r2_lay.addWidget(self.Ab11)
-        self.r2_lay.addWidget(self.Ab12)
-        self.r2_lay.addWidget(self.Ab13)
-        self.r2_lay.addWidget(self.Ab14)
-
-        self.r3_lay = QHBoxLayout()
-        self.r3_lay.addWidget(self.Ab15)
-        self.r3_lay.addWidget(self.Ab16)
-        self.r3_lay.addWidget(self.Ab17)
-        self.r3_lay.addWidget(self.Ab18)
-        self.r3_lay.addWidget(self.Ab19)
-        self.r3_lay.addWidget(self.Ab20)
-        self.r3_lay.addWidget(self.Ab21)
-
-        # --------------------------------------------------------------------------------------------------------------
-        if True:
-            # add widget
-            self.main_layout.addLayout(self.r1_lay)
-            self.main_layout.addLayout(self.r2_lay)
-            self.main_layout.addLayout(self.r3_lay)
-            pass
 
 class ABBoardUI(BoardUI):
     def __init__(self):
@@ -146,28 +126,8 @@ class ABBoardUI(BoardUI):
         super(ABBoardUI, self).update()
 
         if len(logic_mem['AB_DIG']) > 1:
-            self.Ab1.update(logic_mem['AB_DIG'][0])
-            self.Ab2.update(logic_mem['AB_DIG'][1])
-            self.Ab3.update(logic_mem['AB_DIG'][2])
-            self.Ab4.update(logic_mem['AB_DIG'][3])
-            self.Ab5.update(logic_mem['AB_DIG'][4])
-            self.Ab6.update(logic_mem['AB_DIG'][5])
-            self.Ab7.update(logic_mem['AB_DIG'][6])
-            self.Ab8.update(logic_mem['AB_DIG'][7])
-            self.Ab9.update(logic_mem['AB_DIG'][8])
-            self.Ab10.update(logic_mem['AB_DIG'][9])
-            self.Ab11.update(logic_mem['AB_DIG'][10])
-            self.Ab12.update(logic_mem['AB_DIG'][11])
-            self.Ab13.update(logic_mem['AB_DIG'][12])
-            self.Ab14.update(logic_mem['AB_DIG'][13])
-            self.Ab15.update(logic_mem['AB_DIG'][14])
-            self.Ab16.update(logic_mem['AB_DIG'][15])
-            self.Ab17.update(logic_mem['AB_DIG'][16])
-            self.Ab18.update(logic_mem['AB_DIG'][17])
-            self.Ab19.update(logic_mem['AB_DIG'][18])
-            self.Ab20.update(logic_mem['AB_DIG'][19])
-            self.Ab21.update(logic_mem['AB_DIG'][20])
-        pass
+            for i, one_abindicicator in enumerate(self.Ab_List):
+                one_abindicicator.update(logic_mem['AB_DIG'][i])
 
 
 if __name__ == '__main__':

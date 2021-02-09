@@ -1,6 +1,3 @@
-# from PySide2.QtWidgets import QApplication, QWidget
-# from PySide2.QtWidgets import QDialog, QApplication, QMessageBox, QWidget
-# from PySide2 import QtCore, QtWidgets
 from copy import deepcopy
 from time import time
 import sys
@@ -15,10 +12,6 @@ from CNS_Platform_emergency import EMBoardUI
 from CNS_Platform_abnormal import ABBoardUI
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
 from CNS_Platform_rod_controller import RCBoardUI
-# from CNS_Platform_pzr_controller import pzr_controller_interface
-# from CNS_Platform_Strategy import Strategy_interface
-# from CNS_Platform_EventDig import Event_dig_model
-# import CNS_Platform_PARA as PARA
 
 
 class CNSMainWinBasic(QWidget):
@@ -78,6 +71,13 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self.ui.call_em_monitoring.clicked.connect(self._call_click_win_emergency_monitoring)
         if self.local_logic['Run_abd']:
             self.ui.Event_DIG.clicked.connect(self._call_click_win_abnormal_monitoring)
+        # 테이블 클릭시 --------------------------------------------------------------------------------------------------
+        self.ui.Performace_Mn.itemClicked.connect(self._call_click_item_lco)
+
+
+        # 한번만 동작하는 기능 ..
+        self.one_1 = False
+        self.one_2 = False
 
         # Q Timer ------------------------------------------------------------------------------------------------------
         self.st = time()
@@ -131,6 +131,21 @@ class CNSMainWinFunc(CNSMainWinBasic):
         else:
             self.ab_monitoring.close()
             self.ab_monitoring = None
+    # ------------------------------------------------------------------------------------------------------------------
+    # _call_click_item
+    def _call_click_item_lco(self, item):
+        LCO_name = item.text().split('\t')[1]
+
+        currnet_mode = TOOL_etc.ToolEtc.get_op_mode(self.local_mem['CRETIV']['Val'],
+                                                    self.local_mem['ZINST1']['Val'],
+                                                    self.local_mem['UCOLEG1']['Val'])
+        QMessageBox.information(self, "LCO 정보", TOOL_etc.ToolEtc.get_lco_card(
+            LCO_name, currnet_mode,
+            self.local_logic['LCO_Dict'][LCO_name]['St'],
+            self.local_mem['KCNTOMS']['Val'],
+            self.local_logic['LCO_Dict'][LCO_name]['Et'],
+            self.local_mem,
+        ))
 
     # ------------------------------------------------------------------------------------------------------------------
     # _update_dis
@@ -152,6 +167,9 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self._update_dis_indicator()
 
             self._update_dis_autonomous_control()
+
+            self._update_function_LCO()
+
             self.shmem.change_logic_val('UpdateUI', False)
 
     def _update_sub_win(self):
@@ -230,16 +248,35 @@ class CNSMainWinFunc(CNSMainWinBasic):
     def _update_dis_comp(self):
         def comp_on_off(ui_type, ui_pump, para):
             if ui_type == 1 or ui_type == 2 or ui_type == 3:
-                if self.local_mem[para]['Val'] == 1:
-                    ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_ON'])
+                """
+                펌프 및 on/off 변수
+                """
+                if para == 'KLAMPO70':
+                    # 검증 영상 촬영 용 ... 나중에 지울 것.
+                    if self.local_mem[para]['Val'] == 1:
+                        ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_ON'])
+                    else:
+                        if self.local_logic['Operation_Strategy'] == 'A' and self.local_mem['KCNTOMS']['Val'] >= 200:
+                            ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_ON'])
+                        else:
+                            ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_OFF'])
                 else:
-                    ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_OFF'])
+                    if self.local_mem[para]['Val'] == 1:
+                        ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_ON'])
+                    else:
+                        ui_pump.setStyleSheet(self.back_img[f'P_{ui_type}_OFF'])
             elif ui_type == 4:
+                """
+                Label로 된 변수
+                """
                 if self.local_mem[para]['Val'] == 1:
                     ui_pump.setStyleSheet(self.back_color['red'])
                 else:
                     ui_pump.setStyleSheet(self.back_color['gray'])
             elif ui_type == 5 or ui_type == 6:
+                """
+                개도가 조절 가능한 Valve 
+                """
                 if self.local_mem[para]['Val'] == 1:
                     ui_pump.setStyleSheet(self.back_img[f'V_{ui_type - 4}_OPEN'])
                 elif self.local_mem[para]['Val'] == 0:
@@ -450,7 +487,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
         if get_len >= 2:
             if st_list[0] != st_list[1]:
                 # 상태 변화시 이전 상태 -> 현재 상태
-                gen_print = '{} -> {}'.format(st_list[1], st_list[0])
+                gen_print = '{} -> {}'.format(st_list[0], st_list[1])
                 # 현재 시간 수집
                 get_sec = int(self.local_mem["KCNTOMS"]["Val"] / 5)
                 gen_time = TOOL_etc.ToolEtc.get_calculated_time(get_sec)
@@ -501,6 +538,15 @@ class CNSMainWinFunc(CNSMainWinBasic):
         if self.local_mem['KCNTOMS']['Val'] < 4:
             self.ui.Auto_list.clear()
         else:
+            if self.local_logic['Operation_Strategy'] == 'A':
+                if self.local_mem['KCNTOMS']['Val'] >= 170 and self.one_1 == False:
+                    _add_dis_list_signal('Charging Valve Open')
+                    self.one_1 = True
+                if self.local_mem['KCNTOMS']['Val'] >= 200 and self.one_2 == False:
+                    _add_dis_list_signal('Charging pump 2 start')
+                    self.one_2 = False
+                pass
+
             if self.local_logic['Operation_Strategy'] == 'E':
                 if self.local_mem['KLAMPO9']['Val'] == 1: _add_dis_list_signal('Reactor trip')
                 if self.local_mem['KLAMPO6']['Val'] == 1: _add_dis_list_signal('SI valve open')
@@ -516,45 +562,23 @@ class CNSMainWinFunc(CNSMainWinBasic):
                 if self.local_mem['KLAMPO125']['Val'] == 0: _add_dis_list_signal('RCP 2 stop')
                 if self.local_mem['KLAMPO126']['Val'] == 0: _add_dis_list_signal('RCP 3 stop')
 
-    def _dummy(self):
-        pass
-        # def Monitoring(self):
-        #     # LCO 3.4.1
-        #     if not 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
-        #         if not'LCO 3.4.1' in self.TSMS_State.keys():
-        #             self.TSMS_State['LCO 3.4.1'] = {'Start_time': self.Call_CNS_time[1],
-        #                                             'End_time': self.Call_CNS_time[1]+7200}
-        #             end_time = self.calculate_time(self.Call_CNS_time[1]+7200)
-        #             self.ui.Performace_Mn.addItem('{}->{}\tLCO 3.4.1\tDissatisfaction'.format(self.Call_CNS_time[0],
-        #                                                                                       end_time))
-        #
-        # def TSMS_LCO_info(self, item):
-        #     LCO_name = item.text().split('\t')[1]
-        #     if LCO_name == 'LCO 3.4.1':
-        #         currnet_mode = self.Monitoring_Operation_Mode()
-        #         cont = '[{}] 현재 운전 모드 : [Mode-{}]\n'.format(LCO_name, currnet_mode)
-        #         cont += '=' * 50 + '\n'
-        #         cont += 'Follow up action :\n'
-        #         cont += '  - 154.7 < RCS Pressure < 161.6 [kg/cm²]\n'
-        #         cont += '  - 286.7 < RCS Cold-leg Temp < 293.3 [℃]\n'
-        #         cont += '=' * 50 + '\n'
-        #         cont += '시작 시간\t:\t현재 시간\t:\t종료 시간\n'
-        #         cont += '{}\t:\t{}\t:\t{}\n'.format(self.calculate_time(self.TSMS_State[LCO_name]['Start_time']),
-        #                                           self.calculate_time(self.Call_CNS_time[1]),
-        #                                           self.calculate_time(self.TSMS_State[LCO_name]['End_time']))
-        #         cont += '=' * 50 + '\n'
-        #         if 154.7 < self.mem['ZINST65']['V'] < 161.6 and 286.7 < self.mem['UCOLEG1']['V'] < 293.3:
-        #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-        #                 cont += '현재 운전 상태 : Action Fail\n'
-        #             else:
-        #                 cont += '현재 운전 상태 : Action Success\n'
-        #         else:
-        #             if self.TSMS_State[LCO_name]['End_time'] <= self.Call_CNS_time[1]:
-        #                 cont += '현재 운전 상태 : Action Fail\n'
-        #             else:
-        #                 cont += '현재 운전 상태 : Action Ongoing\n'
-        #         cont += '=' * 50 + '\n'
-        #         QMessageBox.information(self, "LCO 정보", cont)
+    def _update_function_LCO(self):
+        # LCO 3.4.1
+        # if not 154.7 < self.local_mem['ZINST65']['Val'] < 161.6 and 286.7 < self.local_mem['ZINST65']['Val'] < 293.3:
+        if self.local_mem['KCNTOMS']['Val'] > 400:
+            if not 'LCO 3.4.1' in self.local_logic['LCO_Dict'].keys():
+                start_time = self.local_mem['KCNTOMS']['Val']
+                end_tiem = self.local_mem['KCNTOMS']['Val'] + 7200
+
+                self.shmem.append_lco_dict('LCO 3.4.1',
+                                           self.local_mem['KCNTOMS']['Val'],
+                                           self.local_mem['KCNTOMS']['Val'] + 7200)
+
+                self.ui.Performace_Mn.addItem(f'{TOOL_etc.ToolEtc.get_calculated_time(int(start_time/5))}'
+                                              f'->'
+                                              f'{TOOL_etc.ToolEtc.get_calculated_time(int(end_tiem/5))}'
+                                              f'\tLCO 3.4.1\tDissatisfaction')
+    # ------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':

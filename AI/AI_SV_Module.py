@@ -29,7 +29,7 @@ class Signal_Validation:
         self.out_len = len(self.threshold)
 
     def predict_action(self, mem):
-        if mem['KCNTOMS']['Val'] > 200:
+        if mem['KCNTOMS']['Val'] > 500:
             mem['UUPPPL']['Val'] = 500
 
         self.make_input_data(mem=mem)

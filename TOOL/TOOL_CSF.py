@@ -172,7 +172,7 @@ class CSFTree:
         :return: {'L': 0 만족, 1: 노랑, 2: 주황, 3: 빨강, 'N': 탈출 단계, 'P': 절차서}
         """
         if TRIP == 1:
-            if not PZRL < 92:
+            if not PZRL < 101:  # <----------------------- 원래 92 임
                 return {'L': 1, 'N': 0, 'P': 'I1'}            # GOTO 회복 I.1
             else:
                 if not PZRL > 17:
