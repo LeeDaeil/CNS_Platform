@@ -91,6 +91,13 @@ class SHMem:
             'KCNTOMS': [],      'UAVLEG2': [],      'ZINST65': [],
             'cCOOLRATE': [],
 
+            'BPRZSP': [], 'QPRZH': [], 'KLAMPO118': [],
+            'BHV22': [], 'KLAMPO70': [],
+
+            'KLAMPO134': [], 'KLAMPO135': [], 'KLAMPO136': [],
+            'WAFWS1': [], 'WAFWS2': [], 'WAFWS3': [],
+            'PMSS': [], 'BHTBY': [],
+
             'UP_D': [], 'DOWN_D': [], 'QPROREL': [], 'UAVLEGS': [], 'UAVLEGM': [], 'KBCDO20': [], 'KBCDO21': [],
             'KBCDO22': [], 'KBCDO16': [], 'BOR': [], 'MAKE_UP': [],
         }

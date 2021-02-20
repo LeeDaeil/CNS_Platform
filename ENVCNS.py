@@ -78,7 +78,9 @@ class CMem:
 
         self.PZRBackHeaterOnOff = self.m['KLAMPO118']['Val']
         self.PZRProHeaterManAuto = self.m['KLAMPO117']['Val']
-        self.PZRProHeaterPos = self.m['BHV22']['Val']
+        self.PZRProHeaterPos = self.m['QPRZH']['Val']
+
+        self.SIValve = self.m['BHV22']['Val']
 
         self.ChargingManAUto = self.m['KLAMPO95']['Val']
         self.ChargingValvePos = self.m['BFV122']['Val']

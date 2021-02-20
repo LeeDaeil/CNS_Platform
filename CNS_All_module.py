@@ -105,6 +105,9 @@ class All_Function_module(multiprocessing.Process):
                     """
                     # One Step CNS -------------------------------------------------------------------------------------
                     self.cns_env.dumy_step()
+                    if self.cns_env.ENVStep == 1607:
+                        # Done
+                        self.shmem.change_logic_val('Run', False)
 
                     # Update All mem -----------------------------------------------------------------------------------
                     self._update_cnsenv_to_sharedmem()

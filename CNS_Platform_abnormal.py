@@ -110,7 +110,7 @@ class BoardUI(BoardUI_Base):
                 self.Ab_List.append(AbIndicator(label_, 0, True))
         # Ab indicators Layout 에 등록
         for i, Abindicator_ in enumerate(self.Ab_List):
-            if i % 7 == 0:
+            if i % 3 == 0:
                 r_lay = QHBoxLayout()
                 self.main_layout.addLayout(r_lay)
 

@@ -13,9 +13,26 @@ import numpy as np
 from TOOL.TOOL_PTCurve import PTCureve
 from CNS_Platform_Base import BoardUI_Base
 
+
+@ticker.FuncFormatter
+def major_formatter_time(time, pos):
+    time = int(time/5)
+    return f"{time}[Sec]"
+
+
 @ticker.FuncFormatter
 def major_formatter(x, pos):
-    return f"{abs(int(x))}"
+    return f"{abs(int(x/5))}"
+
+
+@ticker.FuncFormatter
+def major_formatter_aux(aux, pos):
+    return f"{int(aux)}[Kg/sec]"
+
+
+@ticker.FuncFormatter
+def major_formatter_dump(dump, pos):
+    return f"{dump:.1f}[%]"
 
 
 class BoardUI(BoardUI_Base):
@@ -24,7 +41,19 @@ class BoardUI(BoardUI_Base):
                                       WindowId='EM')
         # 요소 선언 -----------------------------------------------------------------------------------------------------
         # 1] 그래프
-        self.fig, self.axs, self.canvas = BoardUI_Base.draw_fig() # tight=True)
+        self.fig = plt.Figure(tight_layout=True)
+        gs = GridSpec(8, 1, figure=self.fig)
+
+        self.axs = [
+            self.fig.add_subplot(gs[0:4, :], projection='3d'),
+            self.fig.add_subplot(gs[4:5, :]),
+            self.fig.add_subplot(gs[5:6, :]),
+            self.fig.add_subplot(gs[6:7, :]),
+            self.fig.add_subplot(gs[7:8, :]),
+        ]
+        self.fig.canvas.draw()
+        self.canvas = FigureCanvasQTAgg(self.fig)
+
         # self.update_3d_fig(self.axs[0]) <- Test용
         # --------------------------------------------------------------------------------------------------------------
         if True:
@@ -113,11 +142,54 @@ class BoardUI(BoardUI_Base):
 
         ax.yaxis.set_major_formatter(major_formatter)
         ax.set_xlabel('Temperature')
-        ax.set_ylabel('Time [Tick]')
+        ax.set_ylabel('Time [Sec]')
         ax.set_zlabel('Pressure')
+        ax.set_title('PT-Curve')
 
         ax.set_xlim(0, max_len)
         ax.set_zlim(0, 200)
+
+    def update_fig(self, axs, mem):
+        # Aux
+        tot_aux = [aux1 * aux1p + aux2 * aux2p + aux3 * aux3p for aux1, aux2, aux3, aux1p, aux2p, aux3p in
+                   zip(mem['WAFWS1'], mem['WAFWS2'], mem['WAFWS3'],
+                       mem['KLAMPO134'], mem['KLAMPO135'], mem['KLAMPO136'])]
+        axs[1].set_ylim(-0.2, 100)
+        axs[1].plot(mem['KCNTOMS'], tot_aux, label='Total Aux Feed Water')
+        axs[1].legend(fontsize=9, loc=1)
+
+        # Dump
+        axs[2].plot(mem['KCNTOMS'], mem['BHTBY'], label='Dump Valve Position')
+        axs[2].set_ylim(-0.2, 1.2)
+        axs[2].legend(fontsize=9, loc=1)
+
+        # Spray and Heater
+        axs[3].plot(mem['KCNTOMS'], mem['BPRZSP'], label='PZR Spray Position')
+        axs[3].plot(mem['KCNTOMS'], mem['QPRZH'], label='PZR Proportional Heater')
+        axs[3].plot(mem['KCNTOMS'], mem['KLAMPO118'], label='PZR Back-up Heater')
+        axs[3].set_ylim(-0.2, 1.2)
+        axs[3].legend(fontsize=9, loc=1)
+
+        # SI Charging
+        axs[4].plot(mem['KCNTOMS'], mem['BHV22'], label='SI Valve')
+        axs[4].plot(mem['KCNTOMS'], mem['KLAMPO70'], label='Charging Pump 2')
+        axs[4].set_ylim(-0.2, 1.2)
+        axs[4].set_yticks([0, 1])
+        axs[4].set_yticklabels(['Close\nStop', 'Open\nStart'])
+        axs[4].legend(fontsize=9, loc=1)
+
+        # axs
+        axs[1].xaxis.set_major_formatter(major_formatter_time)
+        axs[2].xaxis.set_major_formatter(major_formatter_time)
+        axs[3].xaxis.set_major_formatter(major_formatter_time)
+        axs[4].xaxis.set_major_formatter(major_formatter_time)
+        #
+        axs[1].yaxis.set_major_formatter(major_formatter_aux)
+        axs[2].yaxis.set_major_formatter(major_formatter_dump)
+        axs[3].yaxis.set_major_formatter(major_formatter_dump)
+
+        pass
+
 
 class EMBoardUI(BoardUI):
     def __init__(self):
@@ -137,7 +209,9 @@ class EMBoardUI(BoardUI):
                                    ZINST65=mem['ZINST65']
                                    )
 
-                self.fig.canvas.draw()
+                self.update_fig(self.axs, mem)
+
+                self.canvas.draw()
             except Exception as e:
                 print(e)
 

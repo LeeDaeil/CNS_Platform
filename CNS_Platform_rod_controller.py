@@ -19,28 +19,28 @@ import numpy as np
 from CNS_Platform_Base import BoardUI_Base
 
 @ticker.FuncFormatter
-def major_formatter_time(x, time):
+def major_formatter_time(time, pos):
     time = int(time/300)
     return f"{time}[Min]"
 
 @ticker.FuncFormatter
-def major_formatter_reactor_power(x, power):
-    return f"{power*100}[%]"
+def major_formatter_reactor_power(power, pos):
+    return f"{power*100:.1f}[%]"
 
 @ticker.FuncFormatter
-def major_formatter_temp(x, temp):
+def major_formatter_temp(temp, pos):
     return f"{int(temp)}[℃]"
 
 @ticker.FuncFormatter
-def major_formatter_mwe(x, Mwe):
+def major_formatter_mwe(Mwe, pos):
     return f"{int(Mwe)}[MWe]"
 
 @ticker.FuncFormatter
-def major_formatter_ppm(x, ppm):
+def major_formatter_ppm(ppm, pos):
     return f"{int(ppm)}[PPM]"
 
 @ticker.FuncFormatter
-def major_formatter_liter(x, l):
+def major_formatter_liter(l, pos):
     return f"{int(l)}[L]"
 
 
@@ -281,6 +281,7 @@ class RCBoardUI(BoardUI):
             self.bottom_axs[2].set_title('Boron Concentration')
             self.bottom_axs[2].plot(save_mem['KCNTOMS'], save_mem['KBCDO16'],
                                     color='black', label='Boron Concentration [PPM]')
+            self.bottom_axs[2].legend(fontsize=10, loc=0)
 
             # 5] Inject Boron / Make-up
             self.bottom_axs[3].set_title('Injected Boron / Make-up')
