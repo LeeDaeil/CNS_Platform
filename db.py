@@ -24,3 +24,5 @@ class db_make:
 
         # 다음과정을 통하여 shared_mem 은 PID : { type. val, num }를 가진다.
         return shared_mem
+
+

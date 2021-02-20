@@ -245,7 +245,7 @@ class RCBoardUI(BoardUI):
             self.top_axs[0].plot(save_mem['KCNTOMS'], save_mem['UP_D'], color='gray', lw=1, linestyle='--')
             self.top_axs[0].plot(save_mem['KCNTOMS'], save_mem['DOWN_D'], color='gray', lw=1, linestyle='--')
 
-            self.top_axs[0].legend(fontsize=10, loc=0)
+            self.top_axs[0].legend(fontsize=10, loc=2)
 
 
             # 2] Average Temperature
@@ -265,7 +265,7 @@ class RCBoardUI(BoardUI):
 
             self.bottom_axs[0].plot(save_mem['KCNTOMS'], save_mem['UAVLEGM'],
                                   color='black', label='Average Temperature')
-            self.bottom_axs[0].legend(fontsize=10, loc=0)
+            self.bottom_axs[0].legend(fontsize=10, loc=2)
 
             # 3] Electric Power
             self.bottom_axs[1].set_title('Electric Power')
@@ -275,19 +275,19 @@ class RCBoardUI(BoardUI):
                                     color='gray', linestyle='-', label='Load Rate [MWe]')
             self.bottom_axs[1].plot(save_mem['KCNTOMS'], save_mem['KBCDO22'],
                                     color='black', label='Electric Power [MWe]')
-            self.bottom_axs[1].legend(fontsize=10, loc=0)
+            self.bottom_axs[1].legend(fontsize=10, loc=2)
 
             # 4] Boron Concentration
             self.bottom_axs[2].set_title('Boron Concentration')
             self.bottom_axs[2].plot(save_mem['KCNTOMS'], save_mem['KBCDO16'],
                                     color='black', label='Boron Concentration [PPM]')
-            self.bottom_axs[2].legend(fontsize=10, loc=0)
+            self.bottom_axs[2].legend(fontsize=10, loc=2)
 
             # 5] Inject Boron / Make-up
             self.bottom_axs[3].set_title('Injected Boron / Make-up')
             self.bottom_axs[3].step(save_mem['KCNTOMS'], save_mem['BOR'], label='Injected boron mass', color='blue')
             self.bottom_axs[3].step(save_mem['KCNTOMS'], save_mem['MAKE_UP'], label='Injected make-up water mass', color='black')
-            self.bottom_axs[3].legend(fontsize=10, loc=0)
+            self.bottom_axs[3].legend(fontsize=10, loc=2)
 
             # ----------------------------------------------------------------------------------------------------------
             self.set_yaxis()
