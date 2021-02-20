@@ -20,6 +20,7 @@ class CNSMainWinBasic(QWidget):
         self.pr_('Main_interface UI 호출')
         self.ui = CNS_Main_window.Ui_Dialog()
         self.ui.setupUi(self)
+        self.setGeometry(0, 0, 1600, 880)
 
         self._init_color_setting()
 

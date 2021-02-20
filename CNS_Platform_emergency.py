@@ -32,7 +32,12 @@ def major_formatter_aux(aux, pos):
 
 @ticker.FuncFormatter
 def major_formatter_dump(dump, pos):
-    return f"{dump:.1f}[%]"
+    return f"{dump/100000:.1f}[kg/cm^2]"
+
+
+@ticker.FuncFormatter
+def major_formatter_val(val, pos):
+    return f"{val:.1f}[%]"
 
 
 class BoardUI(BoardUI_Base):
@@ -156,27 +161,28 @@ class BoardUI(BoardUI_Base):
                        mem['KLAMPO134'], mem['KLAMPO135'], mem['KLAMPO136'])]
         axs[1].set_ylim(-0.2, 100)
         axs[1].plot(mem['KCNTOMS'], tot_aux, label='Total Aux Feed Water')
-        axs[1].legend(fontsize=9, loc=1)
+        axs[1].legend(fontsize=9, loc=2)
 
         # Dump
-        axs[2].plot(mem['KCNTOMS'], mem['BHTBY'], label='Dump Valve Position')
-        axs[2].set_ylim(-0.2, 1.2)
-        axs[2].legend(fontsize=9, loc=1)
+        # axs[2].plot(mem['KCNTOMS'], mem['BHTBY'], label='Dump Valve Position')
+        axs[2].plot(mem['KCNTOMS'], mem['PMSS'], label='Dump Valve Set-point')
+        # axs[2].set_ylim(-0.2, 1.2)
+        axs[2].legend(fontsize=9, loc=2)
 
         # Spray and Heater
         axs[3].plot(mem['KCNTOMS'], mem['BPRZSP'], label='PZR Spray Position')
         axs[3].plot(mem['KCNTOMS'], mem['QPRZH'], label='PZR Proportional Heater')
         axs[3].plot(mem['KCNTOMS'], mem['KLAMPO118'], label='PZR Back-up Heater')
         axs[3].set_ylim(-0.2, 1.2)
-        axs[3].legend(fontsize=9, loc=1)
+        axs[3].legend(fontsize=9, loc=2)
 
         # SI Charging
         axs[4].plot(mem['KCNTOMS'], mem['BHV22'], label='SI Valve')
-        axs[4].plot(mem['KCNTOMS'], mem['KLAMPO70'], label='Charging Pump 2')
+        # axs[4].plot(mem['KCNTOMS'], mem['KLAMPO70'], label='Charging Pump 2')
         axs[4].set_ylim(-0.2, 1.2)
         axs[4].set_yticks([0, 1])
-        axs[4].set_yticklabels(['Close\nStop', 'Open\nStart'])
-        axs[4].legend(fontsize=9, loc=1)
+        axs[4].set_yticklabels(['Close', 'Open'])
+        axs[4].legend(fontsize=9, loc=2)
 
         # axs
         axs[1].xaxis.set_major_formatter(major_formatter_time)
@@ -186,7 +192,7 @@ class BoardUI(BoardUI_Base):
         #
         axs[1].yaxis.set_major_formatter(major_formatter_aux)
         axs[2].yaxis.set_major_formatter(major_formatter_dump)
-        axs[3].yaxis.set_major_formatter(major_formatter_dump)
+        axs[3].yaxis.set_major_formatter(major_formatter_val)
 
         pass
 
