@@ -1,8 +1,10 @@
 import numpy as np
+from time import sleep
 from TOOL.TOOL_CNS_UDP_FAST import CNS
 from TOOL.TOOL_Cool import CoolingRATE
 from TOOL import TOOL_etc, TOOL_PTCurve, TOOL_CSF
 
+import pandas as pd
 
 class CMem:
     def __init__(self, mem):
@@ -143,6 +145,9 @@ class ENVCNS(CNS):
             ('ZINST65', 1, 0, 160),  # RCSPressure
             ('ZINST63', 1, 0, 100),  # PZRLevel
         ]
+
+        # --------------------------------------------------------------------------------------------------------------
+        self.dumy_db = pd.read_csv('DUMY_ALL_ROD2.csv')
 
     def normalize(self, x, x_round, x_min, x_max):
         if x_max == 0 and x_min == 0:
@@ -472,6 +477,29 @@ class ENVCNS(CNS):
 
         # New Data (time t+1) -------------------------------------
         super(ENVCNS, self).step() # 전체 CNS mem run-Freeze 하고 mem 업데이트
+        self.CMem.update()  # 선택 변수 mem 업데이트
+
+        # 추가된 변수 고려
+        self.mem['cCOOLRATE']['Val'] = self.CMem.CoolingRATE.get_temp(self.CMem.CTIME)
+
+        self._append_val_to_list()
+        self.ENVStep += 1
+
+        # next_state, next_state_list = self.get_state(self.input_info)  # [s(t+1)] #
+        # ----------------------------------------------------------
+        return 0
+
+    def dumy_step(self):
+        # Old Data (time t) ---------------------------------------
+        get_one_line = self.dumy_db.iloc[self.ENVStep]
+        get_one_col = self.dumy_db.columns.to_list()
+
+        for col in get_one_col:
+            if col in self.mem.keys():
+                self.mem[col]['Val'] = float(get_one_line[col])
+
+        # New Data (time t+1) -------------------------------------
+        sleep(0.1)
         self.CMem.update()  # 선택 변수 mem 업데이트
 
         # 추가된 변수 고려

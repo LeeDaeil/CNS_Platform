@@ -98,54 +98,66 @@ class All_Function_module(multiprocessing.Process):
         while True:
             local_logic = self.shmem.get_logic_info()
             if local_logic['Run']:
-                # Make action from AI ----------------------------------------------------------------------------------
-                # - 동작이 허가된 AI 모듈이 cns_env 에서 상태를 취득하여 액션을 계산함.
-                # TODO 향후 cns_env에서 노멀라이제이션까지 모두 처리 할 것.
-                # 1] 비상 냉각 및 감압 자율 운전 모듈
-                if local_logic['Run_ec']:
-                    next_s, next_s_list = self.cns_env.get_state(self.cns_env.input_info_EM)
-                    EM_action = self.AIEM.agent_select_action(next_s, evaluate=True)
-                else:
-                    EM_action = None
-
                 # Rod Control Part -------------------------------------------------------------------------------------
                 if local_logic['Run_rc']:
-                    pass
-
-                # State Monitoring Part --------------------------------------------------------------------------------
-                self._monitoring_state()
-
-                # Abnormal Net
-                if local_logic['Run_abd']:
-                    result = AB_d_net.predict_action(self.cns_env.mem)
-                    self.shmem.change_logic_val('AB_DIG', result)
-                    for check_prob in result[1:]:   # 정상인 0 번째를 제외하고 순회
-                        if check_prob > 0.9:
-                            self.shmem.change_logic_val('Find_AB_DIG', True)
-
-                # Signal validation Part -------------------------------------------------------------------------------
-                if local_logic['Run_sv']:
-                    result = SV_net.predict_action(self.cns_env.mem)
-                    if self.cns_env.CMem.CTIME <= 515:
-                        self.shmem.change_logic_val('SV_RES', result)
-
-                # One Step CNS -----------------------------------------------------------------------------------------
-                Action_dict = {
-                    'EM': EM_action
-                }
-                self.cns_env.step(Action_dict)
-
-                # Update All mem ---------------------------------------------------------------------------------------
-                self._update_cnsenv_to_sharedmem()
-                self.shmem.change_logic_val('UpdateUI', True)
-                if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000:
                     """
-                    50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
+                    TRICK -----------------------------!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                     """
-                    self.shmem.change_logic_val('Run', False)
-                # ------------------------------------------------------------------------------------------------------
-                # self.shmem.change_logic_val('Auto_re_man', True)
-                # self.shmem.change_logic_val('Auto_re_man', False)
+                    # One Step CNS -------------------------------------------------------------------------------------
+                    self.cns_env.dumy_step()
+
+                    # Update All mem -----------------------------------------------------------------------------------
+                    self._update_cnsenv_to_sharedmem()
+                    self.shmem.change_logic_val('UpdateUI', True)
+                else:
+                    # Make action from AI ------------------------------------------------------------------------------
+                    # - 동작이 허가된 AI 모듈이 cns_env 에서 상태를 취득하여 액션을 계산함.
+                    # TODO 향후 cns_env에서 노멀라이제이션까지 모두 처리 할 것.
+                    # 1] 비상 냉각 및 감압 자율 운전 모듈
+                    if local_logic['Run_ec']:
+                        next_s, next_s_list = self.cns_env.get_state(self.cns_env.input_info_EM)
+                        EM_action = self.AIEM.agent_select_action(next_s, evaluate=True)
+                    else:
+                        EM_action = None
+
+                    # Rod Control Part ---------------------------------------------------------------------------------
+                    if local_logic['Run_rc']:
+                        pass
+
+                    # State Monitoring Part ----------------------------------------------------------------------------
+                    self._monitoring_state()
+
+                    # Abnormal Net
+                    if local_logic['Run_abd']:
+                        result = AB_d_net.predict_action(self.cns_env.mem)
+                        self.shmem.change_logic_val('AB_DIG', result)
+                        for check_prob in result[1:]:   # 정상인 0 번째를 제외하고 순회
+                            if check_prob > 0.9:
+                                self.shmem.change_logic_val('Find_AB_DIG', True)
+
+                    # Signal validation Part ---------------------------------------------------------------------------
+                    if local_logic['Run_sv']:
+                        result = SV_net.predict_action(self.cns_env.mem)
+                        if self.cns_env.CMem.CTIME <= 515:
+                            self.shmem.change_logic_val('SV_RES', result)
+
+                    # One Step CNS -------------------------------------------------------------------------------------
+                    Action_dict = {
+                        'EM': EM_action
+                    }
+                    self.cns_env.step(Action_dict)
+
+                    # Update All mem -----------------------------------------------------------------------------------
+                    self._update_cnsenv_to_sharedmem()
+                    self.shmem.change_logic_val('UpdateUI', True)
+                    if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000:
+                        """
+                        50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
+                        """
+                        self.shmem.change_logic_val('Run', False)
+                    # --------------------------------------------------------------------------------------------------
+                    # self.shmem.change_logic_val('Auto_re_man', True)
+                    # self.shmem.change_logic_val('Auto_re_man', False)
             else:
                 self.check_init()
                 self.check_mal()

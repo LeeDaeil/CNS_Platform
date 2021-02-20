@@ -55,7 +55,7 @@ class SHMem:
         self.cnsip, self.cnsport = cnsinfo
         # 0] 기능 동작 로직
         self.SV = True
-        self.RC = True      # Rod Controller
+        self.RC = False      # Rod Controller
         self.EC = True      # Emergency Controller
         self.ABD = True     # Abnormal Diagnosis
 
@@ -90,6 +90,9 @@ class SHMem:
         self.save_mem = {
             'KCNTOMS': [],      'UAVLEG2': [],      'ZINST65': [],
             'cCOOLRATE': [],
+
+            'UP_D': [], 'DOWN_D': [], 'QPROREL': [], 'UAVLEGS': [], 'UAVLEGM': [], 'KBCDO20': [], 'KBCDO21': [],
+            'KBCDO22': [], 'KBCDO16': [], 'BOR': [], 'MAKE_UP': [],
         }
 
     def call_init(self, init_nub):

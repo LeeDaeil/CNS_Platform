@@ -41,6 +41,7 @@ class MyForm(QWidget):
         self.ui.Go_mal.clicked.connect(self.go_mal)
         self.ui.Initial.clicked.connect(self.go_init)
         self.ui.Apply_Sp.clicked.connect(self.go_speed)
+        self.ui.Go_db.clicked.connect(self.go_save)
 
         self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowStaysOnTopHint)
         self.show()
@@ -101,8 +102,8 @@ class MyForm(QWidget):
 
     def go_save(self):
         # 실시간 레코딩 중 ...
-        self.pr_('없는 기능')
-        pass
+        self.shmem.change_logic_val('Run_rc', True)
+        self.pr_('Ester_Egg_Run_ROD CONTROL TRICK')
 
     def go_speed(self):
         self.pr_('CNS 속도 조절')

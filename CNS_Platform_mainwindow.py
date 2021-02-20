@@ -63,14 +63,10 @@ class CNSMainWinFunc(CNSMainWinBasic):
         # 버튼 명령 -----------------------------------------------------------------------------------------------------
         self.ui.Auto_op.clicked.connect(self._call_click_dis_click_auto)
         self.ui.Manual_op.clicked.connect(self._call_click_dis_click_man)
-        if self.local_logic['Run_sv']:
-            self.ui.call_sv_monitoring.clicked.connect(self._call_click_win_signal_validation_monitoring)
-        if self.local_logic['Run_rc']:
-            self.ui.call_rc_monitoring.clicked.connect(self._call_click_win_power_increase_monitoring)
-        if self.local_logic['Run_ec']:
-            self.ui.call_em_monitoring.clicked.connect(self._call_click_win_emergency_monitoring)
-        if self.local_logic['Run_abd']:
-            self.ui.Event_DIG.clicked.connect(self._call_click_win_abnormal_monitoring)
+        self.ui.call_sv_monitoring.clicked.connect(self._call_click_win_signal_validation_monitoring)
+        self.ui.call_rc_monitoring.clicked.connect(self._call_click_win_power_increase_monitoring)
+        self.ui.call_em_monitoring.clicked.connect(self._call_click_win_emergency_monitoring)
+        self.ui.Event_DIG.clicked.connect(self._call_click_win_abnormal_monitoring)
         # 테이블 클릭시 --------------------------------------------------------------------------------------------------
         self.ui.Performace_Mn.itemClicked.connect(self._call_click_item_lco)
 
@@ -105,32 +101,49 @@ class CNSMainWinFunc(CNSMainWinBasic):
             self.shmem.change_logic_val('Auto_Call', True)
 
     def _call_click_win_signal_validation_monitoring(self):
-        if self.signal_validation_monitoring is None:
-            self.signal_validation_monitoring = SVBoardUI()
+        local_logic = self.shmem.get_logic_info()
+        if local_logic['Run_sv']:
+            if self.signal_validation_monitoring is None:
+                self.signal_validation_monitoring = SVBoardUI()
+            else:
+                self.signal_validation_monitoring.close()
+                self.signal_validation_monitoring = None
         else:
-            self.signal_validation_monitoring.close()
-            self.signal_validation_monitoring = None
+            self.pr_('Not Work Signal Validation Module')
 
     def _call_click_win_power_increase_monitoring(self):
-        if self.power_increase_monitoring is None:
-            self.power_increase_monitoring = RCBoardUI()
+        local_logic = self.shmem.get_logic_info()
+        if local_logic['Run_rc']:
+            if self.power_increase_monitoring is None:
+                self.power_increase_monitoring = RCBoardUI()
+            else:
+                self.power_increase_monitoring.close()
+                self.power_increase_monitoring = None
         else:
-            self.power_increase_monitoring.close()
-            self.power_increase_monitoring = None
+            self.pr_('Not Work Power Increase Module')
 
     def _call_click_win_emergency_monitoring(self):
-        if self.em_monitoring is None:
-            self.em_monitoring = EMBoardUI()
+        local_logic = self.shmem.get_logic_info()
+        if local_logic['Run_ec']:
+            if self.em_monitoring is None:
+                self.em_monitoring = EMBoardUI()
+            else:
+                self.em_monitoring.close()
+                self.em_monitoring = None
         else:
-            self.em_monitoring.close()
-            self.em_monitoring = None
+            self.pr_('Not Work Emergency Module')
 
     def _call_click_win_abnormal_monitoring(self):
-        if self.ab_monitoring is None:
-            self.ab_monitoring = ABBoardUI()
+        local_logic = self.shmem.get_logic_info()
+        if local_logic['Run_abd']:
+            if self.ab_monitoring is None:
+                self.ab_monitoring = ABBoardUI()
+            else:
+                self.ab_monitoring.close()
+                self.ab_monitoring = None
         else:
-            self.ab_monitoring.close()
-            self.ab_monitoring = None
+            self.pr_('Not Work Abnormal Module')
+
     # ------------------------------------------------------------------------------------------------------------------
     # _call_click_item
     def _call_click_item_lco(self, item):
