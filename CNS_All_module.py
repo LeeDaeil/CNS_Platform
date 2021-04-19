@@ -66,6 +66,9 @@ class All_Function_module(multiprocessing.Process):
                                                           )
                     self.shmem.change_mal_list(_)
             self.pr_('Mal End!')
+            # -- file name 최초 malcase로 전달받음
+            self.cns_env.file_name = f'{info_mal[1]["Mal_nub"]}_{info_mal[1]["Mal_opt"]}_{info_mal[1]["Mal_time"]}'
+            self.cns_env.init_line()
 
     def check_speed(self):
         if self.shmem.get_logic('Speed_Call'):
@@ -153,7 +156,7 @@ class All_Function_module(multiprocessing.Process):
                     # Update All mem -----------------------------------------------------------------------------------
                     self._update_cnsenv_to_sharedmem()
                     self.shmem.change_logic_val('UpdateUI', True)
-                    if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000:
+                    if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000 + (18000 * 5):
                         """
                         50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
                         """

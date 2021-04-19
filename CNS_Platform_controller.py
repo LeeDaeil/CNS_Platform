@@ -3,7 +3,7 @@ import sys
 import multiprocessing
 from copy import deepcopy
 from time import time
-from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtWidgets import QWidget, QApplication, QTextEdit
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
 #
