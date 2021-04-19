@@ -1,9 +1,10 @@
 #
+
 import sys
 import multiprocessing
 from copy import deepcopy
-from time import time
-from PyQt5.QtWidgets import QWidget, QApplication, QTextEdit
+import time
+from PyQt5.QtWidgets import *
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
 #
@@ -28,9 +29,15 @@ class MyForm(QWidget):
         # shmem
         self.shmem = shmem
         # ---- UI 호출
-        self.pr_('[SHMem:{self.shmem}][Controller UI 호출]')
+        self.pr_(f'[SHMem:{self.shmem}][Controller UI 호출]')
         self.ui = CNS_controller.Ui_Form()
         self.ui.setupUi(self)
+
+        # ----------- ADD !!! -------------- (20210419 for 효진)
+        self.setGeometry(0, 0, 269, 500)
+        self.auto_data_info_list = AutoDataList(parent=self)
+        self.auto_data_info_list.setGeometry(20, 380, 225, 100)
+
         # ---- UI 초기 세팅
         self.ui.Cu_SP.setText(str(self.shmem.get_logic('Speed')))
         self.ui.Se_SP.setText(str(self.shmem.get_logic('Speed')))
@@ -47,8 +54,8 @@ class MyForm(QWidget):
         self.show()
 
         # Call
-        self.cns_main_win = CNSMainWinFunc(shmem=self.shmem)
-        self.cns_main_win.show()
+        # self.cns_main_win = CNSMainWinFunc(shmem=self.shmem)
+        # self.cns_main_win.show()
 
     def pr_(self, s):
         head_ = 'Main_UI'
@@ -113,3 +120,53 @@ class MyForm(QWidget):
         # Controller와 동시 실행
         pass
 
+
+class AutoDataList(QListWidget):
+    def __init__(self, parent):
+        super(AutoDataList, self).__init__(parent=parent)
+        self.run_tirg = False
+
+        # Q Timer ------------------------------------------------------------------------------------------------------
+        timer = QTimer(self)
+        for _ in [self._check_list]:
+            timer.timeout.connect(_)
+        timer.start(1000)
+
+    def contextMenuEvent(self, event) -> None:
+        """ ChartArea 에 기능 올리기  """
+        menu = QMenu(self)
+        add_input1 = menu.addAction("Add input")
+        add_input2 = menu.addAction("Run")
+
+        add_input1.triggered.connect(self._add_input)
+        add_input2.triggered.connect(self._run_cns)
+
+        menu.exec_(event.globalPos())
+
+    def _add_input(self):
+        mal, ok = QInputDialog.getText(self, 'Input Man', 'Mal nub')
+        self.addItem(mal)
+
+    def _check_list(self):
+        if self.__len__() > 0 and self.run_tirg:
+            local_logic = self.parent().shmem.get_logic_info()
+            if local_logic['Run']:
+                pass
+            else:
+                get_first_row = self.item(0).text().split('_')
+                print(get_first_row, 'Start first line mal function')
+                self.parent().go_init()
+                time.sleep(1)
+                self.parent().ui.Mal_nub.setText(get_first_row[0])
+                self.parent().ui.Mal_type.setText(get_first_row[1])
+                self.parent().ui.Mal_time.setText(get_first_row[2])
+                self.parent().go_mal()
+                time.sleep(1)
+                self.parent().run_cns()
+                time.sleep(1)
+                self.takeItem(0)
+        else:
+            self.run_tirg = False
+
+    def _run_cns(self):
+        self.run_tirg = True

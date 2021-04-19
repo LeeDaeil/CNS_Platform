@@ -53,6 +53,10 @@ class All_Function_module(multiprocessing.Process):
             self.shmem.change_logic_val('UpdateUI', True)
             self.pr_('Initial End!')
 
+            # 버그 수정 2번째 초기조건에서 0으로 초기화 되지 않는 현상 수정
+            if self.cns_env.CMem.CTIME != 0:
+                self.cns_env.CMem.update()
+
     def check_mal(self):
         sw, info_mal = self.shmem.get_shmem_malinfo()
         if sw:
@@ -156,11 +160,15 @@ class All_Function_module(multiprocessing.Process):
                     # Update All mem -----------------------------------------------------------------------------------
                     self._update_cnsenv_to_sharedmem()
                     self.shmem.change_logic_val('UpdateUI', True)
-                    if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000 + (18000 * 5):
-                        """
-                        50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
-                        """
+
+                    if self.cns_env.mem['KCNTOMS']['Val'] > 300:
                         self.shmem.change_logic_val('Run', False)
+
+                    # if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000 + (18000 * 5):
+                    #     """
+                    #     50000 tick: 12, 10005, 30 malfunction 인 경우 50000 tick에서 멈춰야함.
+                    #     """
+                    #     self.shmem.change_logic_val('Run', False)
                     # --------------------------------------------------------------------------------------------------
                     # self.shmem.change_logic_val('Auto_re_man', True)
                     # self.shmem.change_logic_val('Auto_re_man', False)
