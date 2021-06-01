@@ -298,7 +298,7 @@ class ENVCNS(CNS):
                     self._send_control_save(ActOrderBook[f'IncreaseAux{MinSGFeed + 1}Flow'])
                     a_log_f(s=f'[{self.CMem.SG1Feed:10}, {self.CMem.SG2Feed:10}, {self.CMem.SG3Feed:10}] Feed water avg')
             # 1.3] 3000부터 SI reset
-            if self.CMem.CTIME == 3000:
+            if self.CMem.CTIME == 3000 + (18000 * 5):
                 self._send_control_save(ActOrderBook['ResetSI'])
                 a_log_f(s=f'ResetSI [{self.CMem.CTIME}]')
             # 2] SI reset 발생 시 냉각 운전 시작
@@ -410,7 +410,7 @@ class ENVCNS(CNS):
                             # self._send_control_save(ActOrderBook['OpenSI'])
                             a_log_f(s=f'OpenSI')
 
-                        if self.CMem.CTIME > 30000:     # TRICK
+                        if self.CMem.CTIME > 30000 + (18000 * 5):     # TRICK
                             # SI logic <- 이를 통해서 압력 감압.
                             Updis, Botdis = TOOL_PTCurve.PTCureve()._check_distance(self.CMem.AVGTemp, self.CMem.PZRPres)
                             if Botdis > 12:

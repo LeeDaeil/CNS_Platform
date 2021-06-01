@@ -33,5 +33,15 @@ class Mainnet:
 
         vae = Model(x, x_decoded_mean)
         vae.load_weights('vae_lstm_weight.h5')
+        # --------------------------------------------------------------------------------------------------------------
+        state = tf.keras.Input(batch_shape=(None, 10, 136))
+        shared = tf.keras.layers.LSTM(256)(state)
+        shared = tf.keras.layers.Dense(256, activation='relu')(shared)
+        shared = tf.keras.layers.Dense(512, activation='relu')(shared)
+        shared = tf.keras.layers.Dense(21, activation='softmax')(shared)
 
-        return vae
+        AB_DIG_AI = tf.keras.Model(inputs=state, outputs=shared)
+        AB_DIG_AI.load_weights('./AI/AI_AB_DIG.h5')
+        # --------------------------------------------------------------------------------------------------------------
+
+        return vae, AB_DIG_AI

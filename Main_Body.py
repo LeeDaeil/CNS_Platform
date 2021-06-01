@@ -54,10 +54,10 @@ class SHMem:
     def __init__(self, cnsinfo, max_len_deque):
         self.cnsip, self.cnsport = cnsinfo
         # 0] 기능 동작 로직
-        self.SV = True
+        self.SV = False
         self.RC = False      # Rod Controller
         self.EC = True      # Emergency Controller
-        self.ABD = True     # Abnormal Diagnosis
+        self.ABD = False     # Abnormal Diagnosis
 
         # 1] CNS 변수용 shmem
         self.mem = db_make().make_mem_structure(max_len_deque)
