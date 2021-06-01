@@ -144,8 +144,13 @@ class AutoDataList(QListWidget):
         menu.exec_(event.globalPos())
 
     def _add_input(self):
-        mal, ok = QInputDialog.getText(self, 'Input Man', 'Mal nub')
-        self.addItem(mal)
+        _, ok = QInputDialog.getText(self, 'Input Man', 'Mal nub')
+
+        for i in range(1, 10):
+           self.addItem(f'12_{2000}{i}_10800')
+        # self.addItem(f'{mal}')
+
+        # self.addItem(mal)
 
     def _check_list(self):
         if self.__len__() > 0 and self.run_tirg:
@@ -156,14 +161,14 @@ class AutoDataList(QListWidget):
                 get_first_row = self.item(0).text().split('_')
                 print(get_first_row, 'Start first line mal function')
                 self.parent().go_init()
-                time.sleep(1)
+                time.sleep(5)
                 self.parent().ui.Mal_nub.setText(get_first_row[0])
                 self.parent().ui.Mal_type.setText(get_first_row[1])
                 self.parent().ui.Mal_time.setText(get_first_row[2])
                 self.parent().go_mal()
-                time.sleep(1)
+                time.sleep(5)
                 self.parent().run_cns()
-                time.sleep(1)
+                time.sleep(5)
                 self.takeItem(0)
         else:
             self.run_tirg = False

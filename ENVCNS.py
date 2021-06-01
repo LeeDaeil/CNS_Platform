@@ -471,10 +471,10 @@ class ENVCNS(CNS):
                 # 강화학습 이전 시 5 tick
                 self.want_tick = int(100)
             else:
-                self.want_tick = int(100)
+                self.want_tick = int(5)
         else:
             # Cooling 계산 시작 및 강화학습 진입 시 100 tick
-            self.want_tick = int(100)
+            self.want_tick = int(200)
         print(self.want_tick, self.CMem.CTIME)
 
         # New Data (time t+1) -------------------------------------
