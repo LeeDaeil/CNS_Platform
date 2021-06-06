@@ -68,6 +68,15 @@ class All_Function_module(multiprocessing.Process):
                                                           info_mal[_]['Mal_opt'],
                                                           info_mal[_]['Mal_time']
                                                           )
+                    # -1번 시나리오만 들어감.
+                    # self.cns_env.mem['cINIT']['Val'] = initial_nub
+                    self.cns_env.mem['cMAL']['Val'] = 1 if sw else 0
+                    self.cns_env.mem['cMALA']['Val'] = 0
+
+                    self.cns_env.mem['cMALC']['Val'] = info_mal[_]['Mal_nub']
+                    self.cns_env.mem['cMALO']['Val'] = info_mal[_]['Mal_opt']
+                    self.cns_env.mem['cMALT']['Val'] = info_mal[_]['Mal_time']
+
                     self.shmem.change_mal_list(_)
             self.pr_('Mal End!')
             # -- file name 최초 malcase로 전달받음
@@ -153,7 +162,8 @@ class All_Function_module(multiprocessing.Process):
 
                     # One Step CNS -------------------------------------------------------------------------------------
                     Action_dict = {
-                        'EM': EM_action
+                        'EM': EM_action,
+                        'AB_DB': True if local_logic['Mode_key'] == 'AB_DB_Collector' else False,
                     }
                     self.cns_env.step(Action_dict)
 
@@ -163,6 +173,10 @@ class All_Function_module(multiprocessing.Process):
 
                     # if self.cns_env.mem['KCNTOMS']['Val'] > 3000:
                     #     self.shmem.change_logic_val('Run', False)
+
+                    if local_logic['Mode_key'] == 'AB_DB_Collector':
+                        if self.cns_env.mem['KCNTOMS']['Val'] > 15 * 60 * 5: # 30min * 60sec * 5 tick:
+                            self.shmem.change_logic_val('Run', False)
 
                     if local_logic['Run_ec'] and self.cns_env.mem['KCNTOMS']['Val'] > 50000 + (18000 * 5):
                         """

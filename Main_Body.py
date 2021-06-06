@@ -19,9 +19,9 @@ class Body:
         # 초기 입력 인자 전달 --------------------------------------------------------------------------------------------
         parser = argparse.ArgumentParser(description='CNS 플랫폼_Ver0')
         parser.add_argument('--comip', type=str, default='', required=False, help="현재 컴퓨터의 ip [default='']")
-        parser.add_argument('--comport', type=int, default=7101, required=False, help="현재 컴퓨터의 port [default=7001]")
+        parser.add_argument('--comport', type=int, default=7105, required=False, help="현재 컴퓨터의 port [default=7001]")
         parser.add_argument('--cnsip', type=str, default='192.168.0.101', required=False, help="CNS 컴퓨터의 ip [default='']")
-        parser.add_argument('--cnsport', type=int, default=7101, required=False, help="CNS 컴퓨터의 port [default=7001]")
+        parser.add_argument('--cnsport', type=int, default=7105, required=False, help="CNS 컴퓨터의 port [default=7001]")
         self.args = parser.parse_args()
         print('=' * 25 + '초기입력 파라메터' + '=' * 25)
 
@@ -53,17 +53,25 @@ class Body:
 class SHMem:
     def __init__(self, cnsinfo, max_len_deque):
         self.cnsip, self.cnsport = cnsinfo
+        self.Mode_key = 'AB_DB_Collector'
+        self.Mode_list = {
+            'AB_DB_Collector': [False, False, False, False],
+            'EM_DB_Collector': [False, False, True, False],
+        }
         # 0] 기능 동작 로직
-        self.SV = False
-        self.RC = False      # Rod Controller
-        self.EC = True      # Emergency Controller
-        self.ABD = False     # Abnormal Diagnosis
+        self.SV, self.RC, self.EC, self.ABD = self.Mode_list[self.Mode_key]
+        print(f'Mode:{self.Mode_key} | SV:{self.SV} | RC:{self.RC} | EC:{self.EC} | ABD:{self.ABD}')
+        # self.SV = False
+        # self.RC = False      # Rod Controller
+        # self.EC = True      # Emergency Controller
+        # self.ABD = False     # Abnormal Diagnosis
 
         # 1] CNS 변수용 shmem
         self.mem = db_make().make_mem_structure(max_len_deque)
         print('Main 메모리 생성 완료')
         # 2] Trig 변수용 shmem
         self.logic = {'Run': False, 'UpdateUI': False,
+                      'Mode_key': self.Mode_key,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
                       'Run_abd': self.ABD,
 
@@ -104,6 +112,7 @@ class SHMem:
 
     def call_init(self, init_nub):
         self.logic = {'Run': False, 'UpdateUI': False,
+                      'Mode_key': self.Mode_key,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
                       'Run_abd': self.ABD,
 

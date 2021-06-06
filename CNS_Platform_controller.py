@@ -137,20 +137,27 @@ class AutoDataList(QListWidget):
         menu = QMenu(self)
         add_input1 = menu.addAction("Add input")
         add_input2 = menu.addAction("Run")
+        add_input3 = menu.addAction("Remove input")
 
         add_input1.triggered.connect(self._add_input)
         add_input2.triggered.connect(self._run_cns)
+        add_input3.triggered.connect(self._remove_input)
 
         menu.exec_(event.globalPos())
+
+    def _remove_input(self):
+        if self.selectedItems() != []:
+            item_ = self.selectedItems()[0]
+            item_index = self.indexFromItem(item_)
+            self.takeItem(item_index.row())
 
     def _add_input(self):
         _, ok = QInputDialog.getText(self, 'Input Man', 'Mal nub')
 
-        for i in range(1, 10):
-           self.addItem(f'12_{2000}{i}_10800')
-        # self.addItem(f'{mal}')
-
-        # self.addItem(mal)
+        # for i in range(1, 10):
+        #    self.addItem(f'12_{1000}{i}_10800')
+        if ok:
+            self.addItem(f'{_}')
 
     def _check_list(self):
         if self.__len__() > 0 and self.run_tirg:

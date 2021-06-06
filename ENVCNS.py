@@ -48,8 +48,10 @@ class CMem:
         self.SteamLine3 = self.m['BHV308']['Val']
 
         self.AVGTemp = self.m['UAVLEG2']['Val']
-        self.PZRPres = self.m['ZINST65']['Val']
-        self.PZRLevel = self.m['ZINST63']['Val']
+        self.PZRPres = self.m['ZINST65']['Val']         # display
+        self.PZRPresRaw = self.m['PPRZ']['Val']         # raw
+        self.PZRLevel = self.m['ZINST63']['Val']        # display
+        self.PZRLevelRaw = self.m['ZPRZNO']['Val']      # raw
 
         # Signal
         self.Trip = self.m['KLAMPO9']['Val']
@@ -91,6 +93,7 @@ class CMem:
         self.LetdownHV2Pos = self.m['BHV2']['Val']
         self.LetdownHV3Pos = self.m['BHV3']['Val']
 
+        self.a1 = self.m['KLAMPO307']['Val']
         # Logic
         if self.CTIME == 0:
             self.CoolingRateSW = 0
@@ -101,6 +104,57 @@ class CMem:
         if self.CoolingRateSW == 1:         # 2.0] Cooling rage 계산 시작
             self.CoolingRATE.save_info(self.AVGTemp, self.CTIME)
             self.CoolingRateSW += 1     # 값 2로 바뀜으로써 이 로직은 1번만 동작함.
+        # --------------------------------------------------------------------------------------------------------------
+        # 현재 발생 비정상 확인
+        self.abnub = {
+            'AB2101': True if self.m['cMALC']['Val'] == 19 and self.m['cMALO']['Val'] > 155 else False,
+            'AB2102': True if self.m['cMALC']['Val'] == 19 and self.m['cMALO']['Val'] < 155 else False,
+            'AB2001': True if self.m['cMALC']['Val'] == 20 and self.m['cMALO']['Val'] > 95 else False,
+            'AB2004': True if self.m['cMALC']['Val'] == 20 and self.m['cMALO']['Val'] < 15 else False,
+        }
+        self.curab = ''
+        for key in self.abnub.keys():
+            if self.abnub[key]:
+                self.curab = key
+
+        # ab_normal operator
+        if self.CTIME == 0:
+            self.ab2101 = {'S1': True, 'S2': False, 'S3': False, 'S4': False, 'S5': False}
+            self.ab2102 = {'S1': True, 'S2': False, 'S3': False}
+            self.ab2001 = {'S1': True, 'S2': False}
+            self.ab2004 = {'S1': True, 'S2': False}
+        else:
+            if self.abnub['AB2101']:
+                # 알람 인지
+                if self.ab2101['S1'] and self.m['KLAMPO308']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2101['S1'], self.ab2101['S2'] = False, True
+                elif self.ab2101['S2']:
+                    if self.PZRProHeaterPos == 1:
+                        self.ab2101['S2'], self.ab2101['S3'] = False, True
+                elif self.ab2101['S3']:
+                    if self.PZRPresRaw > 154 * 1e5:
+                        self.ab2101['S3'], self.ab2101['S4'] = False, True
+                elif self.ab2101['S4']:
+                    if self.PZRProHeaterPos == 0:
+                        self.ab2101['S4'], self.ab2101['S5'] = False, True
+            if self.abnub['AB2102']:
+                # 알람 인지
+                if self.ab2102['S1'] and self.m['KLAMPO307']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2102['S1'], self.ab2102['S2'] = False, True
+                elif self.ab2102['S2']:
+                    if self.PZRProHeaterPos == 0:
+                        self.ab2102['S2'], self.ab2102['S3'] = False, True
+            if self.abnub['AB2001']:
+                if self.ab2001['S1'] and self.m['KLAMPO266']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2001['S1'], self.ab2001['S2'] = False, True
+            if self.abnub['AB2004']:
+                if self.ab2004['S1'] and self.m['KLAMPO274']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2004['S1'], self.ab2004['S2'] = False, True
+
 
 
 class ENVCNS(CNS):
@@ -429,6 +483,114 @@ class ENVCNS(CNS):
 
         return 0
 
+    def _send_act_AB_DB_Module(self):
+        ActOrderBook = {
+            'StopAllRCP': (['KSWO132', 'KSWO133', 'KSWO134'], [0, 0, 0]),
+            'StopRCP1': (['KSWO132'], [0]),
+            'StopRCP2': (['KSWO133'], [0]),
+            'StopRCP3': (['KSWO134'], [0]),
+            'NetBRKOpen': (['KSWO244'], [0]),
+            'OilSysOff': (['KSWO190'], [0]),
+            'TurningGearOff': (['KSWO191'], [0]),
+            'CutBHV311': (['BHV311', 'FKAFWPI'], [0, 0]),
+
+            'PZRSprayMan': (['KSWO128'], [1]), 'PZRSprayAuto': (['KSWO128'], [0]),
+
+            'PZRSprayClose': (['BPRZSP'], [self.mem['BPRZSP']['Val'] + 0.015 * -1]),
+            'PZRSprayOpen': (['BPRZSP'], [self.mem['BPRZSP']['Val'] + 0.015 * 1]),
+
+            'PZRBackHeaterOff': (['KSWO125'], [0]), 'PZRBackHeaterOn': (['KSWO125'], [1]),
+
+            'SteamDumpMan': (['KSWO176'], [1]), 'SteamDumpAuto': (['KSWO176'], [0]),
+
+            'IFLOGIC_SteamDumpUp': (['PMSS'], [self.CMem.PMSS + 2.0E5 * 3 * 0.2]),
+            'IFLOGIC_SteamDumpDown': (['PMSS'], [self.CMem.PMSS + 2.0E5 * (-3) * 0.2]),
+
+            'DecreaseAux1Flow': (['KSWO142', 'KSWO143'], [1, 0]),
+            'IncreaseAux1Flow': (['KSWO142', 'KSWO143'], [0, 1]),
+            'DecreaseAux2Flow': (['KSWO151', 'KSWO152'], [1, 0]),
+            'IncreaseAux2Flow': (['KSWO151', 'KSWO152'], [0, 1]),
+            'DecreaseAux3Flow': (['KSWO154', 'KSWO155'], [1, 0]),
+            'IncreaseAux3Flow': (['KSWO154', 'KSWO155'], [0, 1]),
+
+            'SteamLine1Open': (['KSWO148', 'KSWO149'], [1, 0]),
+            'SteamLine2Open': (['KSWO146', 'KSWO147'], [1, 0]),
+            'SteamLine3Open': (['KSWO144', 'KSWO145'], [1, 0]),
+
+            'ResetSI': (['KSWO7', 'KSWO5'], [1, 1]),
+
+            'PZRProHeaterMan': (['KSWO120'], [1]), 'PZRProHeaterAuto': (['KSWO120'], [0]),
+            'PZRProHeaterDown': (['KSWO121', 'KSWO122'], [1, 0]),
+            'PZRProHeaterUp': (['KSWO121', 'KSWO122'], [0, 1]),
+
+            'RL_IncreaseAux1Flow': (['WAFWS1'], [self.mem['WAFWS1']['Val'] + 0.04 * 1]),
+            'RL_DecreaseAux1Flow': (['WAFWS1'], [self.mem['WAFWS1']['Val'] + 0.04 * (-1)]),
+            'RL_IncreaseAux2Flow': (['WAFWS2'], [self.mem['WAFWS2']['Val'] + 0.04 * 1]),
+            'RL_DecreaseAux2Flow': (['WAFWS2'], [self.mem['WAFWS2']['Val'] + 0.04 * (-1)]),
+            'RL_IncreaseAux3Flow': (['WAFWS3'], [self.mem['WAFWS3']['Val'] + 0.04 * 1]),
+            'RL_DecreaseAux3Flow': (['WAFWS3'], [self.mem['WAFWS3']['Val'] + 0.04 * (-1)]),
+
+            'ChargingValveMan': (['KSWO100'], [1]), 'ChargingValveAUto': (['KSWO100'], [0]),
+            'ChargingValveDown': (['KSWO101', 'KSWO102'], [1, 0]),
+            'ChargingValveUp': (['KSWO101', 'KSWO102'], [0, 1]),
+
+            'LetdownLV459Open': (['KSWO114', 'KSWO113'], [1, 0]),
+            'LetdownLV459Close': (['KSWO114', 'KSWO113'], [0, 1]),
+
+            'LetdownHV1Open': (['KSWO104', 'KSWO103'], [1, 0]),
+            'LetdownHV1Close': (['KSWO104', 'KSWO103'], [0, 1]),
+            'LetdownHV2Open': (['KSWO106', 'KSWO105'], [1, 0]),
+            'LetdownHV2Close': (['KSWO106', 'KSWO105'], [0, 1]),
+            'LetdownHV3Open': (['KSWO108', 'KSWO107'], [1, 0]),
+            'LetdownHV3Close': (['KSWO108', 'KSWO107'], [0, 1]),
+
+            'RunRCP2': (['KSWO130', 'KSWO133'], [1, 1]),
+            'RunCHP2': (['KSWO70'], [1]), 'StopCHP2': (['KSWO70'], [0]),
+            'OpenSI': (['KSWO81', 'KSWO82'], [1, 0]), 'CloseSI': (['KSWO81', 'KSWO82'], [0, 1]),
+        }
+        if self.CMem.abnub['AB2101']:
+            if self.CMem.ab2101['S2']:
+                # 1. 알람 발생 인지 가압기 히터 On
+                self._send_control_save(ActOrderBook['PZRProHeaterMan'])
+                self._send_control_save(ActOrderBook['PZRBackHeaterOn'])
+                self._send_control_save(ActOrderBook['PZRProHeaterUp'])
+            if self.CMem.ab2101['S3']:
+                # 2. 히터 모두 킴. 스프레이 잠그기
+                self._send_control_save(ActOrderBook['PZRSprayMan'])
+                self._send_control_save(ActOrderBook['PZRSprayClose'])
+            if self.CMem.ab2101['S4']:
+                # 3. 압력 처음으로 정상화 히터 잠그기
+                self._send_control_save(ActOrderBook['PZRBackHeaterOff'])
+                self._send_control_save(ActOrderBook['PZRProHeaterDown'])
+            if self.CMem.ab2101['S5']:
+                # 4. 목표 압력 내로 유지하도록 스프레이 조절
+                if self.CMem.PZRPresRaw > 154.05 * 1e5 and int(np.random.choice(2, 1, p=[0.6, 0.4])[0]) == 1:
+                    self._send_control_save(ActOrderBook['PZRSprayOpen'])
+                if self.CMem.PZRPresRaw < 154.00 * 1e5 and int(np.random.choice(2, 1, p=[0.6, 0.4])[0]) == 1:
+                    self._send_control_save(ActOrderBook['PZRSprayClose'])
+        if self.CMem.abnub['AB2102']:
+            if self.CMem.ab2102['S2']:
+                # 1. 알람 발생 인지 가압기 히터 Off
+                self._send_control_save(ActOrderBook['PZRProHeaterMan'])
+                self._send_control_save(ActOrderBook['PZRBackHeaterOff'])
+                self._send_control_save(ActOrderBook['PZRProHeaterDown'])
+            if self.CMem.ab2102['S3']:
+                # 2. 목표 압력 내로 유지하도록 스프레이 조절
+                self._send_control_save(ActOrderBook['PZRSprayMan'])
+                if self.CMem.PZRPresRaw > 154.05 * 1e5 and int(np.random.choice(2, 1, p=[0.6, 0.4])[0]) == 1:
+                    self._send_control_save(ActOrderBook['PZRSprayOpen'])
+                if self.CMem.PZRPresRaw < 154.00 * 1e5 and int(np.random.choice(2, 1, p=[0.6, 0.4])[0]) == 1:
+                    self._send_control_save(ActOrderBook['PZRSprayClose'])
+        if self.CMem.abnub['AB2001'] or self.CMem.abnub['AB2004']:
+            if self.CMem.ab2001['S2'] or self.CMem.ab2004['S2']:
+                # 1. 알람 발생 인지 Charging Man 및 조절
+                self._send_control_save(ActOrderBook['ChargingValveMan'])
+                if self.CMem.PZRLevelRaw < 0.54:
+                    self._send_control_save(ActOrderBook['ChargingValveUp'])
+                if self.CMem.PZRLevelRaw > 0.56:
+                    self._send_control_save(ActOrderBook['ChargingValveDown'])
+        pass
+
     def send_act(self, A):
         """
         A 에 해당하는 액션을 보내고 나머지는 자동
@@ -440,7 +602,6 @@ class ENVCNS(CNS):
         :return: AMod: 수정된 액션
         """
         AMod = A
-
         if isinstance(A, int):      # A=0 인경우
             pass
         elif isinstance(A, dict):   # A = { ... } 각 AI 모듈에 정보가 들어있는 경우
@@ -451,6 +612,9 @@ class ENVCNS(CNS):
                 else:
                     if self.CMem.CTIME % 100 == 0:
                         self._send_act_EM_Module(A['EM'])
+            if A['AB_DB'] is True:
+                self._send_act_AB_DB_Module()
+
         else:
             print('Error')
         # Done Act
@@ -466,16 +630,16 @@ class ENVCNS(CNS):
         # Old Data (time t) ---------------------------------------
         AMod = self.send_act(A)
 
-        if self.CMem.CoolingRateSW == 0:
-            if self.CMem.CTIME >= 800:
-                # 강화학습 이전 시 5 tick
-                self.want_tick = int(100)
-            else:
-                self.want_tick = int(5)
-        else:
-            # Cooling 계산 시작 및 강화학습 진입 시 100 tick
-            self.want_tick = int(200)
-        print(self.want_tick, self.CMem.CTIME)
+        # if self.CMem.CoolingRateSW == 0:
+        #     if self.CMem.CTIME >= 800:
+        #         # 강화학습 이전 시 5 tick
+        #         self.want_tick = int(100)
+        #     else:
+        #         self.want_tick = int(100)
+        # else:
+        #     # Cooling 계산 시작 및 강화학습 진입 시 100 tick
+        #     self.want_tick = int(100)
+        print(self.CMem.curab, self.want_tick, self.CMem.CTIME, self.CMem.a1)
 
         # New Data (time t+1) -------------------------------------
         super(ENVCNS, self).step() # 전체 CNS mem run-Freeze 하고 mem 업데이트
