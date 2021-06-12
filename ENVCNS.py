@@ -39,6 +39,10 @@ class CMem:
         self.SG2Feed = self.m['WFWLN2']['Val']
         self.SG3Feed = self.m['WFWLN3']['Val']
 
+        self.SG1FeedValveM = self.m['KLAMPO147']['Val']
+        self.SG2FeedValveM = self.m['KLAMPO148']['Val']
+        self.SG3FeedValveM = self.m['KLAMPO149']['Val']
+
         self.Aux1Flow = self.m['WAFWS1']['Val']
         self.Aux2Flow = self.m['WAFWS2']['Val']
         self.Aux3Flow = self.m['WAFWS3']['Val']
@@ -93,7 +97,6 @@ class CMem:
         self.LetdownHV2Pos = self.m['BHV2']['Val']
         self.LetdownHV3Pos = self.m['BHV3']['Val']
 
-        self.a1 = self.m['KLAMPO307']['Val']
         # Logic
         if self.CTIME == 0:
             self.CoolingRateSW = 0
@@ -111,6 +114,12 @@ class CMem:
             'AB2102': True if self.m['cMALC']['Val'] == 19 and self.m['cMALO']['Val'] < 155 else False,
             'AB2001': True if self.m['cMALC']['Val'] == 20 and self.m['cMALO']['Val'] > 95 else False,
             'AB2004': True if self.m['cMALC']['Val'] == 20 and self.m['cMALO']['Val'] < 15 else False,
+            'AB1507': True if self.m['cMALC']['Val'] == 30 and (1000 < self.m['cMALO']['Val'] < 1050 or
+                                                                2000 < self.m['cMALO']['Val'] < 2050 or
+                                                                3000 < self.m['cMALO']['Val'] < 3050) else False,
+            'AB1508': True if self.m['cMALC']['Val'] == 30 and (1050 < self.m['cMALO']['Val'] < 1100 or
+                                                                2050 < self.m['cMALO']['Val'] < 2100 or
+                                                                3050 < self.m['cMALO']['Val'] < 3100) else False,
         }
         self.curab = ''
         for key in self.abnub.keys():
@@ -123,6 +132,8 @@ class CMem:
             self.ab2102 = {'S1': True, 'S2': False, 'S3': False}
             self.ab2001 = {'S1': True, 'S2': False}
             self.ab2004 = {'S1': True, 'S2': False}
+            self.ab1507 = {'S1': True, 'S2': False, 'S3': False, 'S4': False}
+            self.ab1508 = {'S1': True, 'S2': False, 'S3': False, 'S4': False}
         else:
             if self.abnub['AB2101']:
                 # 알람 인지
@@ -154,8 +165,54 @@ class CMem:
                 if self.ab2004['S1'] and self.m['KLAMPO274']['Val'] == 1:
                     if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
                         self.ab2004['S1'], self.ab2004['S2'] = False, True
-
-
+            if self.abnub['AB1507']:
+                if self.ab1507['S1'] and self.m['KLAMPO320']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab1507['S1'], self.ab1507['S2'] = False, True
+                        if 1000 < self.m['cMALO']['Val'] < 1050:
+                            self.abSG = 1
+                        elif 2000 < self.m['cMALO']['Val'] < 2050:
+                            self.abSG = 2
+                        elif 3000 < self.m['cMALO']['Val'] < 3050:
+                            self.abSG = 3
+                        else:
+                            self.abSG = 4 # error
+                            print('Error AB 1507 SG')
+                if self.ab1507['S2']:
+                    if self.abSG == 1 and self.SG1FeedValveM == 1:
+                        self.ab1507['S2'], self.ab1507['S3'] = False, True
+                    if self.abSG == 2 and self.SG2FeedValveM == 1:
+                        self.ab1507['S2'], self.ab1507['S3'] = False, True
+                    if self.abSG == 3 and self.SG3FeedValveM == 1:
+                        self.ab1507['S2'], self.ab1507['S3'] = False, True
+                if self.ab1507['S3']:
+                    targetBypass = self.m[{1: 'BFV479', 2: 'BFV489', 3: 'BFV499'}[self.abSG]]['Val']
+                    if targetBypass < 0.44:
+                        self.ab1507['S3'], self.ab1507['S4'] = False, True
+            if self.abnub['AB1508']:
+                if self.ab1508['S1'] and self.m['KLAMPO320']['Val'] == 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab1508['S1'], self.ab1508['S2'] = False, True
+                        if 1050 < self.m['cMALO']['Val'] < 1100:
+                            self.abSG = 1
+                        elif 2050 < self.m['cMALO']['Val'] < 2100:
+                            self.abSG = 2
+                        elif 3050 < self.m['cMALO']['Val'] < 3100:
+                            self.abSG = 3
+                        else:
+                            self.abSG = 4  # error
+                            print('Error AB 1507 SG')
+                if self.ab1508['S2']:
+                    if self.abSG == 1 and self.SG1FeedValveM == 1:
+                        self.ab1508['S2'], self.ab1508['S3'] = False, True
+                    if self.abSG == 2 and self.SG2FeedValveM == 1:
+                        self.ab1508['S2'], self.ab1508['S3'] = False, True
+                    if self.abSG == 3 and self.SG3FeedValveM == 1:
+                        self.ab1508['S2'], self.ab1508['S3'] = False, True
+                if self.ab1508['S3']:
+                    targetBypass = self.m[{1: 'BFV479', 2: 'BFV489', 3: 'BFV499'}[self.abSG]]['Val']
+                    if targetBypass > 0.44:
+                        self.ab1508['S3'], self.ab1508['S4'] = False, True
 
 class ENVCNS(CNS):
     def __init__(self, Name, IP, PORT):
@@ -547,6 +604,30 @@ class ENVCNS(CNS):
             'RunRCP2': (['KSWO130', 'KSWO133'], [1, 1]),
             'RunCHP2': (['KSWO70'], [1]), 'StopCHP2': (['KSWO70'], [0]),
             'OpenSI': (['KSWO81', 'KSWO82'], [1, 0]), 'CloseSI': (['KSWO81', 'KSWO82'], [0, 1]),
+
+            'Feed1Man': (['KSWO171', 'KSWO168'], [1, 1]),
+            'Feed1ValveClose': (['KSWO172', 'KSWO173'], [1, 0]),
+            'Feed1ValveStay': (['KSWO172', 'KSWO173'], [0, 0]),
+            'Feed1ValveOpen': (['KSWO172', 'KSWO173'], [0, 1]),
+            'Feed1BypassClose': (['KSWO169', 'KSWO170'], [1, 0]),
+            'Feed1BypassStay': (['KSWO169', 'KSWO170'], [0, 0]),
+            'Feed1BypassOpen': (['KSWO169', 'KSWO170'], [0, 1]),
+
+            'Feed2Man': (['KSWO165', 'KSWO162'], [1, 1]),
+            'Feed2ValveClose': (['KSWO166', 'KSWO167'], [1, 0]),
+            'Feed2ValveStay': (['KSWO166', 'KSWO167'], [0, 0]),
+            'Feed2ValveOpen': (['KSWO166', 'KSWO167'], [0, 1]),
+            'Feed2BypassClose': (['KSWO163', 'KSWO164'], [1, 0]),
+            'Feed2BypassStay': (['KSWO163', 'KSWO164'], [0, 0]),
+            'Feed2BypassOpen': (['KSWO163', 'KSWO164'], [0, 1]),
+
+            'Feed3Man': (['KSWO159', 'KSWO156'], [1, 1]),
+            'Feed3ValveClose': (['KSWO160', 'KSWO161'], [1, 0]),
+            'Feed3ValveStay': (['KSWO160', 'KSWO161'], [0, 0]),
+            'Feed3ValveOpen': (['KSWO160', 'KSWO161'], [0, 1]),
+            'Feed3BypassClose': (['KSWO157', 'KSWO158'], [1, 0]),
+            'Feed3BypassStay': (['KSWO157', 'KSWO158'], [0, 0]),
+            'Feed3BypassOpen': (['KSWO157', 'KSWO158'], [0, 1]),
         }
         if self.CMem.abnub['AB2101']:
             if self.CMem.ab2101['S2']:
@@ -589,7 +670,65 @@ class ENVCNS(CNS):
                     self._send_control_save(ActOrderBook['ChargingValveUp'])
                 if self.CMem.PZRLevelRaw > 0.56:
                     self._send_control_save(ActOrderBook['ChargingValveDown'])
-        pass
+        if self.CMem.abnub['AB1507']:
+            if self.CMem.ab1507['S2']:
+                # 관련 밸브 Manual
+                self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}Man'])
+                for i in range(1, 4):
+                    self._send_control_save(ActOrderBook[f'Feed{i}ValveStay'])
+                    self._send_control_save(ActOrderBook[f'Feed{i}BypassStay'])
+            if self.CMem.ab1507['S3'] or self.CMem.ab1507['S4']:
+                # 선 Bypass 정상화 후 Main feed 조작
+                targetBypass = self.CMem.m[{1: 'BFV479', 2: 'BFV489', 3: 'BFV499'}[self.CMem.abSG]]['Val']
+                if targetBypass > 0.44:
+                    self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}BypassClose'])
+                else:
+                    self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}BypassStay'])
+                if self.CMem.ab1507['S4']:
+                    # Main feed 조작
+                    targetSGW = self.CMem.m[{1: 'ZINST72', 2: 'ZINST71', 3: 'ZINST70'}[self.CMem.abSG]]['Val']
+                    if targetSGW > 89.5:
+                        if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveClose'])
+                        else:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+                    elif targetSGW < 86.5:
+                        if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveOpen'])
+                        else:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+                    else:
+                        self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+        if self.CMem.abnub['AB1508']:
+            if self.CMem.ab1508['S2']:
+                # 관련 밸브 Manual
+                self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}Man'])
+                for i in range(1, 4):
+                    self._send_control_save(ActOrderBook[f'Feed{i}ValveStay'])
+                    self._send_control_save(ActOrderBook[f'Feed{i}BypassStay'])
+            if self.CMem.ab1508['S3'] or self.CMem.ab1508['S4']:
+                # 선 Bypass 정상화 후 Main feed 조작
+                targetBypass = self.CMem.m[{1: 'BFV479', 2: 'BFV489', 3: 'BFV499'}[self.CMem.abSG]]['Val']
+                if targetBypass < 0.44:
+                    self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}BypassOpen'])
+                else:
+                    self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}BypassStay'])
+                if self.CMem.ab1508['S4']:
+                    # Main feed 조작
+                    targetSGW = self.CMem.m[{1: 'ZINST72', 2: 'ZINST71', 3: 'ZINST70'}[self.CMem.abSG]]['Val']
+                    if targetSGW > 89.5:
+                        if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveClose'])
+                        else:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+                    elif targetSGW < 86.5:
+                        if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveOpen'])
+                        else:
+                            self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+                    else:
+                        self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
+
 
     def send_act(self, A):
         """
@@ -639,7 +778,7 @@ class ENVCNS(CNS):
         # else:
         #     # Cooling 계산 시작 및 강화학습 진입 시 100 tick
         #     self.want_tick = int(100)
-        print(self.CMem.curab, self.want_tick, self.CMem.CTIME, self.CMem.a1)
+        print(self.CMem.curab, self.want_tick, self.CMem.CTIME, self.CMem.m['KLAMPO320']['Val'])
 
         # New Data (time t+1) -------------------------------------
         super(ENVCNS, self).step() # 전체 CNS mem run-Freeze 하고 mem 업데이트
