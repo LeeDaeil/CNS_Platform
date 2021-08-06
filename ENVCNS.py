@@ -58,6 +58,7 @@ class CMem:
         self.PZRLevelRaw = self.m['ZPRZNO']['Val']      # raw
 
         # Signal
+        self.Tavgref = self.m['ZINST15']['Val']
         self.Trip = self.m['KLAMPO9']['Val']
         self.SIS = self.m['KLAMPO6']['Val']
         self.MSI = self.m['KLAMPO3']['Val']
@@ -120,6 +121,8 @@ class CMem:
             'AB1508': True if self.m['cMALC']['Val'] == 30 and (1050 < self.m['cMALO']['Val'] < 1100 or
                                                                 2050 < self.m['cMALO']['Val'] < 2100 or
                                                                 3050 < self.m['cMALO']['Val'] < 3100) else False,
+            'AB6304': True if self.m['cMALC']['Val'] == 2 else False,
+            'AB2112': True if self.m['cMALC']['Val'] == 15 else False,
         }
         self.curab = ''
         for key in self.abnub.keys():
@@ -134,6 +137,8 @@ class CMem:
             self.ab2004 = {'S1': True, 'S2': False}
             self.ab1507 = {'S1': True, 'S2': False, 'S3': False, 'S4': False}
             self.ab1508 = {'S1': True, 'S2': False, 'S3': False, 'S4': False}
+            self.ab6304 = {'S1': True, 'S2': False}
+            self.ab2112 = {'S1': True, 'S2': False, 'S3': False, 'S3Try': 0, 'S4': False, 'S4Try': 0, 'S5': False}
         else:
             if self.abnub['AB2101']:
                 # 알람 인지
@@ -213,6 +218,21 @@ class CMem:
                     targetBypass = self.m[{1: 'BFV479', 2: 'BFV489', 3: 'BFV499'}[self.abSG]]['Val']
                     if targetBypass > 0.44:
                         self.ab1508['S3'], self.ab1508['S4'] = False, True
+            if self.abnub['AB6304']:
+                if self.ab6304['S1'] and (self.m['KLAMPO313']['Val'] == 1 or self.m['QPROREL']['Val'] < 0.99):
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab6304['S1'], self.ab6304['S2'] = False, True
+            if self.abnub['AB2112']:
+                if self.ab2112['S1'] and self.m['BPORV']['Val'] != 0:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2112['S1'], self.ab2112['S2'] = False, True
+                if self.ab2112['S2'] and self.m['KLAMPO110']['Val'] == 1:   # 메뉴얼 인지
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self.ab2112['S2'], self.ab2112['S3'] = False, True
+                if self.ab2112['S3Try'] > 5:
+                    self.ab2112['S3'], self.ab2112['S4'] = False, True
+                if self.ab2112['S4Try'] > 5:
+                    self.ab2112['S4'], self.ab2112['S5'] = False, True
 
 class ENVCNS(CNS):
     def __init__(self, Name, IP, PORT):
@@ -628,6 +648,16 @@ class ENVCNS(CNS):
             'Feed3BypassClose': (['KSWO157', 'KSWO158'], [1, 0]),
             'Feed3BypassStay': (['KSWO157', 'KSWO158'], [0, 0]),
             'Feed3BypassOpen': (['KSWO157', 'KSWO158'], [0, 1]),
+
+            'LoadSetDown': (['KSWO225', 'KSWO224'], [0, 1]),
+            'LoadSetUp': (['KSWO225', 'KSWO224'], [1, 0]),
+
+            'PZRPORVMan': (['KSWO115'], [1]),
+            'PZRPORVAuto': (['KSWO115'], [0]),
+            'PZRPORVClose': (['KSWO119', 'KSWO118'], [1, 0]),
+            'PZRPORVOpen': (['KSWO119', 'KSWO118'], [0, 1]),
+            'HV6Open': (['KSWO124', 'KSWO123'], [0, 1]),
+            'HV6Close': (['KSWO124', 'KSWO123'], [1, 0]),
         }
         if self.CMem.abnub['AB2101']:
             if self.CMem.ab2101['S2']:
@@ -728,7 +758,23 @@ class ENVCNS(CNS):
                             self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
                     else:
                         self._send_control_save(ActOrderBook[f'Feed{self.CMem.abSG}ValveStay'])
-
+        if self.CMem.abnub['AB6304']:
+            if self.CMem.ab6304['S2']:
+                # Tavg/ref +- 1 내로 터빈 출력 감소
+                if self.CMem.Tavgref > 1:
+                    if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                        self._send_control_save(ActOrderBook['LoadSetDown'])
+        if self.CMem.abnub['AB2112']:
+            if self.CMem.ab2112['S2']:
+                # PZR PORV 개방 인지 후 매뉴얼 전환
+                if int(np.random.choice(2, 1, p=[0.7, 0.3])[0]) == 1:
+                    self._send_control_save(ActOrderBook['PZRPORVMan'])
+            if self.CMem.ab2112['S3']:
+                self.CMem.ab2112['S3Try'] += 1
+                self._send_control_save(ActOrderBook['PZRPORVClose'])
+            if self.CMem.ab2112['S4']:
+                self.CMem.ab2112['S4Try'] += 1
+                self._send_control_save(ActOrderBook['HV6Close'])
 
     def send_act(self, A):
         """

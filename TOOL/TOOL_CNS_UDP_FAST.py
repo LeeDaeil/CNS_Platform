@@ -675,6 +675,8 @@ class CNS:
 
     def run_freeze_CNS(self):
         old_cont = self.mem['KCNTOMS']['Val'] + self.want_tick
+        self.save_line()    # 액션 로깅도 찍기 위해서 남겨 둠..
+
         self.run_cns()
         while True:
             self._update_mem()
@@ -686,7 +688,7 @@ class CNS:
                     # 이때 반드시 모든 Val은 업데이트 된 상태이며 Append 및 데이터 로깅도 이부분에서 수행된다.
                     self.mem['cMALA']['Val'] = 1 if self.mem['cMALT']['Val'] <= self.mem['KCNTOMS']['Val'] else 0
                     self.mem['cMALCA']['Val'] = self.mem['cMALC']['Val'] if self.mem['cMALT']['Val'] <= self.mem['KCNTOMS']['Val'] else 0
-                    self.save_line()
+                    # self.save_line()
                     break
                 else:
                     pass
