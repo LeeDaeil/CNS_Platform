@@ -81,7 +81,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
         timer = QTimer(self)
         for _ in [self._update_dis]:
             timer.timeout.connect(_)
-        timer.start(1000)
+        timer.start(500)
 
     # ------------------------------------------------------------------------------------------------------------------
     # _init
@@ -114,9 +114,9 @@ class CNSMainWinFunc(CNSMainWinBasic):
 
     def _call_click_win_power_increase_monitoring(self):
         local_logic = self.shmem.get_logic_info()
-        if local_logic['Run_rc']:
+        if local_logic['Run_rc'] or local_logic['Run_nob']:
             if self.power_increase_monitoring is None:
-                self.power_increase_monitoring = RCBoardUI()
+                self.power_increase_monitoring = RCBoardUI(local_logic['Run_nob'])
             else:
                 self.power_increase_monitoring.close()
                 self.power_increase_monitoring = None

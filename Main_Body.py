@@ -53,18 +53,20 @@ class Body:
 class SHMem:
     def __init__(self, cnsinfo, max_len_deque):
         self.cnsip, self.cnsport = cnsinfo
-        self.Mode_key = 'AB_DB_Collector'
+        self.Mode_key = 'NoBornStart'
         self.Mode_list = {
-            'AB_DB_Collector': [False, False, False, False],
-            'EM_DB_Collector': [False, False, True, False],
+            'AB_DB_Collector': [False, False, False, False, False],
+            'EM_DB_Collector': [False, False, True, False, False],
+            'NoBornStart': [False, False, False, False, True],
         }
         # 0] 기능 동작 로직
-        self.SV, self.RC, self.EC, self.ABD = self.Mode_list[self.Mode_key]
-        print(f'Mode:{self.Mode_key} | SV:{self.SV} | RC:{self.RC} | EC:{self.EC} | ABD:{self.ABD}')
+        self.SV, self.RC, self.EC, self.ABD, self.NoB = self.Mode_list[self.Mode_key]
+        print(f'Mode:{self.Mode_key} | SV:{self.SV} | RC:{self.RC} | EC:{self.EC} | ABD:{self.ABD} | NoB:{self.NoB}')
         # self.SV = False
         # self.RC = False      # Rod Controller
-        # self.EC = True      # Emergency Controller
+        # self.EC = True       # Emergency Controller
         # self.ABD = False     # Abnormal Diagnosis
+        # self.NoB =           # No born power operation
 
         # 1] CNS 변수용 shmem
         self.mem = db_make().make_mem_structure(max_len_deque)
@@ -73,7 +75,7 @@ class SHMem:
         self.logic = {'Run': False, 'UpdateUI': False,
                       'Mode_key': self.Mode_key,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
-                      'Run_abd': self.ABD,
+                      'Run_abd': self.ABD, 'Run_nob': self.NoB,
 
                       'Initial_condition': False,
                       'Init_Call': False, 'Init_nub': 1,
@@ -107,14 +109,14 @@ class SHMem:
             'PMSS': [], 'BHTBY': [],
 
             'UP_D': [], 'DOWN_D': [], 'QPROREL': [], 'UAVLEGS': [], 'UAVLEGM': [], 'KBCDO20': [], 'KBCDO21': [],
-            'KBCDO22': [], 'KBCDO16': [], 'BOR': [], 'MAKE_UP': [],
+            'KBCDO22': [], 'KBCDO16': [], 'BOR': [], 'MAKE_UP': [], 'CXEMPCM': [],
         }
 
     def call_init(self, init_nub):
         self.logic = {'Run': False, 'UpdateUI': False,
                       'Mode_key': self.Mode_key,
                       'Run_sv': self.SV, 'Run_rc': self.RC, 'Run_ec': self.EC,
-                      'Run_abd': self.ABD,
+                      'Run_abd': self.ABD, 'Run_nob': self.NoB,
 
                       'Initial_condition': True,
                       'Init_Call': True, 'Init_nub': init_nub,

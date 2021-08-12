@@ -281,6 +281,7 @@ class ENVCNS(CNS):
 
         # --------------------------------------------------------------------------------------------------------------
         self.dumy_db = pd.read_csv('DUMY_ALL_ROD2.csv')
+        self.Nob_db = pd.read_csv('AI/AI_NoB_His.csv')
 
     def normalize(self, x, x_round, x_min, x_max):
         if x_max == 0 and x_min == 0:
@@ -840,17 +841,21 @@ class ENVCNS(CNS):
         # ----------------------------------------------------------
         return 0
 
-    def dumy_step(self):
+    def dumy_step(self, Nob=False):
         # Old Data (time t) ---------------------------------------
-        get_one_line = self.dumy_db.iloc[self.ENVStep]
-        get_one_col = self.dumy_db.columns.to_list()
+        if Nob:
+            get_one_line = self.Nob_db.iloc[self.ENVStep]
+            get_one_col = self.Nob_db.columns.to_list()
+        else:
+            get_one_line = self.dumy_db.iloc[self.ENVStep]
+            get_one_col = self.dumy_db.columns.to_list()
 
         for col in get_one_col:
             if col in self.mem.keys():
                 self.mem[col]['Val'] = float(get_one_line[col])
 
         # New Data (time t+1) -------------------------------------
-        sleep(0.1)
+        sleep(0.5)
         self.CMem.update()  # 선택 변수 mem 업데이트
 
         # 추가된 변수 고려

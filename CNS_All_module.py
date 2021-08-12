@@ -46,6 +46,7 @@ class All_Function_module(multiprocessing.Process):
 
     def check_init(self):
         if self.shmem.get_logic('Init_Call'):
+            local_logic = self.shmem.get_logic_info()
             self.pr_('Initial Start...')
             self.cns_env.reset(file_name='cns_log', initial_nub=self.shmem.get_logic('Init_nub'))
             self._update_cnsenv_to_sharedmem()
@@ -165,7 +166,10 @@ class All_Function_module(multiprocessing.Process):
                         'EM': EM_action,
                         'AB_DB': True if local_logic['Mode_key'] == 'AB_DB_Collector' else False,
                     }
-                    self.cns_env.step(Action_dict)
+                    if local_logic['Run_nob']:
+                        self.cns_env.dumy_step(True)
+                    else:
+                        self.cns_env.step(Action_dict)
 
                     # Update All mem -----------------------------------------------------------------------------------
                     self._update_cnsenv_to_sharedmem()

@@ -54,8 +54,8 @@ class MyForm(QWidget):
         self.show()
 
         # Call
-        # self.cns_main_win = CNSMainWinFunc(shmem=self.shmem)
-        # self.cns_main_win.show()
+        self.cns_main_win = CNSMainWinFunc(shmem=self.shmem)
+        self.cns_main_win.show()
 
     def pr_(self, s):
         head_ = 'Main_UI'

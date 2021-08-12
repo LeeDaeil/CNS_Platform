@@ -103,7 +103,6 @@ class BoardUI(BoardUI_Base):
     def __init__(self):
         super(BoardUI, self).__init__(title='Autonomous Power Increase Module',
                                       WindowId='RC')
-
         # 요소 선언 -----------------------------------------------------------------------------------------------------
         # 1] Title
         main_layout_label = QLabel(text="Autonomous Power Increase Module")
@@ -212,8 +211,9 @@ class BoardUI(BoardUI_Base):
 
 
 class RCBoardUI(BoardUI):
-    def __init__(self):
+    def __init__(self, Nob=False):
         super(RCBoardUI, self).__init__()
+        self.Nob = Nob
         self.show()
 
     def update(self, save_mem, local_mem):
@@ -224,6 +224,8 @@ class RCBoardUI(BoardUI):
         save_mem = temp_save_mem
         try:
             # Rod Pos Update
+            print(local_mem["KBCDO10"]["Val"])
+
             self.Abank.update(int(abs(local_mem['KBCDO10']['Val'] - 228)))
             self.Bbank.update(int(abs(local_mem['KBCDO9']['Val'] - 228)))
             self.Cbank.update(int(abs(local_mem['KBCDO8']['Val'] - 228)))
@@ -239,20 +241,23 @@ class RCBoardUI(BoardUI):
             # 1] Reactor Power
             self.top_axs[0].set_title('Reactor power')
             self.top_axs[0].plot(save_mem['KCNTOMS'], save_mem['QPROREL'], label='Reactor power')
+            if not self.Nob:
+                self.top_axs[0].fill_between(save_mem['KCNTOMS'], save_mem['UP_D'], save_mem['DOWN_D'],
+                                             color='gray', alpha=0.5, label='Boundary')
 
-            self.top_axs[0].fill_between(save_mem['KCNTOMS'], save_mem['UP_D'], save_mem['DOWN_D'],
-                                         color='gray', alpha=0.5, label='Boundary')
             self.top_axs[0].plot(save_mem['KCNTOMS'], save_mem['UP_D'], color='gray', lw=1, linestyle='--')
             self.top_axs[0].plot(save_mem['KCNTOMS'], save_mem['DOWN_D'], color='gray', lw=1, linestyle='--')
 
             self.top_axs[0].legend(fontsize=10, loc=2)
 
-
             # 2] Average Temperature
             self.bottom_axs[0].set_title('Average Temperature')
-
-            UpBound = [_ + 1.3 for _ in save_mem['UAVLEGS']]
-            DownBound = [_ - 1.3 for _ in save_mem['UAVLEGS']]
+            if self.Nob:
+                UpBound = [_ + 1 for _ in save_mem['UAVLEGS']]
+                DownBound = [_ - 1 for _ in save_mem['UAVLEGS']]
+            else:
+                UpBound = [_ + 1.3 for _ in save_mem['UAVLEGS']]
+                DownBound = [_ - 1.3 for _ in save_mem['UAVLEGS']]
             self.bottom_axs[0].fill_between(save_mem['KCNTOMS'], UpBound, DownBound,
                                           color='gray', alpha=0.5, label='Boundary')
 
@@ -281,6 +286,8 @@ class RCBoardUI(BoardUI):
             self.bottom_axs[2].set_title('Boron Concentration')
             self.bottom_axs[2].plot(save_mem['KCNTOMS'], save_mem['KBCDO16'],
                                     color='black', label='Boron Concentration [PPM]')
+            self.bottom_axs[2].plot(save_mem['KCNTOMS'], save_mem['CXEMPCM'],
+                                    color='r', label='Xenone Concentration [PPM]')
             self.bottom_axs[2].legend(fontsize=10, loc=2)
 
             # 5] Inject Boron / Make-up
