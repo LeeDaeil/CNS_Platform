@@ -855,7 +855,7 @@ class ENVCNS(CNS):
                 self.mem[col]['Val'] = float(get_one_line[col])
 
         # New Data (time t+1) -------------------------------------
-        sleep(0.5)
+        sleep(0.2)
         self.CMem.update()  # 선택 변수 mem 업데이트
 
         # 추가된 변수 고려

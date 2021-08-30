@@ -53,7 +53,7 @@ class Body:
 class SHMem:
     def __init__(self, cnsinfo, max_len_deque):
         self.cnsip, self.cnsport = cnsinfo
-        self.Mode_key = 'NoBornStart'
+        self.Mode_key = 'AB_DB_Collector'
         self.Mode_list = {
             'AB_DB_Collector': [False, False, False, False, False],
             'EM_DB_Collector': [False, False, True, False, False],

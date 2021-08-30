@@ -81,7 +81,7 @@ class CNSMainWinFunc(CNSMainWinBasic):
         timer = QTimer(self)
         for _ in [self._update_dis]:
             timer.timeout.connect(_)
-        timer.start(500)
+        timer.start(250)
 
     # ------------------------------------------------------------------------------------------------------------------
     # _init
